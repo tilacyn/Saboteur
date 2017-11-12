@@ -15,13 +15,12 @@ public class Heal extends Action {
     }
 
     public boolean canPlay(int playerNumber) {
-        return field.players[playerNumber].needHeal(this);
+        return !field.didCurrentPlayerPlayCard() && field.players[playerNumber].needHeal(this);
     }
 
     public void play(int playerNumber) {
         field.players[playerNumber].heal(this);
-
-        field.startNextTurn();
+        field.iPlayedCard();
     }
 
     public boolean isHealLamp() {

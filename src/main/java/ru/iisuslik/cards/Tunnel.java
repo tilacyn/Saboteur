@@ -18,13 +18,13 @@ public class Tunnel extends Card {
     }
 
     public boolean canPlay(int i, int j) {
-        return field.players[playerNumber].canPutTunnels() && field.canPutTunnel(this, i, j);
+        return !field.didCurrentPlayerPlayCard() && field.players[playerNumber].canPutTunnels() && field.canPutTunnel(this, i, j);
     }
 
     public void play(int i, int j) {
         field.putTunnel(this, i, j);
         field.players[playerNumber].playCard(this);
-        field.startNextTurn();
+        field.iPlayedCard();
     }
 
     public void spin() { //TODO

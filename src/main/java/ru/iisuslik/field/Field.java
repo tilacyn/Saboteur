@@ -8,11 +8,21 @@ import java.util.Random;
 
 public class Field {
 
-    public static final int WIDTH = 19;
-    public static final int HEIGHT = 50;
+    private boolean currentPlayerPlayedCard = false;
 
-    public static final int ENTRY_POS_I = 40;
-    public static final int ENTRY_POS_J = 10;
+    public boolean didCurrentPlayerPlayCard() {
+        return currentPlayerPlayedCard;
+    }
+
+    public void iPlayedCard() {
+        currentPlayerPlayedCard = true;
+    }
+
+    public static final int WIDTH = 15;
+    public static final int HEIGHT = 18;
+
+    public static final int ENTRY_POS_I = 12;
+    public static final int ENTRY_POS_J = 8;
 
     private int playingCount;
     private int currentPlayer = 0;
@@ -32,9 +42,16 @@ public class Field {
                 players[currentPlayer].isBrokenTrolley()};
     }
 
+    public boolean isCurrentPlayerSaboteur(){
+        return players[currentPlayer].getPersonality() == Player.SABOTEUR;
+    }
+
     public void startNextTurn() {
-        if (deck.size() != 0)
-            players[currentPlayer].addCard(deck.remove(deck.size() - 1));
+        if (deck.size() != 0) {
+            Card next = deck.remove(deck.size() - 1);
+            next.setPlayerNumber(currentPlayer);
+            players[currentPlayer].addCard(next);
+        }
         if (players[currentPlayer].getHand().size() == 0) {
             players[currentPlayer].concede();
             playingCount--;
@@ -79,15 +96,56 @@ public class Field {
         if (field[i][j] != null) {
             return false;
         }
-        if (i < HEIGHT - 1 && field[i + 1][j] != null && !field[i + 1][j].up)
-            return false;
-        if (i > 0 && field[i - 1][j] != null && !field[i - 1][j].down)
-            return false;
-        if (j < WIDTH - 1 && field[i][j + 1] != null && !field[i][j + 1].left)
-            return false;
-        if (j > 0 && field[i][j + 1] != null && !field[i][j + 1].right)
-            return false;
-        return true;
+        boolean hasContinue = false;
+        if (i < HEIGHT - 1 && field[i + 1][j] != null) {
+            Tunnel t = field[i + 1][j];
+            if (!t.isClosedTunnel() || t.isClosedTunnel() && !((ClosedTunnel) t).isClosed()) {
+                if (tunnel.down) {
+                    if (t.up) {
+                        hasContinue = true;
+                    } else {
+                        return false;
+                    }
+                }
+            }
+        }
+        if (i > 0 && field[i - 1][j] != null) {
+            Tunnel t = field[i - 1][j];
+            if (!t.isClosedTunnel() || t.isClosedTunnel() && !((ClosedTunnel) t).isClosed()) {
+                if (tunnel.up) {
+                    if (t.down) {
+                        hasContinue = true;
+                    } else {
+                        return false;
+                    }
+                }
+            }
+        }
+        if (i < WIDTH - 1 && field[i][j + 1] != null) {
+            Tunnel t = field[i][j + 1];
+            if (!t.isClosedTunnel() || t.isClosedTunnel() && !((ClosedTunnel) t).isClosed()) {
+                if (tunnel.right) {
+                    if (t.left) {
+                        hasContinue = true;
+                    } else {
+                        return false;
+                    }
+                }
+            }
+        }
+        if (j > 0 && field[i][j - 1] != null) {
+            Tunnel t = field[i][j - 1];
+            if (!t.isClosedTunnel() || t.isClosedTunnel() && !((ClosedTunnel) t).isClosed()) {
+                if (tunnel.left) {
+                    if (t.right) {
+                        hasContinue = true;
+                    } else {
+                        return false;
+                    }
+                }
+            }
+        }
+        return hasContinue;
     }
 
     public void putTunnel(Tunnel tunnel, int i, int j) {
@@ -129,15 +187,18 @@ public class Field {
         Random rnd = new Random();
         for (int k = 0; k < 3; k++) {
             field[firstTunnelI][firstTunnelJ + k * 2] = tunnels[perestanovka[k]];
-            if(rnd.nextBoolean())
+            if (rnd.nextBoolean())
                 field[firstTunnelI][firstTunnelJ + k * 2].spin();
         }
     }
 
     private void giveCards() {
-        for (Player player : players) {
-            for (int i = 0; i < 6; i++)
-                player.addCard(deck.remove(deck.size() - 1));
+        for (int now = 0; now < players.length; now++) {
+            for (int i = 0; i < 6; i++) {
+                Card next = deck.remove(deck.size() - 1);
+                next.setPlayerNumber(now);
+                players[now].addCard(next);
+            }
         }
     }
 
@@ -146,7 +207,7 @@ public class Field {
         for (int i = 0; i < count; i++) {
             Tunnel tunnel = new Tunnel(43, "Tunnel", "Just a tunnel", this, -1,
                     up == 1, down == 1, left == 1, right == 1, centre == 1);
-            if(rnd.nextBoolean())
+            if (rnd.nextBoolean())
                 tunnel.spin();
             deck.add(tunnel);
         }
@@ -227,5 +288,38 @@ public class Field {
         randomShuffle(deck);
         giveCards();
         //TODO
+    }
+
+
+    public void print() {
+        for (int i = 0; i < HEIGHT; i++) {
+            for (Card card : field[i]) {
+                if (card != null) {
+                    Tunnel t = (Tunnel) card;
+                    t.printFirst();
+                } else {
+                    System.out.print("      ");
+                }
+            }
+            System.out.println();
+            for (Card card : field[i]) {
+                if (card != null) {
+                    Tunnel t = (Tunnel) card;
+                    t.printSecond();
+                } else {
+                    System.out.print("      ");
+                }
+            }
+            System.out.println();
+            for (Card card : field[i]) {
+                if (card != null) {
+                    Tunnel t = (Tunnel) card;
+                    t.printThird();
+                } else {
+                    System.out.print("      ");
+                }
+            }
+            System.out.println();
+        }
     }
 }

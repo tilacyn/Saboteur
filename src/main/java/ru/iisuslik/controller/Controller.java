@@ -27,4 +27,18 @@ public class Controller {
     public Tunnel[][] getField() {
         return field.field;
     }
+
+    public boolean canStartNextTurn() {
+        return field.didCurrentPlayerPlayCard();
+    }
+
+    public boolean isCurrentPlayerSaboteur(){
+        return field.isCurrentPlayerSaboteur();
+    }
+
+
+
+    public void printField() {
+        field.print();
+    }
 }

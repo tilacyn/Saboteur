@@ -45,9 +45,18 @@ public class Card {
         return type;
     }
 
+    public boolean canDiscard() {
+        return !field.didCurrentPlayerPlayCard();
+    }
+
     public void discard() {
         field.players[playerNumber].playCard(this);
+        field.iPlayedCard();
     }
+
+
+
+
 
     protected void printSmth(){
         System.out.print("%%%   ");

@@ -46,7 +46,7 @@ public class Player {
     }
 
     public boolean canPutTunnels() {
-        return brokenLamp || brokenPick || brokenTrolley;
+        return !brokenLamp && !brokenPick && !brokenTrolley;
     }
 
     public void concede() {

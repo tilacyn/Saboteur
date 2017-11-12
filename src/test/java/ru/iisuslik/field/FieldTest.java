@@ -32,31 +32,7 @@ public class FieldTest {
     @Test
     public void Field() throws Exception {
         Field f = new Field(3);
-        for(int i = 0; i < Field.HEIGHT; i++) {
-            for(Card card: f.field[i]) {
-                if(card != null && card.getType() == Card.TUNNEL) {
-                    Tunnel t = (Tunnel) card;
-                    t.printFirst();
-                }
-            }
-            System.out.println();
-            for(Card card: f.field[i]) {
-                if(card != null && card.getType() == Card.TUNNEL) {
-                    Tunnel t = (Tunnel) card;
-                    t.printSecond();
-                }
-            }
-            System.out.println();
-            for(Card card: f.field[i]) {
-                if(card != null && card.getType() == Card.TUNNEL) {
-                    Tunnel t = (Tunnel) card;
-                    t.printThird();
-                }
-            }
-            System.out.println();
-            System.out.println();
-            System.out.println();
-        }
+        f.print();
     }
 
     @Test
@@ -74,8 +50,6 @@ public class FieldTest {
             for(Card card: f.players[i].getHand()) {
                 card.printThird();
             }
-            System.out.println();
-            System.out.println();
             System.out.println();
         }
     }

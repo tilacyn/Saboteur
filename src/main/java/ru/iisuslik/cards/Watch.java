@@ -9,12 +9,12 @@ public class Watch extends Action {
 
     public boolean canPlay(int i, int j) {
         Tunnel toCheck = field.field[i][j];
-        return toCheck != null && toCheck.isClosedTunnel();
+        return !field.didCurrentPlayerPlayCard() && toCheck != null && toCheck.isClosedTunnel();
     }
 
     public boolean play(int i, int j) {
         ClosedTunnel ct = (ClosedTunnel) field.field[i][j];
-        field.startNextTurn();//TODO нужна ли кнопка end turn
+        field.iPlayedCard();
         return ct.isGold();
     }
 }

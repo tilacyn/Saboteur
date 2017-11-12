@@ -19,4 +19,8 @@ public class ClosedTunnel extends Tunnel {
     public boolean isGold() {
         return gold;
     }
+
+    public boolean isClosed() {
+        return closed;
+    }
 }
