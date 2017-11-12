@@ -35,6 +35,12 @@ public class Controller {
     public boolean isCurrentPlayerSaboteur(){
         return field.isCurrentPlayerSaboteur();
     }
+    public boolean isThisTheEnd(){
+        return field.isThisTheEnd();
+    }
+    public int currentPlayerNumber(){
+        return field.getCurrentPlayer();
+    }
 
 
 

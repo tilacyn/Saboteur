@@ -1,8 +1,10 @@
 package ru.iisuslik.controller;
 
 import org.junit.Test;
+import ru.iisuslik.cards.Action;
 import ru.iisuslik.cards.Card;
 import ru.iisuslik.cards.Tunnel;
+import ru.iisuslik.cards.Watch;
 
 import java.util.ArrayList;
 
@@ -13,6 +15,7 @@ import static ru.iisuslik.controller.Controller.ENTRY_POS_J;
 public class ControllerTest {
 
     private void printCurrentPlayerHand(Controller c){
+        System.out.printf("Player %d\n", c.currentPlayerNumber());
         for(Card card: c.getCurrentPlayerHand()) {
             card.printFirst();
         }
@@ -44,6 +47,9 @@ public class ControllerTest {
             if(cards.get(i).getType() == Card.TUNNEL) {
                 Tunnel tunnel = (Tunnel)cards.get(i);
                 assertFalse(tunnel.canPlay(ENTRY_POS_I, ENTRY_POS_J));
+                int firstTunnelI = ENTRY_POS_I - 8;
+                int firstTunnelJ = ENTRY_POS_J - 2;
+                assertFalse(tunnel.canPlay(firstTunnelI,firstTunnelJ + 1));
                 if(tunnel.canPlay(ENTRY_POS_I - 1,ENTRY_POS_J )){
                     tunnel.play(ENTRY_POS_I - 1, ENTRY_POS_J);
                     played = true;
@@ -65,6 +71,32 @@ public class ControllerTest {
 
         System.out.println(c.isCurrentPlayerSaboteur());
         printCurrentPlayerHand(c);
+        assertTrue(c.getCurrentPlayerHand().get(0).canDiscard());
+        c.getCurrentPlayerHand().get(0).discard();
+        printCurrentPlayerHand(c);
+        assertFalse(c.getCurrentPlayerHand().get(0).canDiscard());
+        assertTrue(c.canStartNextTurn());
+        c.startNextTurn();
+
+        printCurrentPlayerHand(c);
+        assertTrue(c.getCurrentPlayerHand().get(0).canDiscard());
+        c.getCurrentPlayerHand().get(0).discard();
+        assertTrue(c.canStartNextTurn());
+        c.startNextTurn();
+
+        printCurrentPlayerHand(c);
+        assertFalse(c.isThisTheEnd());
+
+        cards = c.getCurrentPlayerHand();
+        for(int i = 0; i < cards.size(); i++) {
+            if(cards.get(i).getType() == Card.ACTION) {
+                Action a = (Action)cards.get(i);
+                if(a.getActionType() == Action.WATCH){
+                    Watch w = (Watch)a;
+                    System.out.println(w.play(ENTRY_POS_I - 8, ENTRY_POS_J - 2));
+                }
+            }
+        }
     }
 
 }

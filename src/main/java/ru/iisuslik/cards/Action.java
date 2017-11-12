@@ -18,6 +18,10 @@ public class Action extends Card {
         this.actionType = actionType;
     }
 
+    public int getActionType() {
+        return actionType;
+    }
+
     @Override
     public void printFirst() {
         printSmth();

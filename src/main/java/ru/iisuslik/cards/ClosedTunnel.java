@@ -16,11 +16,32 @@ public class ClosedTunnel extends Tunnel {
         closedTunnel = true;
     }
 
+    public void open(){
+        closed = false;
+    }
+
     public boolean isGold() {
         return gold;
     }
 
     public boolean isClosed() {
         return closed;
+    }
+
+    @Override
+    public void printFirst() {
+        printSmth();
+    }//TODO if !closed
+
+    @Override
+    public void printSecond() {
+        System.out.print('%');
+        System.out.print(isGold() ? '1' : '0');
+        System.out.print("%   ");
+    }
+
+    @Override
+    public void printThird() {
+        printSmth();
     }
 }

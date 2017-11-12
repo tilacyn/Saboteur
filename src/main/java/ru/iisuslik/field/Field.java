@@ -27,6 +27,15 @@ public class Field {
     private int playingCount;
     private int currentPlayer = 0;
     private boolean theEnd = false;
+
+    public int getCurrentPlayer() {
+        return currentPlayer;
+    }
+
+    public boolean isThisTheEnd() {
+        return theEnd;
+    }
+
     public Tunnel[][] field = new Tunnel[HEIGHT][WIDTH];
     public Player[] players;
     public ArrayList<Card> deck = new ArrayList<>();
@@ -42,7 +51,7 @@ public class Field {
                 players[currentPlayer].isBrokenTrolley()};
     }
 
-    public boolean isCurrentPlayerSaboteur(){
+    public boolean isCurrentPlayerSaboteur() {
         return players[currentPlayer].getPersonality() == Player.SABOTEUR;
     }
 
@@ -62,10 +71,12 @@ public class Field {
         }
         currentPlayer++;
         currentPlayer %= players.length;
+
         while (!players[currentPlayer].isPlaying()) {
             currentPlayer++;
             currentPlayer %= players.length;
         }
+        currentPlayerPlayedCard = false;
     }
 
     private void randomShuffle(int arr[]) {
@@ -189,6 +200,78 @@ public class Field {
             field[firstTunnelI][firstTunnelJ + k * 2] = tunnels[perestanovka[k]];
             if (rnd.nextBoolean())
                 field[firstTunnelI][firstTunnelJ + k * 2].spin();
+        }
+    }
+
+    public void dfs(int i, int j, int iPrev, int jPrev) {
+        Tunnel tunnel = field[i][j];
+        if (i + 1 != iPrev && j != jPrev && i < HEIGHT - 1 && field[i + 1][j] != null) {
+            Tunnel t = field[i + 1][j];
+            if (!t.isClosedTunnel() || t.isClosedTunnel() && !((ClosedTunnel) t).isClosed()) {
+                if (tunnel.down) {
+                    if (t.up) {
+                        dfs(i + 1, j, i, j);
+                    }
+                }
+            } else if (t.isClosedTunnel() && ((ClosedTunnel) t).isClosed()) {
+                ClosedTunnel ct = (ClosedTunnel) t;
+                ct.open();
+                if (ct.isGold()) {
+                    theEnd = true;
+                    return;
+                }
+            }
+        }
+        if (i - 1 != iPrev && j != jPrev && i > 0 && field[i - 1][j] != null) {
+            Tunnel t = field[i - 1][j];
+            if (!t.isClosedTunnel() || t.isClosedTunnel() && !((ClosedTunnel) t).isClosed()) {
+                if (tunnel.up) {
+                    if (t.down) {
+                        dfs(i - 1, j,i,j);
+                    }
+                }
+            } else if (t.isClosedTunnel() && ((ClosedTunnel) t).isClosed()) {
+                ClosedTunnel ct = (ClosedTunnel) t;
+                ct.open();
+                if (ct.isGold()) {
+                    theEnd = true;
+                    return;
+                }
+            }
+        }
+        if (i != iPrev && j + 1 != jPrev && i < WIDTH - 1 && field[i][j + 1] != null) {
+            Tunnel t = field[i][j + 1];
+            if (!t.isClosedTunnel() || t.isClosedTunnel() && !((ClosedTunnel) t).isClosed()) {
+                if (tunnel.right) {
+                    if (t.left) {
+                        dfs(i, j + 1,i,j);
+                    }
+                }
+            } else if (t.isClosedTunnel() && ((ClosedTunnel) t).isClosed()) {
+                ClosedTunnel ct = (ClosedTunnel) t;
+                ct.open();
+                if (ct.isGold()) {
+                    theEnd = true;
+                    return;
+                }
+            }
+        }
+        if (i != iPrev && j - 1 != jPrev && j > 0 && field[i][j - 1] != null) {
+            Tunnel t = field[i][j - 1];
+            if (!t.isClosedTunnel() || t.isClosedTunnel() && !((ClosedTunnel) t).isClosed()) {
+                if (tunnel.left) {
+                    if (t.right) {
+                        dfs(i, j - 1,i,j);
+                    }
+                }
+            } else if (t.isClosedTunnel() && ((ClosedTunnel) t).isClosed()) {
+                ClosedTunnel ct = (ClosedTunnel) t;
+                ct.open();
+                if (ct.isGold()) {
+                    theEnd = true;
+                    return;
+                }
+            }
         }
     }
 
