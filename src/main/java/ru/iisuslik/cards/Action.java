@@ -17,4 +17,21 @@ public class Action extends Card {
         super(ACTION, id, name, description, field, playerNumber);
         this.actionType = actionType;
     }
+
+    @Override
+    public void printFirst() {
+        printSmth();
+    }
+
+    @Override
+    public void printSecond() {
+        System.out.print('%');
+        System.out.print(name.charAt(0));
+        System.out.print("%   ");
+    }
+
+    @Override
+    public void printThird() {
+        printSmth();
+    }
 }

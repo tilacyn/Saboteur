@@ -18,7 +18,7 @@ public class Tunnel extends Card {
     }
 
     public boolean canPlay(int i, int j) {
-        return field.players[playerNumber].canPutTunnels() && field.canPutTunnel(this,i,j);
+        return field.players[playerNumber].canPutTunnels() && field.canPutTunnel(this, i, j);
     }
 
     public void play(int i, int j) {
@@ -27,7 +27,7 @@ public class Tunnel extends Card {
         field.startNextTurn();
     }
 
-    public void spin(){ //TODO
+    public void spin() { //TODO
         boolean temp = up;
         up = down;
         down = temp;
@@ -38,5 +38,33 @@ public class Tunnel extends Card {
 
     public boolean isClosedTunnel() {
         return closedTunnel;
+    }
+
+    private void printBoolean(boolean b) {
+        if (b) System.out.print('+');
+        else System.out.print(' ');
+    }
+
+    @Override
+    public void printFirst() {
+        System.out.print(' ');
+        printBoolean(up);
+        System.out.print("   ");
+    }
+
+    @Override
+    public void printSecond() {
+        printBoolean(left);
+        if (centre) System.out.print('@');
+        else System.out.print(' ');
+        printBoolean(right);
+        System.out.print("  ");
+    }
+
+    @Override
+    public void printThird() {
+        System.out.print(' ');
+        printBoolean(down);
+        System.out.print("   ");
     }
 }

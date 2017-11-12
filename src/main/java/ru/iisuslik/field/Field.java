@@ -17,9 +17,9 @@ public class Field {
     private int playingCount;
     private int currentPlayer = 0;
     private boolean theEnd = false;
-    public Tunnel[][] field = new Tunnel[WIDTH][HEIGHT];
+    public Tunnel[][] field = new Tunnel[HEIGHT][WIDTH];
     public Player[] players;
-    public ArrayList<Card> deck;
+    public ArrayList<Card> deck = new ArrayList<>();
 
 
     public ArrayList<Card> getCurrentPlayerHand() {
@@ -28,8 +28,8 @@ public class Field {
 
     public boolean[] getCurrentPlayerDebuffs() {
         return new boolean[]{players[currentPlayer].isBrokenLamp(),
-                players[currentPlayer].isBrokenLamp(),
-                players[currentPlayer].isBrokenLamp()};
+                players[currentPlayer].isBrokenPick(),
+                players[currentPlayer].isBrokenTrolley()};
     }
 
     public void startNextTurn() {
@@ -126,8 +126,11 @@ public class Field {
                 true, false, true, false, true, false);
         int firstTunnelI = ENTRY_POS_I - 8;
         int firstTunnelJ = ENTRY_POS_J - 2;
+        Random rnd = new Random();
         for (int k = 0; k < 3; k++) {
             field[firstTunnelI][firstTunnelJ + k * 2] = tunnels[perestanovka[k]];
+            if(rnd.nextBoolean())
+                field[firstTunnelI][firstTunnelJ + k * 2].spin();
         }
     }
 
@@ -139,9 +142,14 @@ public class Field {
     }
 
     private void addTunnel(int count, int up, int down, int left, int right, int centre) {
-        for (int i = 0; i < count; i++)
-            deck.add(new Tunnel(43, "Tunnel", "Just a tunnel", this, -1,
-                    up == 1, down == 1, left == 1, right == 1, centre == 1));
+        Random rnd = new Random();
+        for (int i = 0; i < count; i++) {
+            Tunnel tunnel = new Tunnel(43, "Tunnel", "Just a tunnel", this, -1,
+                    up == 1, down == 1, left == 1, right == 1, centre == 1);
+            if(rnd.nextBoolean())
+                tunnel.spin();
+            deck.add(tunnel);
+        }
     }
 
     private void addHealingCards() {
@@ -216,6 +224,8 @@ public class Field {
         initializeField();
         initializePlayers();
         initializeDeck();
+        randomShuffle(deck);
+        giveCards();
         //TODO
     }
 }

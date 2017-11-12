@@ -48,4 +48,17 @@ public class Card {
     public void discard() {
         field.players[playerNumber].playCard(this);
     }
+
+    protected void printSmth(){
+        System.out.print("%%%   ");
+    }
+
+    public void printFirst(){printSmth();}
+
+    public void printSecond(){printSmth();}
+
+    public void printThird(){printSmth();}
+
 }
+
+
