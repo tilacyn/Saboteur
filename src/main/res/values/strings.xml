@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Saboteur</string>
+    <string name="title_activity_game">GameActivity</string>
+</resources>
