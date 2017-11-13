@@ -12,7 +12,6 @@ public class Debuff extends Action {
         this.breakingLamp = breakingLamp;
         this.breakingPick = breakingPick;
         this.breakingTrolley = breakingTrolley;
-        this.id = 0;
     }
     public boolean canPlay(int playerNumber) {
         return !field.didCurrentPlayerPlayCard() && !field.didCurrentPlayerPlayCard() && field.players[playerNumber].canBreak(this);

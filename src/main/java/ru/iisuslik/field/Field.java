@@ -100,7 +100,14 @@ public class Field {
     }
 
     private int getSaboteurCount(int playersCount) {
-        return 1;//TODO
+        if (playersCount <= 4)
+            return 1;
+        if (playersCount <= 6)
+            return 2;
+        if (playersCount <= 9)
+            return 3;
+        else
+            return 4;
     }
 
     public boolean canPutTunnel(Tunnel tunnel, int i, int j) {
@@ -117,7 +124,8 @@ public class Field {
                     } else {
                         return false;
                     }
-                }
+                } else if (t.up)
+                    return false;
             }
         }
         if (i > 0 && field[i - 1][j] != null) {
@@ -129,7 +137,8 @@ public class Field {
                     } else {
                         return false;
                     }
-                }
+                } else if (t.down)
+                    return false;
             }
         }
         if (i < WIDTH - 1 && field[i][j + 1] != null) {
@@ -141,7 +150,8 @@ public class Field {
                     } else {
                         return false;
                     }
-                }
+                } else if (t.left)
+                    return false;
             }
         }
         if (j > 0 && field[i][j - 1] != null) {
@@ -153,7 +163,8 @@ public class Field {
                     } else {
                         return false;
                     }
-                }
+                } else if (t.right)
+                    return false;
             }
         }
         return hasContinue;
@@ -180,18 +191,18 @@ public class Field {
     }
 
     private void initializeField() {
-        field[ENTRY_POS_I][ENTRY_POS_J] = new Tunnel(43, "ENTRY", //TODO id
+        field[ENTRY_POS_I][ENTRY_POS_J] = new Tunnel("ENTRY", //TODO id
                 "First tunnel in the way",
                 this, Card.NO_PLAYER,
                 true, true, true, true, true);
         int[] perestanovka = {0, 1, 2};
         randomShuffle(perestanovka);
         ClosedTunnel[] tunnels = new ClosedTunnel[3];
-        tunnels[0] = new ClosedTunnel(43, "Closed Tunnel", "Probably has gold", this, -1,
+        tunnels[0] = new ClosedTunnel("Closed Tunnel", "Probably has gold", this, -1,
                 true, true, true, true, true, true);
-        tunnels[1] = new ClosedTunnel(43, "Closed Tunnel", "Probably has gold", this, -1,
+        tunnels[1] = new ClosedTunnel("Closed Tunnel", "Probably has gold", this, -1,
                 true, false, false, true, true, false);
-        tunnels[2] = new ClosedTunnel(43, "Closed Tunnel", "Probably has gold", this, -1,
+        tunnels[2] = new ClosedTunnel("Closed Tunnel", "Probably has gold", this, -1,
                 true, false, true, false, true, false);
         int firstTunnelI = ENTRY_POS_I - 8;
         int firstTunnelJ = ENTRY_POS_J - 2;
@@ -227,7 +238,7 @@ public class Field {
             if (!t.isClosedTunnel() || t.isClosedTunnel() && !((ClosedTunnel) t).isClosed()) {
                 if (tunnel.up) {
                     if (t.down) {
-                        dfs(i - 1, j,i,j);
+                        dfs(i - 1, j, i, j);
                     }
                 }
             } else if (t.isClosedTunnel() && ((ClosedTunnel) t).isClosed()) {
@@ -244,7 +255,7 @@ public class Field {
             if (!t.isClosedTunnel() || t.isClosedTunnel() && !((ClosedTunnel) t).isClosed()) {
                 if (tunnel.right) {
                     if (t.left) {
-                        dfs(i, j + 1,i,j);
+                        dfs(i, j + 1, i, j);
                     }
                 }
             } else if (t.isClosedTunnel() && ((ClosedTunnel) t).isClosed()) {
@@ -261,7 +272,7 @@ public class Field {
             if (!t.isClosedTunnel() || t.isClosedTunnel() && !((ClosedTunnel) t).isClosed()) {
                 if (tunnel.left) {
                     if (t.right) {
-                        dfs(i, j - 1,i,j);
+                        dfs(i, j - 1, i, j);
                     }
                 }
             } else if (t.isClosedTunnel() && ((ClosedTunnel) t).isClosed()) {
@@ -285,10 +296,10 @@ public class Field {
         }
     }
 
-    private void addTunnel(int count, int up, int down, int left, int right, int centre) {
+    private void addTunnel(int count, int up, int down, int left, int right, int centre, int id) {
         Random rnd = new Random();
         for (int i = 0; i < count; i++) {
-            Tunnel tunnel = new Tunnel(43, "Tunnel", "Just a tunnel", this, -1,
+            Tunnel tunnel = new Tunnel("Tunnel", "Just a tunnel", this, -1,
                     up == 1, down == 1, left == 1, right == 1, centre == 1);
             if (rnd.nextBoolean())
                 tunnel.spin();
@@ -298,28 +309,28 @@ public class Field {
 
     private void addHealingCards() {
         for (int i = 0; i < 2; i++) {
-            deck.add(new Heal(43, "Heal lamp", "Heals lamp (choose player)", this, -1,
+            deck.add(new Heal(32, "Heal lamp", "Heals lamp (choose player)", this, -1,
                     true, false, false));
-            deck.add(new Heal(43, "Heal trolley", "Heals trolley (choose player)", this, -1,
+            deck.add(new Heal(33, "Heal trolley", "Heals trolley (choose player)", this, -1,
                     false, true, false));
-            deck.add(new Heal(43, "Heal pick", "Heals pick (choose player)", this, -1,
+            deck.add(new Heal(34, "Heal pick", "Heals pick (choose player)", this, -1,
                     false, false, true));
         }
-        deck.add(new Heal(43, "Heal pick and trolley", "Heals pick and trolley (choose player)", this, -1,
+        deck.add(new Heal(35, "Heal pick and trolley", "Heals pick and trolley (choose player)", this, -1,
                 false, true, true));
-        deck.add(new Heal(43, "Heal pick and lamp", "Heals pick and lamp (choose player)", this, -1,
+        deck.add(new Heal(36, "Heal pick and lamp", "Heals pick and lamp (choose player)", this, -1,
                 true, false, true));
-        deck.add(new Heal(43, "Heal lamp and trolley", "Heals lamp and trolley (choose player)", this, -1,
+        deck.add(new Heal(37, "Heal lamp and trolley", "Heals lamp and trolley (choose player)", this, -1,
                 true, true, false));
     }
 
     private void addDebuffCards() {
         for (int i = 0; i < 3; i++) {
-            deck.add(new Debuff(43, "Break lamp", "Breaks lamp (choose player)", this, -1,
+            deck.add(new Debuff(38, "Break lamp", "Breaks lamp (choose player)", this, -1,
                     true, false, false));
-            deck.add(new Debuff(43, "Break trolley", "Breaks trolley (choose player)", this, -1,
+            deck.add(new Debuff(39, "Break trolley", "Breaks trolley (choose player)", this, -1,
                     false, true, false));
-            deck.add(new Debuff(43, "Break pick", "Breaks pick (choose player)", this, -1,
+            deck.add(new Debuff(40, "Break pick", "Breaks pick (choose player)", this, -1,
                     false, false, true));
         }
     }
@@ -327,34 +338,34 @@ public class Field {
 
     private void addWatchCards() {
         for (int i = 0; i < 6; i++) {
-            deck.add(new Watch(43, "Watch closed cards", "Check if closed card has gold inside", this, -1));
+            deck.add(new Watch(41, "Watch closed cards", "Check if closed card has gold inside", this, -1));
         }
     }
 
 
     private void addDestroyCards() {
         for (int i = 0; i < 6; i++) {
-            deck.add(new Destroy(43, "Destroy tunnel", "Destroy a tunnel, except entry and closed cards", this, -1));
+            deck.add(new Destroy(42, "Destroy tunnel", "Destroy a tunnel, except entry and closed cards", this, -1));
         }
     }
 
     private void initializeDeck() {
-        addTunnel(5, 1, 0, 1, 1, 1);
-        addTunnel(4, 0, 0, 1, 1, 1);
-        addTunnel(5, 1, 1, 0, 1, 1);
-        addTunnel(5, 0, 1, 1, 1, 1);
-        addTunnel(3, 1, 1, 0, 0, 1);
-        addTunnel(4, 0, 1, 1, 0, 1);
-        addTunnel(5, 1, 1, 0, 1, 1);
-        addTunnel(1, 0, 0, 1, 0, 1);
-        addTunnel(1, 1, 1, 1, 0, 0);
-        addTunnel(1, 1, 0, 0, 0, 1);
-        addTunnel(1, 1, 1, 1, 1, 0);
-        addTunnel(1, 0, 1, 1, 1, 0);
-        addTunnel(1, 1, 0, 1, 0, 0);
-        addTunnel(1, 0, 1, 1, 0, 0);
-        addTunnel(1, 0, 0, 1, 1, 0);
-        addTunnel(1, 1, 1, 0, 0, 0);
+        addTunnel(5, 1, 0, 1, 1, 1, 0);
+        addTunnel(4, 0, 0, 1, 1, 1, 1);
+        addTunnel(5, 1, 1, 0, 1, 1, 2);
+        addTunnel(5, 1, 1, 1, 1, 1, 3);
+        addTunnel(3, 1, 1, 0, 0, 1, 4);
+        addTunnel(4, 0, 1, 1, 0, 1, 5);
+        addTunnel(5, 1, 1, 0, 1, 1, 6);
+        addTunnel(1, 0, 0, 1, 0, 1, 7);
+        addTunnel(1, 1, 1, 1, 0, 0, 8);
+        addTunnel(1, 1, 0, 0, 0, 1, 9);
+        addTunnel(1, 1, 1, 1, 1, 0, 10);
+        addTunnel(1, 0, 1, 1, 1, 0, 11);
+        addTunnel(1, 1, 0, 1, 0, 0, 12);
+        addTunnel(1, 0, 1, 1, 0, 0, 13);
+        addTunnel(1, 0, 0, 1, 1, 0, 14);
+        addTunnel(1, 1, 1, 0, 0, 0, 15);
         addHealingCards();
         addDebuffCards();
         addWatchCards();

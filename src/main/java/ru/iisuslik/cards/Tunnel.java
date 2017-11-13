@@ -7,17 +7,14 @@ public class Tunnel extends Card {
     public boolean up, down, left, right, centre;
     protected boolean closedTunnel = false;
 
-    public Tunnel(int id, String name, String description, Field field, int playerNumber,
+    public Tunnel(String name, String description, Field field, int playerNumber,
                   boolean up, boolean down, boolean left, boolean right, boolean centre) {
-        super(TUNNEL, id, name, description, field, playerNumber);
+        super(TUNNEL, 0, name, description, field, playerNumber);
         this.up = up;
         this.down = down;
         this.right = right;
         this.left = left;
         this.centre = centre;
-
-        this.id = 0;
-
         if (centre) {
             this.id++;
             if (left) this.id++;
@@ -38,13 +35,21 @@ public class Tunnel extends Card {
         field.dfs(Field.ENTRY_POS_I, Field.ENTRY_POS_J, -1, -1);
     }
 
-    public void spin() { //TODO
+    public void spin() {
         boolean temp = up;
         up = down;
         down = temp;
         temp = right;
         right = left;
         left = temp;
+        this.id = 0;
+        if (centre) {
+            this.id++;
+            if (left) this.id++;
+            if (down) this.id += 2;
+            if (up) this.id += 4;
+            if (right) this.id += 8;
+        }
     }
 
     public boolean isClosedTunnel() {

@@ -16,7 +16,6 @@ public class Action extends Card {
                   int actionType) {
         super(ACTION, id, name, description, field, playerNumber);
         this.actionType = actionType;
-        this.id = 0;
     }
 
     public int getActionType() {

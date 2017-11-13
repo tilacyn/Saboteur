@@ -7,14 +7,13 @@ public class ClosedTunnel extends Tunnel {
     private boolean closed = true;
     private boolean gold;
 
-    public ClosedTunnel(int id, String name, String description, Field field, int playerNumber,
+    public ClosedTunnel(String name, String description, Field field, int playerNumber,
                         boolean up, boolean down, boolean left, boolean right, boolean centre,
                         boolean gold) {
-        super(id, name, description, field, playerNumber, up, down, left, right, centre);
+        super(name, description, field, playerNumber, up, down, left, right, centre);
         this.gold = gold;
         this.closed = true;
         closedTunnel = true;
-        this.id = 0;
     }
 
     public void open(){

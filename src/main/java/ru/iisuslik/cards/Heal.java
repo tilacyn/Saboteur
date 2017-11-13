@@ -12,7 +12,6 @@ public class Heal extends Action {
         this.healLamp = healLamp;
         this.healPick = healPick;
         this.healTrolley = healTrolley;
-        this.id = 0;
     }
 
     public boolean canPlay(int playerNumber) {

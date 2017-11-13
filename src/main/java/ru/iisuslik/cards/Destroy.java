@@ -5,7 +5,6 @@ import ru.iisuslik.field.Field;
 public class Destroy extends Action {
     public Destroy(int id, String name, String description, Field field, int playerNumber) {
         super(id, name, description, field, playerNumber, DESTROY);
-        this.id = 0;
     }
 
     public boolean canPlay(int i, int j) {
