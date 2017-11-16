@@ -19,7 +19,16 @@
         <activity
             android:name=".GameActivity"
             android:label="@string/title_activity_game"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".PlayerChooseActivity"
+            android:label="@string/title_activity_player_choose"
+            android:parentActivityName=".GameActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="ru.tilacyn.saboteur.GameActivity" />
+        </activity>
     </application>
 
 </manifest>

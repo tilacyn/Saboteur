@@ -15,6 +15,14 @@ public class Controller {
     public static final int ENTRY_POS_I = Field.ENTRY_POS_I;
     public static final int ENTRY_POS_J = Field.ENTRY_POS_J;
 
+
+    public int getWidth() {
+        return field.WIDTH;
+    }
+
+    public int getHeight() {
+        return field.HEIGHT;
+    }
     public ArrayList<Card> getCurrentPlayerHand() {
         return field.getCurrentPlayerHand();
     }
