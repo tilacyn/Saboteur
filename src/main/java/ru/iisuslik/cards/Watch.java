@@ -14,6 +14,7 @@ public class Watch extends Action {
 
     public boolean play(int i, int j) {
         ClosedTunnel ct = (ClosedTunnel) field.field[i][j];
+        field.players[playerNumber].playCard(this);
         field.iPlayedCard();
         return ct.isGold();
     }

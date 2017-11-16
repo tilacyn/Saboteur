@@ -51,6 +51,12 @@ public class Field {
                 players[currentPlayer].isBrokenTrolley()};
     }
 
+    public boolean[] getPlayerDebuffs(int index) {
+        return new boolean[]{players[index].isBrokenLamp(),
+                players[index].isBrokenPick(),
+                players[index].isBrokenTrolley()};
+    }
+
     public boolean isCurrentPlayerSaboteur() {
         return players[currentPlayer].getPersonality() == Player.SABOTEUR;
     }
@@ -214,14 +220,26 @@ public class Field {
         }
     }
 
-    public void dfs(int i, int j, int iPrev, int jPrev) {
+    private boolean[][] used = new boolean[HEIGHT][WIDTH];
+
+    public void startDfs() {
+        for (int i = 0; i < HEIGHT; i++) {
+            for (int j = 0; j < WIDTH; j++) {
+                used[i][j] = false;
+            }
+        }
+        dfs(ENTRY_POS_I, ENTRY_POS_J);
+    }
+
+    private void dfs(int i, int j) {
         Tunnel tunnel = field[i][j];
-        if (i + 1 != iPrev && j != jPrev && i < HEIGHT - 1 && field[i + 1][j] != null) {
+        used[i][j] = true;
+        if (i < HEIGHT - 1 && !used[i + 1][j] && field[i + 1][j] != null) {
             Tunnel t = field[i + 1][j];
             if (!t.isClosedTunnel() || t.isClosedTunnel() && !((ClosedTunnel) t).isClosed()) {
                 if (tunnel.down) {
                     if (t.up) {
-                        dfs(i + 1, j, i, j);
+                        dfs(i + 1, j);
                     }
                 }
             } else if (t.isClosedTunnel() && ((ClosedTunnel) t).isClosed()) {
@@ -233,12 +251,12 @@ public class Field {
                 }
             }
         }
-        if (i - 1 != iPrev && j != jPrev && i > 0 && field[i - 1][j] != null) {
+        if (i > 0 && !used[i - 1][j] && field[i - 1][j] != null) {
             Tunnel t = field[i - 1][j];
             if (!t.isClosedTunnel() || t.isClosedTunnel() && !((ClosedTunnel) t).isClosed()) {
                 if (tunnel.up) {
                     if (t.down) {
-                        dfs(i - 1, j, i, j);
+                        dfs(i - 1, j);
                     }
                 }
             } else if (t.isClosedTunnel() && ((ClosedTunnel) t).isClosed()) {
@@ -250,12 +268,12 @@ public class Field {
                 }
             }
         }
-        if (i != iPrev && j + 1 != jPrev && i < WIDTH - 1 && field[i][j + 1] != null) {
+        if (i < WIDTH - 1 && !used[i][j + 1] && field[i][j + 1] != null) {
             Tunnel t = field[i][j + 1];
             if (!t.isClosedTunnel() || t.isClosedTunnel() && !((ClosedTunnel) t).isClosed()) {
                 if (tunnel.right) {
                     if (t.left) {
-                        dfs(i, j + 1, i, j);
+                        dfs(i, j + 1);
                     }
                 }
             } else if (t.isClosedTunnel() && ((ClosedTunnel) t).isClosed()) {
@@ -267,12 +285,12 @@ public class Field {
                 }
             }
         }
-        if (i != iPrev && j - 1 != jPrev && j > 0 && field[i][j - 1] != null) {
+        if (j > 0 && !used[i][j - 1] && field[i][j - 1] != null) {
             Tunnel t = field[i][j - 1];
             if (!t.isClosedTunnel() || t.isClosedTunnel() && !((ClosedTunnel) t).isClosed()) {
                 if (tunnel.left) {
                     if (t.right) {
-                        dfs(i, j - 1, i, j);
+                        dfs(i, j - 1);
                     }
                 }
             } else if (t.isClosedTunnel() && ((ClosedTunnel) t).isClosed()) {

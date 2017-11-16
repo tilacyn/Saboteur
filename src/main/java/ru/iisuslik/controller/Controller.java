@@ -29,6 +29,11 @@ public class Controller {
     public boolean[] getCurrentPlayerDebuffs() {
         return field.getCurrentPlayerDebuffs();//Lamp Pick Trolley
     }
+    public boolean[] getPlayerDebuffs(int index) {
+        return field.getPlayerDebuffs(index);//Lamp Pick Trolley
+    }
+
+
     public void startNextTurn() {
         field.startNextTurn();
     }

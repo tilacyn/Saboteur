@@ -14,6 +14,7 @@ public class Destroy extends Action {
 
     public void play(int i, int j) {
         field.field[i][j] = null;
+        field.players[playerNumber].playCard(this);
         field.iPlayedCard();
     }
 }

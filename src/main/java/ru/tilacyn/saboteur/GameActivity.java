@@ -87,6 +87,15 @@ public class GameActivity extends AppCompatActivity {
     private boolean isCardChosen = false;
     private Card chosenCard;
 
+    private boolean isDiscard = false;
+
+    public void drawAll() {
+
+    }
+
+    public void setDiscard() {
+        isDiscard = false;
+    }
 
     public void drawTable(final TableLayout table, final TableRow.LayoutParams params) {
         table.removeAllViews();
@@ -96,15 +105,13 @@ public class GameActivity extends AppCompatActivity {
         arkenstoneTableRow0.setGravity(Gravity.CENTER_HORIZONTAL);
 
 
-        for(int i = 0; i < fieldWidth + 2; i++) {
+        for (int i = 0; i < fieldWidth + 2; i++) {
             ImageView empty_tunnel = new ImageView(this);
             empty_tunnel.setImageResource(R.drawable.arkenstone);
             arkenstoneTableRow0.addView(empty_tunnel);
         }
 
         table.addView(arkenstoneTableRow0);
-
-
 
 
         TableRow[] field = new TableRow[fieldHeight];
@@ -123,14 +130,12 @@ public class GameActivity extends AppCompatActivity {
             for (int j = 0; j < fieldWidth; j++) {
                 final ImageView tunnel = new ImageView(this);
                 Tunnel real = controller.getField()[i][j];
-                if(real == null) {
+                if (real == null) {
                     tunnel.setImageResource(R.drawable.empty_tunnel);
-                }
-                else {
-                    if(real.isClosedTunnel()) {
+                } else {
+                    if (real.isClosedTunnel() && ((ClosedTunnel) real).isClosed()) {
                         tunnel.setImageResource(R.drawable.hidden_tunnel);
-                    }
-                    else {
+                    } else {
                         tunnel.setImageResource(getCardImageById[real.getId()]);
                     }
                 }
@@ -147,9 +152,9 @@ public class GameActivity extends AppCompatActivity {
                         int y = (int) map.get(tunnel).second;
                         //System.out.println(x);
                         //System.out.println(y);
-                        if(chosenCard instanceof Tunnel) {
+                        if (chosenCard instanceof Tunnel) {
                             //tunnel.setImageResource(getCardImageById[chosenCard.getId()]);
-                            if(((Tunnel) chosenCard).canPlay(x, y)) {
+                            if (((Tunnel) chosenCard).canPlay(x, y)) {
                                 ((Tunnel) chosenCard).play(x, y);
                                 drawTable(table, params);
                             } else {
@@ -157,18 +162,25 @@ public class GameActivity extends AppCompatActivity {
 
                             }
                         }
-                        if(chosenCard instanceof Destroy) {
+                        if (chosenCard instanceof Destroy) {
                             //tunnel.setImageResource(getCardImageById[chosenCard.getId()]);
-                            if(((Destroy) chosenCard).canPlay(x, y)) {
+                            if (((Destroy) chosenCard).canPlay(x, y)) {
                                 ((Destroy) chosenCard).play(x, y);
                                 drawTable(table, params);
                             }
                         }
 
-                        if(chosenCard instanceof Watch) {
+                        if (chosenCard instanceof Watch) {
                             //tunnel.setImageResource(getCardImageById[chosenCard.getId()]);
-                            if(((Watch) chosenCard).canPlay(x, y)) {
-                                ((Watch) chosenCard).play(x, y);
+                            if (((Watch) chosenCard).canPlay(x, y)) {
+                                if (((Watch) chosenCard).play(x, y)) {
+                                    Toast.makeText(getApplicationContext(), "This is a hidden treasure!",
+                                            Toast.LENGTH_SHORT).show();
+
+                                } else {
+                                    Toast.makeText(getApplicationContext(), "Oh no! Just a simple tunnel(",
+                                            Toast.LENGTH_SHORT).show();
+                                }
                                 drawTable(table, params);
                             }
                         }
@@ -201,13 +213,13 @@ public class GameActivity extends AppCompatActivity {
         emptyTableRow.setGravity(Gravity.CENTER_HORIZONTAL);
 
 
-        for(int i = 0; i < fieldWidth + 2; i++) {
+        for (int i = 0; i < fieldWidth + 2; i++) {
             ImageView arkenstone = new ImageView(this);
             arkenstone.setImageResource(R.drawable.arkenstone);
             arkenstoneTableRow1.addView(arkenstone);
         }
 
-        for(int i = 0; i < fieldWidth + 2; i++) {
+        for (int i = 0; i < fieldWidth + 2; i++) {
             ImageView empty_tunnel = new ImageView(this);
             empty_tunnel.setImageResource(R.drawable.nothing);
             emptyTableRow.addView(empty_tunnel);
@@ -218,14 +230,10 @@ public class GameActivity extends AppCompatActivity {
 
     }
 
-    Context we() {
-        return this;
-    }
-
 
     void closeCards(TableRow cardsRow) {
         cardsRow.removeAllViews();
-        for(int i = 0; i < 6; i++) {
+        for (int i = 0; i < controller.getCurrentPlayerHand().size(); i++) {
             ImageButton empty = new ImageButton(this);
             empty.setImageResource(R.drawable.dark_side_of_the_moon);
             cardsRow.addView(empty);
@@ -233,9 +241,10 @@ public class GameActivity extends AppCompatActivity {
     }
 
 
-    void makeYou(final LinearLayout overTables, final ImageView dwarf, Button you) {
+    void makeYou(final LinearLayout overTables, final ImageView dwarf, TextView yourNumber, Button you) {
 
         overTables.removeView(dwarf);
+        overTables.removeView(yourNumber);
         overTables.removeView(you);
 
         you.setText("You: ");
@@ -243,7 +252,6 @@ public class GameActivity extends AppCompatActivity {
         you.setWidth(30);
         you.setHeight(30);
 
-        TextView yourNumber = new TextView(this);
         yourNumber.setText("Player " + ((Integer) (controller.currentPlayerNumber() + 1)).toString());
         yourNumber.setTextSize(30);
         yourNumber.setGravity(Gravity.CENTER_HORIZONTAL);
@@ -276,36 +284,31 @@ public class GameActivity extends AppCompatActivity {
     private int playerChoose = -1;
 
 
-    int getPlayerChoose() {
-        return playerChoose;
-    }
-
-
     void choosePlayer() {
         Intent intent = new Intent(this, PlayerChooseActivity.class);
-        intent.putExtra("playerCount", 2);
+        intent.putExtra("playerCount", playerCount);
+        intent.putExtra("currentPlayerNumber", controller.currentPlayerNumber());
         startActivityForResult(intent, PLAYER_CHOOSE);
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(requestCode == PLAYER_CHOOSE) {
-            if(resultCode == RESULT_OK) {
+        if (requestCode == PLAYER_CHOOSE) {
+            if (resultCode == RESULT_OK) {
                 int playerChoose = data.getIntExtra("player", 0);//get player number
-                Toast.makeText(getApplicationContext(), "Player " + Integer.toString(playerChoose),
+                Toast.makeText(getApplicationContext(), "Player " + Integer.toString(playerChoose + 1),
                         Toast.LENGTH_SHORT).show();
-                if(chosenCard instanceof Debuff) {
-                    if(((Debuff) chosenCard).canPlay(playerChoose)) {
+                if (chosenCard instanceof Debuff) {
+                    if (((Debuff) chosenCard).canPlay(playerChoose)) {
                         ((Debuff) chosenCard).play(playerChoose);
                     }
                 }
 
-                if(chosenCard instanceof Heal) {
-                    if(((Heal) chosenCard).canPlay(playerChoose)) {
+                if (chosenCard instanceof Heal) {
+                    if (((Heal) chosenCard).canPlay(playerChoose)) {
                         ((Heal) chosenCard).play(playerChoose);
                     }
                 }
-            }
-            else {
+            } else {
                 playerChoose = -1;
                 Toast.makeText(getApplicationContext(), "Choose please ",
                         Toast.LENGTH_SHORT).show();
@@ -313,6 +316,56 @@ public class GameActivity extends AppCompatActivity {
         }
     }
 
+    void makeToolsTable(TableLayout toolsTable) {
+        toolsTable.removeAllViews();
+        TableRow[] playerRows = new TableRow[playerCount];
+        for (int i = 0; i < playerCount; i++) {
+
+            playerRows[i] = new TableRow(this);
+            playerRows[i].setGravity(Gravity.CENTER_HORIZONTAL);
+
+
+            TextView playerNumber = new TextView(this);
+            playerNumber.setText("Player " + ((Integer) (i + 1)).toString());
+            playerNumber.setTextSize(30);
+
+
+            //playerNumber.setGravity(Gravity.);
+            playerNumber.setTextColor(Color.BLUE);
+
+            boolean[] currentDebuffs = controller.getPlayerDebuffs(i);
+            ImageView lamp = new ImageView(this);
+            ImageView pick = new ImageView(this);
+            ImageView trolley = new ImageView(this);
+
+            if (!currentDebuffs[0]) {
+                lamp.setImageResource(R.drawable.lamp);
+            } else {
+                lamp.setImageResource(R.drawable.broken_lamp);
+            }
+
+            if (!currentDebuffs[1]) {
+                pick.setImageResource(R.drawable.pick);
+            } else {
+                pick.setImageResource(R.drawable.broken_pick);
+            }
+
+            if (!currentDebuffs[2]) {
+                trolley.setImageResource(R.drawable.trolley);
+            } else {
+                trolley.setImageResource(R.drawable.broken_trolley);
+            }
+
+            playerRows[i].addView(playerNumber);
+            playerRows[i].addView(lamp);
+            playerRows[i].addView(pick);
+            playerRows[i].addView(trolley);
+
+
+            toolsTable.addView(playerRows[i]);
+
+        }
+    }
 
 
     @Override
@@ -382,8 +435,9 @@ public class GameActivity extends AppCompatActivity {
 
 
         final Button you = new Button(this);
+        final TextView yourNumber = new TextView(this);
         final ImageView dwarf = new ImageView(this);
-        makeYou(overTables, dwarf, you);
+        makeYou(overTables, dwarf, yourNumber, you);
 
         // Set cardsRow
 
@@ -420,20 +474,28 @@ public class GameActivity extends AppCompatActivity {
                         @Override
                         public void onClick(View v) {
                             isCardChosen = true;
-                            for(int i = 0; i < cardsRow.getVirtualChildCount(); i++) {
-                                if(cardsRow.getVirtualChildAt(i).equals(cardImage)) {
+                            for (int i = 0; i < cardsRow.getVirtualChildCount(); i++) {
+                                if (cardsRow.getVirtualChildAt(i).equals(cardImage)) {
                                     chosenCard = playerCards.get(i);
                                     break;
                                 }
                             }
-                            if(chosenCard instanceof Debuff) {
-                                choosePlayer();
 
+                            if (isDiscard) {
+                                if (chosenCard.canDiscard()) {
+                                    chosenCard.discard();
+                                } else {
+                                    Toast.makeText(getApplicationContext(), "You cannot discard this card", Toast.LENGTH_SHORT).show();
+                                }
+                                return;
                             }
 
-                            if(chosenCard instanceof Heal) {
+                            if (chosenCard instanceof Debuff) {
                                 choosePlayer();
+                            }
 
+                            if (chosenCard instanceof Heal) {
+                                choosePlayer();
                             }
                         }
                     });
@@ -443,11 +505,28 @@ public class GameActivity extends AppCompatActivity {
 
         // Cards Row added
 
-        Button info = new Button(this);
-        // info.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
-        // LinearLayout.LayoutParams.WRAP_CONTENT));
-        info.setText("INFO");
-        info.setTextSize(10);
+
+        // Set toolsTable
+
+        final TableLayout toolsTable = new TableLayout(this);
+        makeToolsTable(toolsTable);
+
+        // toolsTable set
+
+        // set discard button
+
+        final Button discard = new Button(this);
+        discard.setTextSize(15);
+        discard.setText("DISCARD");
+
+        discard.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                isDiscard = !isDiscard;
+            }
+        });
+
+        // discard button set
 
         // switchPlayer button
 
@@ -458,17 +537,25 @@ public class GameActivity extends AppCompatActivity {
         switchPlayer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!controller.canStartNextTurn()) {
+                if (controller.isThisTheEnd()) {
+                    Toast.makeText(getApplicationContext(), "This is the end, congratulations to the winners!", Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+
+                if (!controller.canStartNextTurn()) {
                     Toast.makeText(getApplicationContext(), "Your turn still! Don't fraud!", Toast.LENGTH_SHORT).show();
                     return;
                 }
                 controller.startNextTurn();
-                makeYou(overTables, dwarf, you);
+                setDiscard();
+                makeYou(overTables, dwarf, yourNumber, you);
                 closeCards(cardsRow);
+                drawTable(table, params);
+                makeToolsTable(toolsTable);
             }
         });
 
-        overTables.setBackgroundColor(Color.parseColor("#21161141"));
+        overTables.setBackgroundColor(Color.parseColor("#91161141"));
 
         // overTables add
 
@@ -476,7 +563,8 @@ public class GameActivity extends AppCompatActivity {
         //      overTables.setGravity(Gravity.CENTER);
 
         overTables.addView(cardsTable);
-        overTables.addView(info);
+        overTables.addView(toolsTable);
+        overTables.addView(discard);
         overTables.addView(switchPlayer);
 
         setContentView(scrollView);

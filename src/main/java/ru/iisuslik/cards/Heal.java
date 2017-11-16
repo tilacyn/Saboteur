@@ -20,6 +20,7 @@ public class Heal extends Action {
 
     public void play(int playerNumber) {
         field.players[playerNumber].heal(this);
+        field.players[playerNumber].playCard(this);
         field.iPlayedCard();
     }
 

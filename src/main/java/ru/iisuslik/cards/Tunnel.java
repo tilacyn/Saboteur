@@ -32,7 +32,7 @@ public class Tunnel extends Card {
         field.putTunnel(this, i, j);
         field.players[playerNumber].playCard(this);
         field.iPlayedCard();
-        field.dfs(Field.ENTRY_POS_I, Field.ENTRY_POS_J, -1, -1);
+        field.startDfs();
     }
 
     public void spin() {

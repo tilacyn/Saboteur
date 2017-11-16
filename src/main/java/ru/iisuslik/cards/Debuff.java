@@ -19,6 +19,7 @@ public class Debuff extends Action {
 
     public void play(int playerNumber) {
         field.players[playerNumber].breakIt(this);
+        field.players[playerNumber].playCard(this);
         field.iPlayedCard();
     }
 
