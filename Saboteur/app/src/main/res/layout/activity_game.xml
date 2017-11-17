@@ -1,24 +1,103 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/scroll"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
-    <HorizontalScrollView
-        android:id="@+id/hscroll"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent">
-        <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
-            android:id="@+id/tableLayout1"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:shrinkColumns="*"
-            android:stretchColumns="*" >
-            <TableRow>
-                <ImageView />
 
-            </TableRow>
+
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="ru.tilacyn.saboteur.GameActivity">
+
+        <ScrollView
+            android:layout_width="300dp"
+            android:layout_height="300dp"
+            android:id="@+id/stable"
+            android:layout_marginRight="8dp"
+            android:layout_marginTop="130dp"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginEnd="8dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                >
+
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                >
+
+                <TableLayout
+                    android:id="@+id/table"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    >
+
+
+                </TableLayout>
+
+            </HorizontalScrollView>
+
+            </LinearLayout>
+
+
+        </ScrollView>
+
+
+    <TextView
+        android:id="@+id/yourName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TextView"
+        android:layout_marginTop="9dp"
+        app:layout_constraintLeft_toRightOf="@+id/you"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginLeft="10dp" />
+
+    <Button
+        android:id="@+id/you"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Button"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="8dp" />
+
+    <ImageView
+        android:id="@+id/dwarf"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:srcCompat="@drawable/dark_side_of_the_moon"
+        android:layout_marginRight="8dp"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="8dp"  />
+
+    <HorizontalScrollView
+        android:layout_width="300dp"
+        android:layout_height="50dp"
+        android:layout_marginLeft="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginTop="8dp">
+
+        <TableLayout
+            android:id="@+id/buttonsTable"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            >
+
 
         </TableLayout>
 
     </HorizontalScrollView>
-</ScrollView>
+
+
+
+
+
+
+</android.support.constraint.ConstraintLayout>

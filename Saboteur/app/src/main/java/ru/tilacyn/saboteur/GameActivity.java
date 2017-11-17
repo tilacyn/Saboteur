@@ -1,19 +1,15 @@
-
-
 package ru.tilacyn.saboteur;
 
 
 import ru.iisuslik.controller.*;
-import ru.iisuslik.player.*;
-import ru.iisuslik.field.*;
 import ru.iisuslik.cards.*;
 
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.media.Image;
 import android.support.annotation.IntegerRes;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -90,16 +86,8 @@ public class GameActivity extends AppCompatActivity {
 
     private boolean isDiscard = false;
 
-    // horizontal scroll view
-    HorizontalScrollView horizontalScrollView;
-
-    // scroll view
-    ScrollView scrollView;
-
-    // over tables linear layout
-    LinearLayout overTables;
-    // over horizontal scroll view linear layout
-    LinearLayout overHorizont;
+    // constraint layout
+    ConstraintLayout screen;
 
     // game field
     TableLayout table;
@@ -125,8 +113,17 @@ public class GameActivity extends AppCompatActivity {
     // discard
     Button discard;
 
+    // game field
+    Button gameField;
+
+    // tools
+    Button tools;
+
     // switch
     Button switchPlayer;
+
+    // buttons table
+    TableLayout buttonsTable;
 
     // communicating with PlayerChooseActivity
     private static final int PLAYER_CHOOSE = 43;
@@ -135,20 +132,12 @@ public class GameActivity extends AppCompatActivity {
 
 
     public void initializeAll() {
-        // horizontal scroll view
-        horizontalScrollView = new HorizontalScrollView(this);
 
-        // scroll view
-        scrollView = new ScrollView(this);
-
-        // over tables linear layout
-        overTables = new LinearLayout(this);
-
-        // over horizontal scroll view linear layout
-        overHorizont = new LinearLayout(this);
+        //constraint layout
+        screen = (ConstraintLayout) findViewById(R.id.activity_main);
 
         // game field
-        table = new TableLayout(this);
+        table = (TableLayout) findViewById(R.id.table);
 
         // table row params for table(game field)
         params = new TableRow.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT,
@@ -156,15 +145,22 @@ public class GameActivity extends AppCompatActivity {
 
         // YOU
 
-        you = new Button(this);
-        yourNumber = new TextView(this);
-        dwarf = new ImageView(this);
+        you = (Button) findViewById(R.id.you);
+        yourNumber = (TextView) findViewById(R.id.yourName);
+        dwarf = (ImageView) findViewById(R.id.dwarf);
 
         // CardsTable, cardsRow and button cards
 
         cards = new Button(this);
+        //cardsTable = (TableLayout)findViewById(R.id.buttonsTable);
         cardsTable = new TableLayout(this);
         cardsRow = new TableRow(this);
+
+        // game field
+        gameField = new Button(this);
+
+        // tools
+        tools = new Button(this);
 
         // toolsTable
         toolsTable = new TableLayout(this);
@@ -174,6 +170,32 @@ public class GameActivity extends AppCompatActivity {
 
         // switch
         switchPlayer = new Button(this);
+
+        //buttons table
+        buttonsTable = (TableLayout) findViewById(R.id.buttonsTable);
+
+    }
+
+    public void makeTools() {
+        tools.setText("TOOLS");
+        tools.setTextSize(10);
+        tools.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                makeToolsTable();
+            }
+        });
+    }
+
+    public void makeGameField() {
+        gameField.setText("FIELD");
+        gameField.setTextSize(10);
+        gameField.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                drawTable();
+            }
+        });
     }
 
     public void setDiscard() {
@@ -321,16 +343,23 @@ public class GameActivity extends AppCompatActivity {
         cards.setText("CARDS");
         cards.setTextSize(10);
 
-        closeCards();
-
-        // set cards.OnClickListener
-
         cards.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                final ArrayList<Card> playerCards = controller.getCurrentPlayerHand();
+                //cardsTable = (TableLayout) findViewById(R.id.table);
 
+                table.removeAllViews();
+                cardsRow.removeAllViews();
+                for (int i = 0; i < controller.getCurrentPlayerHand().size(); i++) {
+                    ImageButton empty = new ImageButton(GameActivity.this);
+                    empty.setImageResource(R.drawable.dark_side_of_the_moon);
+                    cardsRow.addView(empty);
+                }
+                table.addView(cardsRow);
+
+
+                final ArrayList<Card> playerCards = controller.getCurrentPlayerHand();
 
                 for (int i = 0; i < playerCards.size(); i++) {
                     //final ImageView cardImage = (ImageView) cardsRow.getVirtualChildAt(i);
@@ -371,14 +400,7 @@ public class GameActivity extends AppCompatActivity {
 
     }
 
-    void closeCards() {
-        cardsRow.removeAllViews();
-        for (int i = 0; i < controller.getCurrentPlayerHand().size(); i++) {
-            ImageButton empty = new ImageButton(this);
-            empty.setImageResource(R.drawable.dark_side_of_the_moon);
-            cardsRow.addView(empty);
-        }
-    }
+
 
     void makeYou() {
 
@@ -410,7 +432,7 @@ public class GameActivity extends AppCompatActivity {
     }
 
     void makeToolsTable() {
-        toolsTable.removeAllViews();
+        table.removeAllViews();
         TableRow[] playerRows = new TableRow[playerCount];
         for (int i = 0; i < playerCount; i++) {
 
@@ -455,7 +477,7 @@ public class GameActivity extends AppCompatActivity {
             playerRows[i].addView(trolley);
 
 
-            toolsTable.addView(playerRows[i]);
+            table.addView(playerRows[i]);
 
         }
     }
@@ -479,15 +501,13 @@ public class GameActivity extends AppCompatActivity {
                 controller.startNextTurn();
                 setDiscard();
                 makeYou();
-                closeCards();
                 drawTable();
-                makeToolsTable();
             }
         });
     }
 
     void makeDiscard() {
-        discard.setTextSize(15);
+        discard.setTextSize(10);
         discard.setText("DISCARD");
 
         discard.setOnClickListener(new View.OnClickListener() {
@@ -498,62 +518,30 @@ public class GameActivity extends AppCompatActivity {
         });
     }
 
+    void makeButtonsTable() {
+        TableRow buttonsRow = new TableRow(this);
+        buttonsRow.addView(gameField);
+        buttonsRow.addView(cards);
+        buttonsRow.addView(switchPlayer);
+        buttonsRow.addView(discard);
+        buttonsRow.addView(tools);
+        buttonsTable.addView(buttonsRow);
+    }
+
     void setLayoutParams() {
-        scrollView.setLayoutParams(new ScrollView.LayoutParams(ScrollView.LayoutParams.MATCH_PARENT,
-                ScrollView.LayoutParams.WRAP_CONTENT));
-
-        overTables.setLayoutParams(new LinearLayoutCompat.LayoutParams(LinearLayoutCompat.LayoutParams.FILL_PARENT,
-                LinearLayoutCompat.LayoutParams.FILL_PARENT));
-
-        overTables.setOrientation(LinearLayout.VERTICAL);
-
-        table.setLayoutParams(new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT,
-                TableLayout.LayoutParams.WRAP_CONTENT));
 
 
-        table.
-        overTables.setBackgroundColor(Color.parseColor("#91161141"));
+
+        screen.setBackgroundColor(Color.parseColor("#91161141"));
 
         cardsRow.setGravity(Gravity.CENTER_HORIZONTAL);
         cardsRow.setLayoutParams(params);
         //cardsTable.setLayoutParams(new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT,
           //      TableLayout.LayoutParams.WRAP_CONTENT));
-        //cards.setLayoutParams(new LinearLayoutCompat.LayoutParams(LinearLayoutCompat.LayoutParams.WRAP_CONTENT,
-          //      LinearLayoutCompat.LayoutParams.WRAP_CONTENT));
-        /*
-        switchPlayer.setLayoutParams(new LinearLayoutCompat.LayoutParams(LinearLayoutCompat.LayoutParams.WRAP_CONTENT,
-                LinearLayoutCompat.LayoutParams.WRAP_CONTENT));
-        discard.setLayoutParams(new LinearLayoutCompat.LayoutParams(LinearLayoutCompat.LayoutParams.WRAP_CONTENT,
-                LinearLayoutCompat.LayoutParams.WRAP_CONTENT));
-        you.setLayoutParams(new LinearLayoutCompat.LayoutParams(LinearLayoutCompat.LayoutParams.WRAP_CONTENT,
-                LinearLayoutCompat.LayoutParams.WRAP_CONTENT));
-        */
-        cards.setGravity(Gravity.CENTER_HORIZONTAL);
-        switchPlayer.setGravity(Gravity.CENTER_HORIZONTAL);
-        discard.setGravity(Gravity.CENTER_HORIZONTAL);
-        you.setGravity(Gravity.CENTER_HORIZONTAL);
 
     }
 
     void setDependencies() { // to be called once
-        scrollView.addView(overHorizont);
-        overHorizont.addView(horizontalScrollView);
-        horizontalScrollView.addView(overTables, new HorizontalScrollView.LayoutParams(HorizontalScrollView.LayoutParams.WRAP_CONTENT,
-                HorizontalScrollView.LayoutParams.WRAP_CONTENT));
-        overTables.addView(table);
-
-        overTables.addView(you);
-        overTables.addView(yourNumber);
-        overTables.addView(dwarf);
-
-        overTables.addView(cardsTable);
-        overTables.addView(switchPlayer);
-        overTables.addView(toolsTable);
-        overTables.addView(discard);
-
-        cardsTable.addView(cards);
-        cardsTable.addView(cardsRow);
-
 
     }
 
@@ -595,6 +583,8 @@ public class GameActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        setContentView(R.layout.activity_game);
+
         initializeAll();
 
         playerCount = getIntent().getIntExtra("playerCount", 2);
@@ -606,28 +596,30 @@ public class GameActivity extends AppCompatActivity {
         fieldHeight = controller.getHeight();
         fieldWidth = controller.getWidth();
 
-        setLayoutParams();
-
-        // global add section
+        //setLayoutParams();
 
         setDependencies();
 
-        //
-
-
         drawTable();
+
 
         makeCards();
 
         makeYou();
 
-        makeToolsTable();
+        //makeToolsTable();
 
         makeDiscard();
 
         makeSwitch();
 
-        setContentView(scrollView);
+        makeTools();
+
+        makeGameField();
+
+        makeButtonsTable();
+
+        //setContentView(scrollView);
 
     }
 
