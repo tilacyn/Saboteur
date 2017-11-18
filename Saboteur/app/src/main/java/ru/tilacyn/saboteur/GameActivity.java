@@ -7,25 +7,16 @@ import ru.iisuslik.cards.*;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
-import android.media.Image;
-import android.support.annotation.IntegerRes;
+import android.graphics.drawable.AnimationDrawable;
 import android.support.constraint.ConstraintLayout;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutCompat;
 import android.util.Pair;
-import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
-import android.view.ViewParent;
 import android.widget.Button;
-import android.widget.FrameLayout;
-import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -34,8 +25,6 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import static android.R.attr.x;
-import static android.R.attr.y;
 
 public class GameActivity extends AppCompatActivity {
 
@@ -81,7 +70,7 @@ public class GameActivity extends AppCompatActivity {
     private int fieldHeight;
     private int fieldWidth;
 
-    int buttonStyle = R.drawable.brown_button;
+    int buttonStyle = R.drawable.red_button;
 
     private boolean isCardChosen = false;
     private Card chosenCard;
@@ -191,9 +180,14 @@ public class GameActivity extends AppCompatActivity {
         tools.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                removeSpin();
                 makeToolsTable();
             }
         });
+    }
+
+    public void removeSpin() {
+        buttonsRow.removeView(spin);
     }
 
     public void makeGameField() {
@@ -206,6 +200,7 @@ public class GameActivity extends AppCompatActivity {
         gameField.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                removeSpin();
                 drawTable();
             }
         });
@@ -254,7 +249,11 @@ public class GameActivity extends AppCompatActivity {
                     if (real.isClosedTunnel() && ((ClosedTunnel) real).isClosed()) {
                         tunnel.setImageResource(R.drawable.hidden_tunnel);
                     } else {
-                        tunnel.setImageResource(getCardImageById[real.getId()]);
+                        if(real.isClosedTunnel() && ((ClosedTunnel) real).isGold()) {
+                            tunnel.setImageResource(R.drawable.gold);
+                        } else {
+                            tunnel.setImageResource(getCardImageById[real.getId()]);
+                        }
                     }
                 }
                 //tunnel.setImageResource(R.drawable.small_tunnel_pattern);
@@ -266,6 +265,7 @@ public class GameActivity extends AppCompatActivity {
                 tunnel.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        removeSpin();
                         int x = (int) map.get(tunnel).first;
                         int y = (int) map.get(tunnel).second;
                         //System.out.println(x);
@@ -355,6 +355,7 @@ public class GameActivity extends AppCompatActivity {
             cardImage.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    removeSpin();
                     isCardChosen = true;
                     for (int i = 0; i < cardsRow.getVirtualChildCount(); i++) {
                         if (cardsRow.getVirtualChildAt(i).equals(cardImage)) {
@@ -386,6 +387,7 @@ public class GameActivity extends AppCompatActivity {
                     if (chosenCard instanceof Tunnel) {
                         makeSpin();
                         buttonsRow.addView(spin, 0);
+                        drawTable();
                     }
 
                     if (chosenCard instanceof Destroy) {
@@ -412,7 +414,8 @@ public class GameActivity extends AppCompatActivity {
         cards.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-            drawCards();
+                removeSpin();
+                drawCards();
             }
         });
 
@@ -444,6 +447,8 @@ public class GameActivity extends AppCompatActivity {
         yourNumber.setTypeface(Typeface.createFromAsset(getAssets(),"comicbd.ttf"));
 
 
+
+
         dwarf.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -452,7 +457,9 @@ public class GameActivity extends AppCompatActivity {
                 if (!isSaboteur) {
                     dwarf.setImageResource(R.drawable.bread_winner);
                 } else {
-                    dwarf.setImageResource(R.drawable.saboteur);
+                    dwarf.setImageResource(0);
+                    dwarf.setBackgroundResource(R.drawable.saboteur_animation);
+                    ((AnimationDrawable) dwarf.getBackground()).start();
                 }
             }
         });
@@ -523,6 +530,7 @@ public class GameActivity extends AppCompatActivity {
         switchPlayer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                removeSpin();
                 if (controller.isThisTheEnd()) {
                     Toast.makeText(getApplicationContext(), "This is the end, congratulations to the winners!", Toast.LENGTH_SHORT).show();
                     finish();
@@ -551,6 +559,7 @@ public class GameActivity extends AppCompatActivity {
         discard.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                removeSpin();
                 isDiscard = !isDiscard;
                 drawCards();
             }
@@ -685,8 +694,6 @@ public class GameActivity extends AppCompatActivity {
         makeGameField();
 
         makeButtonsTable();
-
-        //setContentView(scrollView);
 
     }
 
