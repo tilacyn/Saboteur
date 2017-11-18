@@ -81,6 +81,8 @@ public class GameActivity extends AppCompatActivity {
     private int fieldHeight;
     private int fieldWidth;
 
+    int buttonStyle = R.drawable.brown_button;
+
     private boolean isCardChosen = false;
     private Card chosenCard;
 
@@ -103,11 +105,9 @@ public class GameActivity extends AppCompatActivity {
     // CardsTable, cardsRow and button cards
 
     Button cards;
-    TableLayout cardsTable;
     TableRow cardsRow;
 
     // toolsTable
-    TableLayout toolsTable;
 
     // discard
     Button discard;
@@ -121,8 +121,12 @@ public class GameActivity extends AppCompatActivity {
     // switch
     Button switchPlayer;
 
+    //spin
+    Button spin;
+
     // buttons table
     TableLayout buttonsTable;
+    TableRow buttonsRow;
 
     // communicating with PlayerChooseActivity
     private static final int PLAYER_CHOOSE = 43;
@@ -151,7 +155,6 @@ public class GameActivity extends AppCompatActivity {
 
         cards = new Button(this);
         //cardsTable = (TableLayout)findViewById(R.id.buttonsTable);
-        cardsTable = new TableLayout(this);
         cardsRow = new TableRow(this);
 
         // game field
@@ -161,23 +164,27 @@ public class GameActivity extends AppCompatActivity {
         tools = new Button(this);
 
         // toolsTable
-        toolsTable = new TableLayout(this);
 
         // discard
         discard = new Button(this);
+
+        //spin
+        spin = new Button(this);
 
         // switch
         switchPlayer = new Button(this);
 
         //buttons table
         buttonsTable = (TableLayout) findViewById(R.id.buttonsTable);
+        buttonsRow = new TableRow(this);
+
 
     }
 
     public void makeTools() {
         tools.setText("TOOLS");
         tools.setTextSize(13);
-        tools.setBackgroundResource(R.drawable.red_button);
+        tools.setBackgroundResource(buttonStyle);
         tools.setTextColor(Color.WHITE);
         tools.setTypeface(Typeface.createFromAsset(getAssets(),"comic.ttf"));
 
@@ -192,7 +199,7 @@ public class GameActivity extends AppCompatActivity {
     public void makeGameField() {
         gameField.setText("FIELD");
         gameField.setTextSize(13);
-        gameField.setBackgroundResource(R.drawable.red_button);
+        gameField.setBackgroundResource(buttonStyle);
         gameField.setTextColor(Color.WHITE);
         gameField.setTypeface(Typeface.createFromAsset(getAssets(),"comic.ttf"));
 
@@ -328,79 +335,103 @@ public class GameActivity extends AppCompatActivity {
         table.addView(arkenstoneTableRow1);
     }
 
+    public void drawCards() {
+        table.removeAllViews();
+        cardsRow.removeAllViews();
+        for (int i = 0; i < controller.getCurrentPlayerHand().size(); i++) {
+            ImageButton empty = new ImageButton(GameActivity.this);
+            empty.setImageResource(R.drawable.dark_side_of_the_moon);
+            cardsRow.addView(empty);
+        }
+        table.addView(cardsRow);
+
+
+        final ArrayList<Card> playerCards = controller.getCurrentPlayerHand();
+
+        for (int i = 0; i < playerCards.size(); i++) {
+            //final ImageView cardImage = (ImageView) cardsRow.getVirtualChildAt(i);
+            final ImageButton cardImage = (ImageButton) cardsRow.getVirtualChildAt(i);
+            cardImage.setImageResource(getCardImageById[playerCards.get(i).getId()]);
+            cardImage.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    isCardChosen = true;
+                    for (int i = 0; i < cardsRow.getVirtualChildCount(); i++) {
+                        if (cardsRow.getVirtualChildAt(i).equals(cardImage)) {
+                            chosenCard = playerCards.get(i);
+                            break;
+                        }
+                    }
+
+                    if (isDiscard) {
+                        if (chosenCard.canDiscard()) {
+                            chosenCard.discard();
+                        } else {
+                            Toast.makeText(getApplicationContext(), "You cannot discard this card", Toast.LENGTH_SHORT).show();
+                        }
+                        if(controller.canStartNextTurn()) {
+                            cardsRow.removeView(cardImage);
+                        }
+                        return;
+                    }
+
+                    if (chosenCard instanceof Debuff) {
+                        choosePlayer();
+                    }
+
+                    if (chosenCard instanceof Heal) {
+                        choosePlayer();
+                    }
+
+                    if (chosenCard instanceof Tunnel) {
+                        makeSpin();
+                        buttonsRow.addView(spin, 0);
+                    }
+
+                    if (chosenCard instanceof Destroy) {
+                        drawTable();
+                    }
+                    if (chosenCard instanceof Watch) {
+                        drawTable();
+                    }
+                    if(controller.canStartNextTurn()) {
+                        cardsRow.removeView(cardImage);
+                    }
+                }
+            });
+        }
+    }
+
     void makeCards() {
         cards.setText("CARDS");
         cards.setTextSize(13);
-        cards.setBackgroundResource(R.drawable.red_button);
+        cards.setBackgroundResource(buttonStyle);
         cards.setTextColor(Color.WHITE);
         cards.setTypeface(Typeface.createFromAsset(getAssets(),"comic.ttf"));
 
         cards.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                //cardsTable = (TableLayout) findViewById(R.id.table);
-
-                table.removeAllViews();
-                cardsRow.removeAllViews();
-                for (int i = 0; i < controller.getCurrentPlayerHand().size(); i++) {
-                    ImageButton empty = new ImageButton(GameActivity.this);
-                    empty.setImageResource(R.drawable.dark_side_of_the_moon);
-                    cardsRow.addView(empty);
-                }
-                table.addView(cardsRow);
-
-
-                final ArrayList<Card> playerCards = controller.getCurrentPlayerHand();
-
-                for (int i = 0; i < playerCards.size(); i++) {
-                    //final ImageView cardImage = (ImageView) cardsRow.getVirtualChildAt(i);
-                    final ImageButton cardImage = (ImageButton) cardsRow.getVirtualChildAt(i);
-                    cardImage.setImageResource(getCardImageById[playerCards.get(i).getId()]);
-                    cardImage.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            isCardChosen = true;
-                            for (int i = 0; i < cardsRow.getVirtualChildCount(); i++) {
-                                if (cardsRow.getVirtualChildAt(i).equals(cardImage)) {
-                                    chosenCard = playerCards.get(i);
-                                    break;
-                                }
-                            }
-
-                            if (isDiscard) {
-                                if (chosenCard.canDiscard()) {
-                                    chosenCard.discard();
-                                } else {
-                                    Toast.makeText(getApplicationContext(), "You cannot discard this card", Toast.LENGTH_SHORT).show();
-                                }
-                                return;
-                            }
-
-                            if (chosenCard instanceof Debuff) {
-                                choosePlayer();
-                            }
-
-                            if (chosenCard instanceof Heal) {
-                                choosePlayer();
-                            }
-
-                            if (chosenCard instanceof Tunnel) {
-                                drawTable();
-                            }
-
-                            if (chosenCard instanceof Destroy) {
-                                drawTable();
-                            }
-                            if (chosenCard instanceof Watch) {
-                                drawTable();
-                            }
-                        }
-                    });
-                }
+            drawCards();
             }
         });
 
+    }
+
+    void makeSpin() {
+        spin.setText("SPIN");
+        spin.setTextSize(13);
+        spin.setBackgroundResource(R.drawable.red_button);
+        spin.setTextColor(Color.YELLOW);
+        spin.setTypeface(Typeface.createFromAsset(getAssets(),"comicbd.ttf"));
+        spin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ((Tunnel) chosenCard).spin();
+                buttonsRow.removeView(spin);
+                drawCards();
+            }
+        });
     }
 
     void makeYou() {
@@ -484,7 +515,7 @@ public class GameActivity extends AppCompatActivity {
     void makeSwitch() {
         switchPlayer.setText("SWITCH");
         switchPlayer.setTextSize(13);
-        switchPlayer.setBackgroundResource(R.drawable.red_button);
+        switchPlayer.setBackgroundResource(buttonStyle);
         switchPlayer.setTextColor(Color.WHITE);
         switchPlayer.setTypeface(Typeface.createFromAsset(getAssets(),"comic.ttf"));
 
@@ -505,6 +536,7 @@ public class GameActivity extends AppCompatActivity {
                 setDiscard();
                 makeYou();
                 drawTable();
+                playerChoose = -1;
             }
         });
     }
@@ -512,7 +544,7 @@ public class GameActivity extends AppCompatActivity {
     void makeDiscard() {
         discard.setTextSize(13);
         discard.setText("DISCARD");
-        discard.setBackgroundResource(R.drawable.red_button);
+        discard.setBackgroundResource(buttonStyle);
         discard.setTextColor(Color.WHITE);
         discard.setTypeface(Typeface.createFromAsset(getAssets(),"comic.ttf"));
 
@@ -520,12 +552,12 @@ public class GameActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 isDiscard = !isDiscard;
+                drawCards();
             }
         });
     }
 
     void makeButtonsTable() {
-        TableRow buttonsRow = new TableRow(this);
         buttonsRow.addView(gameField);
         buttonsRow.addView(cards);
         buttonsRow.addView(switchPlayer);
@@ -535,7 +567,7 @@ public class GameActivity extends AppCompatActivity {
     }
 
     void setLayoutParams() {
-        screen.setBackgroundResource(R.drawable.background1);
+        screen.setBackgroundResource(R.drawable.background2);
         //screen.setBackgroundColor(Color.parseColor("#FF4B2510"));
     }
 
@@ -544,6 +576,46 @@ public class GameActivity extends AppCompatActivity {
     }
 
     void choosePlayer() {
+        table.removeAllViews();
+        for(int i = 0; i < playerCount; i++) {
+            final TableRow playerRow = new TableRow(this);
+            TextView playerNumber = new TextView(this);
+            playerNumber.setText("Player " + ((Integer) (i + 1)).toString());
+            playerNumber.setTextSize(30);
+            playerNumber.setTextColor(Color.WHITE);
+            playerNumber.setTypeface(Typeface.createFromAsset(getAssets(),"comicbd.ttf"));
+            playerRow.addView(playerNumber);
+            playerRow.setBackgroundColor(Color.parseColor("#FF4B2510"));
+            playerRow.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    playerChoose = Character.getNumericValue(((TextView) playerRow.getVirtualChildAt(0)).getText().charAt(7)) - 1;
+                    Toast.makeText(getApplicationContext(), "Player " + Integer.toString(playerChoose + 1),
+                            Toast.LENGTH_SHORT).show();
+                    if (chosenCard instanceof Debuff) {
+                        if (((Debuff) chosenCard).canPlay(playerChoose)) {
+                            ((Debuff) chosenCard).play(playerChoose);
+                        } else {
+                            Toast.makeText(getApplicationContext(), "This gnome cannot be played this way!",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    if (chosenCard instanceof Heal) {
+                        if (((Heal) chosenCard).canPlay(playerChoose)) {
+                            ((Heal) chosenCard).play(playerChoose);
+                        } else {
+                            Toast.makeText(getApplicationContext(), "This gnome cannot be played this way!",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }
+            });
+            table.addView(playerRow);
+        }
+    }
+
+    void choosePlayerActivity() {
         Intent intent = new Intent(this, PlayerChooseActivity.class);
         intent.putExtra("playerCount", playerCount);
         intent.putExtra("currentPlayerNumber", controller.currentPlayerNumber());
