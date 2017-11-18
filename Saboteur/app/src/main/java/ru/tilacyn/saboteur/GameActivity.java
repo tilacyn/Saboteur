@@ -97,7 +97,6 @@ public class GameActivity extends AppCompatActivity {
 
     // YOU
 
-    Button you;
     TextView yourNumber;
     ImageView dwarf;
 
@@ -145,7 +144,6 @@ public class GameActivity extends AppCompatActivity {
 
         // YOU
 
-        you = (Button) findViewById(R.id.you);
         yourNumber = (TextView) findViewById(R.id.yourName);
         dwarf = (ImageView) findViewById(R.id.dwarf);
 
@@ -178,7 +176,11 @@ public class GameActivity extends AppCompatActivity {
 
     public void makeTools() {
         tools.setText("TOOLS");
-        tools.setTextSize(10);
+        tools.setTextSize(13);
+        tools.setBackgroundResource(R.drawable.red_button);
+        tools.setTextColor(Color.WHITE);
+        tools.setTypeface(Typeface.createFromAsset(getAssets(),"comic.ttf"));
+
         tools.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -189,7 +191,11 @@ public class GameActivity extends AppCompatActivity {
 
     public void makeGameField() {
         gameField.setText("FIELD");
-        gameField.setTextSize(10);
+        gameField.setTextSize(13);
+        gameField.setBackgroundResource(R.drawable.red_button);
+        gameField.setTextColor(Color.WHITE);
+        gameField.setTypeface(Typeface.createFromAsset(getAssets(),"comic.ttf"));
+
         gameField.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -200,10 +206,6 @@ public class GameActivity extends AppCompatActivity {
 
     public void setDiscard() {
         isDiscard = false;
-    }
-
-    public void drawAll() {
-
     }
 
     public void drawTable() {
@@ -317,31 +319,21 @@ public class GameActivity extends AppCompatActivity {
         arkenstoneTableRow1.setLayoutParams(params);
         arkenstoneTableRow1.setGravity(Gravity.CENTER_HORIZONTAL);
 
-        TableRow emptyTableRow = new TableRow(this);
-        emptyTableRow.setLayoutParams(params);
-        emptyTableRow.setGravity(Gravity.CENTER_HORIZONTAL);
-
-
         for (int i = 0; i < fieldWidth + 2; i++) {
             ImageView arkenstone = new ImageView(this);
             arkenstone.setImageResource(R.drawable.arkenstone);
             arkenstoneTableRow1.addView(arkenstone);
         }
 
-        for (int i = 0; i < fieldWidth + 2; i++) {
-            ImageView empty_tunnel = new ImageView(this);
-            empty_tunnel.setImageResource(R.drawable.nothing);
-            emptyTableRow.addView(empty_tunnel);
-        }
-
         table.addView(arkenstoneTableRow1);
-        table.addView(emptyTableRow);
-
     }
 
     void makeCards() {
         cards.setText("CARDS");
-        cards.setTextSize(10);
+        cards.setTextSize(13);
+        cards.setBackgroundResource(R.drawable.red_button);
+        cards.setTextColor(Color.WHITE);
+        cards.setTypeface(Typeface.createFromAsset(getAssets(),"comic.ttf"));
 
         cards.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -392,6 +384,17 @@ public class GameActivity extends AppCompatActivity {
                             if (chosenCard instanceof Heal) {
                                 choosePlayer();
                             }
+
+                            if (chosenCard instanceof Tunnel) {
+                                drawTable();
+                            }
+
+                            if (chosenCard instanceof Destroy) {
+                                drawTable();
+                            }
+                            if (chosenCard instanceof Watch) {
+                                drawTable();
+                            }
                         }
                     });
                 }
@@ -400,22 +403,17 @@ public class GameActivity extends AppCompatActivity {
 
     }
 
-
-
     void makeYou() {
 
-        you.setText("You: ");
-        you.setTextSize(20);
-        you.setWidth(30);
-        you.setHeight(30);
 
         yourNumber.setText("Player " + ((Integer) (controller.currentPlayerNumber() + 1)).toString());
         yourNumber.setTextSize(30);
         yourNumber.setGravity(Gravity.CENTER_HORIZONTAL);
-        yourNumber.setTextColor(Color.BLUE);
+        yourNumber.setTextColor(Color.WHITE);
+        yourNumber.setTypeface(Typeface.createFromAsset(getAssets(),"comicbd.ttf"));
 
 
-        you.setOnClickListener(new View.OnClickListener() {
+        dwarf.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 boolean isSaboteur = controller.isCurrentPlayerSaboteur();
@@ -443,10 +441,11 @@ public class GameActivity extends AppCompatActivity {
             TextView playerNumber = new TextView(this);
             playerNumber.setText("Player " + ((Integer) (i + 1)).toString());
             playerNumber.setTextSize(30);
+            playerNumber.setTypeface(Typeface.createFromAsset(getAssets(),"comicbd.ttf"));
 
 
             //playerNumber.setGravity(Gravity.);
-            playerNumber.setTextColor(Color.BLUE);
+            playerNumber.setTextColor(Color.WHITE);
 
             boolean[] currentDebuffs = controller.getPlayerDebuffs(i);
             ImageView lamp = new ImageView(this);
@@ -484,7 +483,11 @@ public class GameActivity extends AppCompatActivity {
 
     void makeSwitch() {
         switchPlayer.setText("SWITCH");
-        switchPlayer.setTextSize(10);
+        switchPlayer.setTextSize(13);
+        switchPlayer.setBackgroundResource(R.drawable.red_button);
+        switchPlayer.setTextColor(Color.WHITE);
+        switchPlayer.setTypeface(Typeface.createFromAsset(getAssets(),"comic.ttf"));
+
 
         switchPlayer.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -507,8 +510,11 @@ public class GameActivity extends AppCompatActivity {
     }
 
     void makeDiscard() {
-        discard.setTextSize(10);
+        discard.setTextSize(13);
         discard.setText("DISCARD");
+        discard.setBackgroundResource(R.drawable.red_button);
+        discard.setTextColor(Color.WHITE);
+        discard.setTypeface(Typeface.createFromAsset(getAssets(),"comic.ttf"));
 
         discard.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -529,16 +535,8 @@ public class GameActivity extends AppCompatActivity {
     }
 
     void setLayoutParams() {
-
-
-
-        screen.setBackgroundColor(Color.parseColor("#91161141"));
-
-        cardsRow.setGravity(Gravity.CENTER_HORIZONTAL);
-        cardsRow.setLayoutParams(params);
-        //cardsTable.setLayoutParams(new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT,
-          //      TableLayout.LayoutParams.WRAP_CONTENT));
-
+        screen.setBackgroundResource(R.drawable.background1);
+        //screen.setBackgroundColor(Color.parseColor("#FF4B2510"));
     }
 
     void setDependencies() { // to be called once
@@ -596,18 +594,15 @@ public class GameActivity extends AppCompatActivity {
         fieldHeight = controller.getHeight();
         fieldWidth = controller.getWidth();
 
-        //setLayoutParams();
+        setLayoutParams();
 
         setDependencies();
 
         drawTable();
 
-
         makeCards();
 
         makeYou();
-
-        //makeToolsTable();
 
         makeDiscard();
 

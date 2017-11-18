@@ -51,20 +51,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="TextView"
-        android:layout_marginTop="9dp"
-        app:layout_constraintLeft_toRightOf="@+id/you"
+        android:layout_marginTop="8dp"
+        app:layout_constraintLeft_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginLeft="10dp" />
+        android:layout_marginLeft="8dp" />
 
-    <Button
-        android:id="@+id/you"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Button"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginLeft="8dp"
-        android:layout_marginTop="8dp" />
 
     <ImageView
         android:id="@+id/dwarf"
@@ -82,7 +73,7 @@
         android:layout_marginLeft="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        android:layout_marginTop="8dp">
+        android:layout_marginBottom="8dp">
 
         <TableLayout
             android:id="@+id/buttonsTable"
