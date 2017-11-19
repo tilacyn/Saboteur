@@ -19,11 +19,16 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import ru.iisuslik.controller.Controller;
+
 public class MainActivity extends AppCompatActivity {
 
     int playerCount;
 
     int buttonStyle;
+
+
+    //private Controller controller = new Controller();
 
     TableLayout playerCountTable;
     TableRow playerCountRow;

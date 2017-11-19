@@ -32,23 +32,24 @@ public class GameActivity extends AppCompatActivity {
     private int[] getCardImageById = new int[100];
 
     private void fillCardIdArray() {
-        //getCardImageById[0] = R.drawable.tunnel_pattern;
-        //getCardImageById[1] = R.drawable.tunnel_pattern;
-        getCardImageById[2] = R.drawable.tunnel_pattern_17;
-        getCardImageById[3] = R.drawable.tunnel_pattern_18;
+
+
+        getCardImageById[2] = R.drawable.tunnel_pattern_2;
+        getCardImageById[3] = R.drawable.tunnel_pattern_3;
         getCardImageById[4] = R.drawable.tunnel_pattern_4;
-        getCardImageById[5] = R.drawable.tunnel_pattern_20;
+        getCardImageById[5] = R.drawable.tunnel_pattern_5;
+        getCardImageById[6] = R.drawable.tunnel_pattern_6;
         getCardImageById[7] = R.drawable.tunnel_pattern_7;
         getCardImageById[8] = R.drawable.tunnel_pattern_8;
-        getCardImageById[9] = R.drawable.tunnel_pattern_24;
-        getCardImageById[11] = R.drawable.tunnel_pattern_11;
-        getCardImageById[13] = R.drawable.tunnel_pattern_13;
-        getCardImageById[6] = R.drawable.tunnel_pattern_6;
-        getCardImageById[14] = R.drawable.tunnel_pattern_14;
-        getCardImageById[16] = R.drawable.tunnel_pattern_16;
-        getCardImageById[15] = R.drawable.tunnel_pattern_15;
+        getCardImageById[9] = R.drawable.tunnel_pattern_9;
         getCardImageById[10] = R.drawable.tunnel_pattern_10;
+        getCardImageById[11] = R.drawable.tunnel_pattern_11;
         getCardImageById[12] = R.drawable.tunnel_pattern_12;
+        getCardImageById[13] = R.drawable.tunnel_pattern_13;
+        getCardImageById[14] = R.drawable.tunnel_pattern_14;
+        getCardImageById[15] = R.drawable.tunnel_pattern_15;
+        getCardImageById[16] = R.drawable.tunnel_pattern_16;
+
         //getCardImageById[17] = R.drawable.tunnel_pattern_17;
         //getCardImageById[18] = R.drawable.tunnel_pattern_18;
         getCardImageById[19] = R.drawable.tunnel_pattern_19;
@@ -66,10 +67,14 @@ public class GameActivity extends AppCompatActivity {
         getCardImageById[31] = R.drawable.tunnel_pattern_31;
 
 
+        getCardImageById[42] = R.drawable.big_tunnel_pattern_2;
+        getCardImageById[43] = R.drawable.big_tunnel_pattern_3;
         getCardImageById[44] = R.drawable.big_tunnel_pattern_4;
+        getCardImageById[45] = R.drawable.big_tunnel_pattern_5;
         getCardImageById[46] = R.drawable.big_tunnel_pattern_6;
         getCardImageById[47] = R.drawable.big_tunnel_pattern_7;
         getCardImageById[48] = R.drawable.big_tunnel_pattern_8;
+        getCardImageById[49] = R.drawable.big_tunnel_pattern_9;
         getCardImageById[50] = R.drawable.big_tunnel_pattern_10;
         getCardImageById[51] = R.drawable.big_tunnel_pattern_11;
         getCardImageById[52] = R.drawable.big_tunnel_pattern_12;
@@ -77,14 +82,14 @@ public class GameActivity extends AppCompatActivity {
         getCardImageById[54] = R.drawable.big_tunnel_pattern_14;
         getCardImageById[55] = R.drawable.big_tunnel_pattern_15;
         getCardImageById[56] = R.drawable.big_tunnel_pattern_16;
-        getCardImageById[57] = R.drawable.big_tunnel_pattern_17;
-        getCardImageById[58] = R.drawable.big_tunnel_pattern_18;
+        //getCardImageById[57] = R.drawable.big_tunnel_pattern_17;
+        //getCardImageById[58] = R.drawable.big_tunnel_pattern_18;
         getCardImageById[59] = R.drawable.big_tunnel_pattern_19;
-        getCardImageById[60] = R.drawable.big_tunnel_pattern_20;
+        //getCardImageById[60] = R.drawable.big_tunnel_pattern_20;
         getCardImageById[61] = R.drawable.big_tunnel_pattern_21;
         getCardImageById[62] = R.drawable.big_tunnel_pattern_22;
         getCardImageById[63] = R.drawable.big_tunnel_pattern_23;
-        getCardImageById[64] = R.drawable.big_tunnel_pattern_24;
+        //getCardImageById[64] = R.drawable.big_tunnel_pattern_24;
         getCardImageById[65] = R.drawable.big_tunnel_pattern_25;
         getCardImageById[66] = R.drawable.big_tunnel_pattern_26;
         getCardImageById[67] = R.drawable.big_tunnel_pattern_27;
@@ -108,7 +113,8 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private int playerCount;
-    private Controller controller = new Controller();
+    private Controller controller;
+    SaboteurApplication saboteurApplication;
     private HashMap<ImageView, Pair<Integer, Integer>> map = new HashMap();
     private int[] xPos = {0};
     private int[] yPos = {0};
@@ -181,6 +187,11 @@ public class GameActivity extends AppCompatActivity {
     }
 
     public void initializeAll() {
+
+        //controller
+        saboteurApplication = SaboteurApplication.getInstance();
+        controller = saboteurApplication.getController();
+
 
         //constraint layout
         screen = (ConstraintLayout) findViewById(R.id.activity_main);
