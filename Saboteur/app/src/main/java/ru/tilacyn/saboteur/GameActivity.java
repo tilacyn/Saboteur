@@ -32,23 +32,68 @@ public class GameActivity extends AppCompatActivity {
     private int[] getCardImageById = new int[100];
 
     private void fillCardIdArray() {
-        getCardImageById[0] = R.drawable.tunnel_pattern_0;
-        getCardImageById[1] = R.drawable.tunnel_pattern_0;
-        getCardImageById[2] = R.drawable.tunnel_pattern_2;
-        getCardImageById[3] = R.drawable.tunnel_pattern_3;
+        //getCardImageById[0] = R.drawable.tunnel_pattern;
+        //getCardImageById[1] = R.drawable.tunnel_pattern;
+        getCardImageById[2] = R.drawable.tunnel_pattern_17;
+        getCardImageById[3] = R.drawable.tunnel_pattern_18;
         getCardImageById[4] = R.drawable.tunnel_pattern_4;
-        getCardImageById[5] = R.drawable.tunnel_pattern_5;
+        getCardImageById[5] = R.drawable.tunnel_pattern_20;
         getCardImageById[7] = R.drawable.tunnel_pattern_7;
-        getCardImageById[9] = R.drawable.tunnel_pattern_9;
+        getCardImageById[8] = R.drawable.tunnel_pattern_8;
+        getCardImageById[9] = R.drawable.tunnel_pattern_24;
         getCardImageById[11] = R.drawable.tunnel_pattern_11;
         getCardImageById[13] = R.drawable.tunnel_pattern_13;
         getCardImageById[6] = R.drawable.tunnel_pattern_6;
         getCardImageById[14] = R.drawable.tunnel_pattern_14;
-        getCardImageById[16] = R.drawable.small_tunnel_pattern;
+        getCardImageById[16] = R.drawable.tunnel_pattern_16;
         getCardImageById[15] = R.drawable.tunnel_pattern_15;
         getCardImageById[10] = R.drawable.tunnel_pattern_10;
         getCardImageById[12] = R.drawable.tunnel_pattern_12;
-        getCardImageById[8] = R.drawable.tunnel_pattern_8;
+        //getCardImageById[17] = R.drawable.tunnel_pattern_17;
+        //getCardImageById[18] = R.drawable.tunnel_pattern_18;
+        getCardImageById[19] = R.drawable.tunnel_pattern_19;
+        //getCardImageById[20] = R.drawable.tunnel_pattern_20;
+        getCardImageById[21] = R.drawable.tunnel_pattern_21;
+        getCardImageById[22] = R.drawable.tunnel_pattern_22;
+        getCardImageById[23] = R.drawable.tunnel_pattern_23;
+        //getCardImageById[24] = R.drawable.tunnel_pattern_24;
+        getCardImageById[25] = R.drawable.tunnel_pattern_25;
+        getCardImageById[26] = R.drawable.tunnel_pattern_26;
+        getCardImageById[27] = R.drawable.tunnel_pattern_27;
+        getCardImageById[28] = R.drawable.tunnel_pattern_28;
+        getCardImageById[29] = R.drawable.tunnel_pattern_29;
+        getCardImageById[30] = R.drawable.tunnel_pattern_30;
+        getCardImageById[31] = R.drawable.tunnel_pattern_31;
+
+
+        getCardImageById[44] = R.drawable.big_tunnel_pattern_4;
+        getCardImageById[46] = R.drawable.big_tunnel_pattern_6;
+        getCardImageById[47] = R.drawable.big_tunnel_pattern_7;
+        getCardImageById[48] = R.drawable.big_tunnel_pattern_8;
+        getCardImageById[50] = R.drawable.big_tunnel_pattern_10;
+        getCardImageById[51] = R.drawable.big_tunnel_pattern_11;
+        getCardImageById[52] = R.drawable.big_tunnel_pattern_12;
+        getCardImageById[53] = R.drawable.big_tunnel_pattern_13;
+        getCardImageById[54] = R.drawable.big_tunnel_pattern_14;
+        getCardImageById[55] = R.drawable.big_tunnel_pattern_15;
+        getCardImageById[56] = R.drawable.big_tunnel_pattern_16;
+        getCardImageById[57] = R.drawable.big_tunnel_pattern_17;
+        getCardImageById[58] = R.drawable.big_tunnel_pattern_18;
+        getCardImageById[59] = R.drawable.big_tunnel_pattern_19;
+        getCardImageById[60] = R.drawable.big_tunnel_pattern_20;
+        getCardImageById[61] = R.drawable.big_tunnel_pattern_21;
+        getCardImageById[62] = R.drawable.big_tunnel_pattern_22;
+        getCardImageById[63] = R.drawable.big_tunnel_pattern_23;
+        getCardImageById[64] = R.drawable.big_tunnel_pattern_24;
+        getCardImageById[65] = R.drawable.big_tunnel_pattern_25;
+        getCardImageById[66] = R.drawable.big_tunnel_pattern_26;
+        getCardImageById[67] = R.drawable.big_tunnel_pattern_27;
+        getCardImageById[68] = R.drawable.big_tunnel_pattern_28;
+        getCardImageById[69] = R.drawable.big_tunnel_pattern_29;
+        getCardImageById[70] = R.drawable.big_tunnel_pattern_30;
+        getCardImageById[71] = R.drawable.big_tunnel_pattern_31;
+
+
         getCardImageById[32] = R.drawable.card_32;
         getCardImageById[33] = R.drawable.card_33;
         getCardImageById[34] = R.drawable.card_34;
@@ -70,7 +115,12 @@ public class GameActivity extends AppCompatActivity {
     private int fieldHeight;
     private int fieldWidth;
 
+    Button selected;
+    int selectedButtonStyle = R.drawable.yellow_button;
+    int selectedTextColor = Color.BLACK;
+
     int buttonStyle = R.drawable.red_button;
+    int buttonTextColor = Color.WHITE;
 
     private boolean isCardChosen = false;
     private Card chosenCard;
@@ -122,6 +172,13 @@ public class GameActivity extends AppCompatActivity {
     private int playerChoose = -1;
 
 
+    void updateSelected(Button b) {
+        selected.setBackgroundResource(buttonStyle);
+        selected.setTextColor(buttonTextColor);
+        selected = b;
+        selected.setBackgroundResource(selectedButtonStyle);
+        selected.setTextColor(selectedTextColor);
+    }
 
     public void initializeAll() {
 
@@ -167,6 +224,9 @@ public class GameActivity extends AppCompatActivity {
         buttonsTable = (TableLayout) findViewById(R.id.buttonsTable);
         buttonsRow = new TableRow(this);
 
+        // selected button
+        selected = gameField;
+        updateSelected(gameField);
 
     }
 
@@ -175,11 +235,12 @@ public class GameActivity extends AppCompatActivity {
         tools.setTextSize(13);
         tools.setBackgroundResource(buttonStyle);
         tools.setTextColor(Color.WHITE);
-        tools.setTypeface(Typeface.createFromAsset(getAssets(),"comic.ttf"));
+        tools.setTypeface(Typeface.createFromAsset(getAssets(), "comic.ttf"));
 
         tools.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                updateSelected(tools);
                 removeSpin();
                 makeToolsTable();
             }
@@ -195,11 +256,12 @@ public class GameActivity extends AppCompatActivity {
         gameField.setTextSize(13);
         gameField.setBackgroundResource(buttonStyle);
         gameField.setTextColor(Color.WHITE);
-        gameField.setTypeface(Typeface.createFromAsset(getAssets(),"comic.ttf"));
+        gameField.setTypeface(Typeface.createFromAsset(getAssets(), "comic.ttf"));
 
         gameField.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                updateSelected(gameField);
                 removeSpin();
                 drawTable();
             }
@@ -211,6 +273,8 @@ public class GameActivity extends AppCompatActivity {
     }
 
     public void drawTable() {
+        updateSelected(gameField);
+
         table.removeAllViews();
 
         TableRow arkenstoneTableRow0 = new TableRow(this);
@@ -249,7 +313,7 @@ public class GameActivity extends AppCompatActivity {
                     if (real.isClosedTunnel() && ((ClosedTunnel) real).isClosed()) {
                         tunnel.setImageResource(R.drawable.hidden_tunnel);
                     } else {
-                        if(real.isClosedTunnel() && ((ClosedTunnel) real).isGold()) {
+                        if (real.isClosedTunnel() && ((ClosedTunnel) real).isGold()) {
                             tunnel.setImageResource(R.drawable.gold);
                         } else {
                             tunnel.setImageResource(getCardImageById[real.getId()]);
@@ -351,7 +415,11 @@ public class GameActivity extends AppCompatActivity {
         for (int i = 0; i < playerCards.size(); i++) {
             //final ImageView cardImage = (ImageView) cardsRow.getVirtualChildAt(i);
             final ImageButton cardImage = (ImageButton) cardsRow.getVirtualChildAt(i);
-            cardImage.setImageResource(getCardImageById[playerCards.get(i).getId()]);
+            if (playerCards.get(i) instanceof Tunnel) {
+                cardImage.setImageResource(getCardImageById[playerCards.get(i).getId() + 40]);
+            } else {
+                cardImage.setImageResource(getCardImageById[playerCards.get(i).getId()]);
+            }
             cardImage.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -370,7 +438,7 @@ public class GameActivity extends AppCompatActivity {
                         } else {
                             Toast.makeText(getApplicationContext(), "You cannot discard this card", Toast.LENGTH_SHORT).show();
                         }
-                        if(controller.canStartNextTurn()) {
+                        if (controller.canStartNextTurn()) {
                             cardsRow.removeView(cardImage);
                         }
                         return;
@@ -396,7 +464,7 @@ public class GameActivity extends AppCompatActivity {
                     if (chosenCard instanceof Watch) {
                         drawTable();
                     }
-                    if(controller.canStartNextTurn()) {
+                    if (controller.canStartNextTurn()) {
                         cardsRow.removeView(cardImage);
                     }
                 }
@@ -409,11 +477,12 @@ public class GameActivity extends AppCompatActivity {
         cards.setTextSize(13);
         cards.setBackgroundResource(buttonStyle);
         cards.setTextColor(Color.WHITE);
-        cards.setTypeface(Typeface.createFromAsset(getAssets(),"comic.ttf"));
+        cards.setTypeface(Typeface.createFromAsset(getAssets(), "comic.ttf"));
 
         cards.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                updateSelected(cards);
                 removeSpin();
                 drawCards();
             }
@@ -426,7 +495,7 @@ public class GameActivity extends AppCompatActivity {
         spin.setTextSize(13);
         spin.setBackgroundResource(R.drawable.red_button);
         spin.setTextColor(Color.YELLOW);
-        spin.setTypeface(Typeface.createFromAsset(getAssets(),"comicbd.ttf"));
+        spin.setTypeface(Typeface.createFromAsset(getAssets(), "comicbd.ttf"));
         spin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -444,9 +513,7 @@ public class GameActivity extends AppCompatActivity {
         yourNumber.setTextSize(30);
         yourNumber.setGravity(Gravity.CENTER_HORIZONTAL);
         yourNumber.setTextColor(Color.WHITE);
-        yourNumber.setTypeface(Typeface.createFromAsset(getAssets(),"comicbd.ttf"));
-
-
+        yourNumber.setTypeface(Typeface.createFromAsset(getAssets(), "comicbd.ttf"));
 
 
         dwarf.setOnClickListener(new View.OnClickListener() {
@@ -479,7 +546,7 @@ public class GameActivity extends AppCompatActivity {
             TextView playerNumber = new TextView(this);
             playerNumber.setText("Player " + ((Integer) (i + 1)).toString());
             playerNumber.setTextSize(30);
-            playerNumber.setTypeface(Typeface.createFromAsset(getAssets(),"comicbd.ttf"));
+            playerNumber.setTypeface(Typeface.createFromAsset(getAssets(), "comicbd.ttf"));
 
 
             //playerNumber.setGravity(Gravity.);
@@ -524,12 +591,13 @@ public class GameActivity extends AppCompatActivity {
         switchPlayer.setTextSize(13);
         switchPlayer.setBackgroundResource(buttonStyle);
         switchPlayer.setTextColor(Color.WHITE);
-        switchPlayer.setTypeface(Typeface.createFromAsset(getAssets(),"comic.ttf"));
+        switchPlayer.setTypeface(Typeface.createFromAsset(getAssets(), "comic.ttf"));
 
 
         switchPlayer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                updateSelected(switchPlayer);
                 removeSpin();
                 if (controller.isThisTheEnd()) {
                     Toast.makeText(getApplicationContext(), "This is the end, congratulations to the winners!", Toast.LENGTH_SHORT).show();
@@ -554,11 +622,16 @@ public class GameActivity extends AppCompatActivity {
         discard.setText("DISCARD");
         discard.setBackgroundResource(buttonStyle);
         discard.setTextColor(Color.WHITE);
-        discard.setTypeface(Typeface.createFromAsset(getAssets(),"comic.ttf"));
+        discard.setTypeface(Typeface.createFromAsset(getAssets(), "comic.ttf"));
 
         discard.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (isDiscard) {
+                    updateSelected(cards);
+                } else {
+                    updateSelected(discard);
+                }
                 removeSpin();
                 isDiscard = !isDiscard;
                 drawCards();
@@ -586,13 +659,13 @@ public class GameActivity extends AppCompatActivity {
 
     void choosePlayer() {
         table.removeAllViews();
-        for(int i = 0; i < playerCount; i++) {
+        for (int i = 0; i < playerCount; i++) {
             final TableRow playerRow = new TableRow(this);
             TextView playerNumber = new TextView(this);
             playerNumber.setText("Player " + ((Integer) (i + 1)).toString());
             playerNumber.setTextSize(30);
             playerNumber.setTextColor(Color.WHITE);
-            playerNumber.setTypeface(Typeface.createFromAsset(getAssets(),"comicbd.ttf"));
+            playerNumber.setTypeface(Typeface.createFromAsset(getAssets(), "comicbd.ttf"));
             playerRow.addView(playerNumber);
             playerRow.setBackgroundColor(Color.parseColor("#FF4B2510"));
             playerRow.setOnClickListener(new View.OnClickListener() {
@@ -655,7 +728,6 @@ public class GameActivity extends AppCompatActivity {
             }
         }
     }
-
 
 
     @Override

@@ -21,6 +21,12 @@ public class Tunnel extends Card {
             if (down) this.id += 2;
             if (up) this.id += 4;
             if (right) this.id += 8;
+        } else {
+            this.id += 16;
+            if (left) this.id++;
+            if (down) this.id += 2;
+            if (up) this.id += 4;
+            if (right) this.id += 8;
         }
     }
 
@@ -45,6 +51,12 @@ public class Tunnel extends Card {
         this.id = 0;
         if (centre) {
             this.id++;
+            if (left) this.id++;
+            if (down) this.id += 2;
+            if (up) this.id += 4;
+            if (right) this.id += 8;
+        } else {
+            this.id += 16;
             if (left) this.id++;
             if (down) this.id += 2;
             if (up) this.id += 4;

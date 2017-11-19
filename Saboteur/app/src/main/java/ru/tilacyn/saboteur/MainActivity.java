@@ -5,6 +5,7 @@ package ru.tilacyn.saboteur;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.media.Image;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -50,6 +51,9 @@ public class MainActivity extends AppCompatActivity {
 
         playerCountRow = new TableRow(this);
         playerCountTable = (TableLayout) findViewById(R.id.playerCountTable);
+
+        //ImageView vlad = (ImageView) findViewById(R.id.vlad);
+        //vlad.setImageResource(R.drawable.vlad);
 
 
         TextView name = (TextView) findViewById(R.id.Saboteur);
