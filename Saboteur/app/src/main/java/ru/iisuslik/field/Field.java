@@ -231,77 +231,52 @@ public class Field {
         dfs(ENTRY_POS_I, ENTRY_POS_J);
     }
 
-    private void dfs(int i, int j) {
+    private boolean checkTunnel(int i, int j, int iNext, int jNext) {
         Tunnel tunnel = field[i][j];
+        if (iNext > HEIGHT - 1 || iNext < 0 || jNext > WIDTH - 1 || jNext < 0)
+            return false;
+        if (!used[iNext][jNext] && field[iNext][jNext] != null && field[iNext][jNext].centre) {
+            Tunnel t = field[iNext][jNext];
+            boolean wayTo;
+            if (i + 1 == iNext && tunnel.down) {
+                wayTo = t.up;
+            } else if (i - 1 == iNext && tunnel.up) {
+                wayTo = t.down;
+            } else if (j + 1 == jNext && tunnel.right) {
+                wayTo = t.left;
+            } else if (j - 1 == jNext && tunnel.left) {
+                wayTo = t.right;
+            } else {
+                return false;
+            }
+            if (!t.isClosedTunnel() || !((ClosedTunnel) t).isClosed()) {
+                return wayTo;
+            } else {
+                ClosedTunnel ct = (ClosedTunnel) t;
+                ct.open();
+                if (ct.isGold()) {
+                    theEnd = true;
+                    return false;
+                } else {
+                    if (!wayTo)
+                        ct.spin();
+                    return false;
+                }
+            }
+        }
+        return false;
+    }
+
+    private void dfs(int i, int j) {
         used[i][j] = true;
-        if (i < HEIGHT - 1 && !used[i + 1][j] && field[i + 1][j] != null) {
-            Tunnel t = field[i + 1][j];
-            if (!t.isClosedTunnel() || t.isClosedTunnel() && !((ClosedTunnel) t).isClosed()) {
-                if (tunnel.down) {
-                    if (t.up) {
-                        dfs(i + 1, j);
-                    }
-                }
-            } else if (t.isClosedTunnel() && ((ClosedTunnel) t).isClosed()) {
-                ClosedTunnel ct = (ClosedTunnel) t;
-                ct.open();
-                if (ct.isGold()) {
-                    theEnd = true;
-                    return;
-                }
-            }
-        }
-        if (i > 0 && !used[i - 1][j] && field[i - 1][j] != null) {
-            Tunnel t = field[i - 1][j];
-            if (!t.isClosedTunnel() || t.isClosedTunnel() && !((ClosedTunnel) t).isClosed()) {
-                if (tunnel.up) {
-                    if (t.down) {
-                        dfs(i - 1, j);
-                    }
-                }
-            } else if (t.isClosedTunnel() && ((ClosedTunnel) t).isClosed()) {
-                ClosedTunnel ct = (ClosedTunnel) t;
-                ct.open();
-                if (ct.isGold()) {
-                    theEnd = true;
-                    return;
-                }
-            }
-        }
-        if (i < WIDTH - 1 && !used[i][j + 1] && field[i][j + 1] != null) {
-            Tunnel t = field[i][j + 1];
-            if (!t.isClosedTunnel() || t.isClosedTunnel() && !((ClosedTunnel) t).isClosed()) {
-                if (tunnel.right) {
-                    if (t.left) {
-                        dfs(i, j + 1);
-                    }
-                }
-            } else if (t.isClosedTunnel() && ((ClosedTunnel) t).isClosed()) {
-                ClosedTunnel ct = (ClosedTunnel) t;
-                ct.open();
-                if (ct.isGold()) {
-                    theEnd = true;
-                    return;
-                }
-            }
-        }
-        if (j > 0 && !used[i][j - 1] && field[i][j - 1] != null) {
-            Tunnel t = field[i][j - 1];
-            if (!t.isClosedTunnel() || t.isClosedTunnel() && !((ClosedTunnel) t).isClosed()) {
-                if (tunnel.left) {
-                    if (t.right) {
-                        dfs(i, j - 1);
-                    }
-                }
-            } else if (t.isClosedTunnel() && ((ClosedTunnel) t).isClosed()) {
-                ClosedTunnel ct = (ClosedTunnel) t;
-                ct.open();
-                if (ct.isGold()) {
-                    theEnd = true;
-                    return;
-                }
-            }
-        }
+        if (checkTunnel(i, j, i + 1, j))
+            dfs(i + 1, j);
+        if (checkTunnel(i, j, i - 1, j))
+            dfs(i - 1, j);
+        if (checkTunnel(i, j, i, j + 1))
+            dfs(i, j + 1);
+        if (checkTunnel(i, j, i, j - 1))
+            dfs(i, j - 1);
     }
 
     private void giveCards() {

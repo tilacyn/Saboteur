@@ -9,7 +9,9 @@ public class Destroy extends Action {
 
     public boolean canPlay(int i, int j) {
         Tunnel toCheck = field.field[i][j];
-        return !field.didCurrentPlayerPlayCard() && toCheck != null && !toCheck.name.equals("Entry") && !toCheck.isClosedTunnel();
+        return !(i == Field.ENTRY_POS_I && j == Field.ENTRY_POS_J) &&
+                !field.didCurrentPlayerPlayCard() &&
+                toCheck != null && !toCheck.isClosedTunnel();
     }
 
     public void play(int i, int j) {
