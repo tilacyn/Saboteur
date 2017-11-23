@@ -1,8 +1,10 @@
 package ru.iisuslik.cards;
 
+import java.io.Serializable;
+
 import ru.iisuslik.field.Field;
 
-public class Card {
+public class Card implements Serializable {
 
     public static final int TUNNEL = 1;
     public static final int ACTION = 2;

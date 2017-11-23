@@ -4,10 +4,11 @@ import ru.iisuslik.cards.Card;
 import ru.iisuslik.cards.Debuff;
 import ru.iisuslik.cards.Heal;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 
-public class Player {
+public class Player implements Serializable {
 
     public static final int SABOTEUR = 1;
     public static final int GNOME = 2;

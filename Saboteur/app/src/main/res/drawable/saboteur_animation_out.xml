@@ -1,0 +1,16 @@
+<animation-list
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:oneshot="true">
+    <item android:drawable="@drawable/saboteur" android:duration="100"/>
+    <item android:drawable="@drawable/saboteur9" android:duration="100"/>
+    <item android:drawable="@drawable/saboteur10" android:duration="100"/>
+    <item android:drawable="@drawable/saboteur11" android:duration="100"/>
+    <item android:drawable="@drawable/saboteur12" android:duration="100"/>
+    <item android:drawable="@drawable/saboteur13" android:duration="100"/>
+    <item android:drawable="@drawable/saboteur14" android:duration="100"/>
+    <item android:drawable="@drawable/saboteur15" android:duration="100"/>
+    <item android:drawable="@drawable/saboteur16" android:duration="100"/>
+    <item android:drawable="@drawable/saboteur17" android:duration="100"/>
+    <item android:drawable="@drawable/saboteur18" android:duration="100"/>
+    <item android:drawable="@drawable/dark_side_of_the_moon_1" android:duration="100"/>
+</animation-list>

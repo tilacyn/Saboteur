@@ -14,19 +14,63 @@ import android.os.Bundle;
 import android.util.Pair;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 
 public class GameActivity extends AppCompatActivity {
+
+    private class Style {
+        Button selected;
+        int selectedButtonStyle = R.drawable.yellow_button;
+        int selectedTextColor = Color.BLACK;
+
+        int textBackgroundColor = Color.parseColor("#FF4B2510");
+
+        int buttonStyle = R.drawable.red_button;
+        int buttonTextColor = Color.WHITE;
+
+        Typeface buttonFont = Typeface.createFromAsset(getAssets(), "almendra.ttf");
+        Typeface textFont = Typeface.createFromAsset(getAssets(), "almendra.ttf");
+
+        int selectedPlayerColor = Color.YELLOW;
+
+        boolean youOpen;
+
+        Style() {
+            selected = gameField;
+            youOpen = false;
+        }
+
+        void decorateButton(Button b) {
+            b.setTextSize(13);
+            b.setBackgroundResource(buttonStyle);
+            b.setTextColor(buttonTextColor);
+            b.setTypeface(buttonFont);
+        }
+
+        void updateSelected(Button b) {
+            selected.setBackgroundResource(buttonStyle);
+            selected.setTextColor(buttonTextColor);
+            selected = b;
+            selected.setBackgroundResource(selectedButtonStyle);
+            selected.setTextColor(selectedTextColor);
+        }
+    }
+
+    private Style style;
 
 
     private int[] getCardImageById = new int[100];
@@ -114,84 +158,124 @@ public class GameActivity extends AppCompatActivity {
 
     private int playerCount;
     private Controller controller;
-    SaboteurApplication saboteurApplication;
     private HashMap<ImageView, Pair<Integer, Integer>> map = new HashMap();
-    private int[] xPos = {0};
-    private int[] yPos = {0};
     private int fieldHeight;
     private int fieldWidth;
 
-    Button selected;
-    int selectedButtonStyle = R.drawable.yellow_button;
-    int selectedTextColor = Color.BLACK;
-
-    int buttonStyle = R.drawable.red_button;
-    int buttonTextColor = Color.WHITE;
-
-    private boolean isCardChosen = false;
     private Card chosenCard;
 
     private boolean isDiscard = false;
 
     // constraint layout
-    ConstraintLayout screen;
+    private ConstraintLayout screen;
 
     // game field
-    TableLayout table;
+    private TableLayout table;
 
     // table row params for table(game field)
-    TableRow.LayoutParams params;
+    private TableRow.LayoutParams params;
 
     // YOU
 
-    TextView yourNumber;
-    ImageView dwarf;
+    private TextView yourNumber;
+    private ImageView dwarf;
 
     // CardsTable, cardsRow and button cards
 
-    Button cards;
-    TableRow cardsRow;
+    private Button cards;
+    private TableRow cardsRow;
 
     // toolsTable
 
     // discard
-    Button discard;
+    private Button discard;
 
     // game field
-    Button gameField;
+    private Button gameField;
 
     // tools
-    Button tools;
+    private Button tools;
 
     // switch
-    Button switchPlayer;
+    private Button switchPlayer;
 
     //spin
-    Button spin;
+    private Button spin;
 
     // buttons table
-    TableLayout buttonsTable;
-    TableRow buttonsRow;
+    private TableLayout buttonsTable;
+    private TableRow buttonsRow;
 
-    // communicating with PlayerChooseActivity
-    private static final int PLAYER_CHOOSE = 43;
+    // tools table
+    private TableLayout toolsTable;
+    private ScrollView toolsScroll;
+
+    // log table
+    private Button log;
+    private ArrayList<TableRow> logRows;
+
+    // chosen cell
+    private int chosenX;
+    private int chosenY;
+
+    //chosen tunnel
+    private TextView textChosenTunnel;
+    private ImageView chosenTunnel;
+
+
+    // choosing player
     private int playerChoose = -1;
 
 
-    void updateSelected(Button b) {
-        selected.setBackgroundResource(buttonStyle);
-        selected.setTextColor(buttonTextColor);
-        selected = b;
-        selected.setBackgroundResource(selectedButtonStyle);
-        selected.setTextColor(selectedTextColor);
+    // return controller
+    byte[] controllerByteArray;
+
+
+    boolean contains(ViewGroup parent, View child) {
+        for (int i = 0; i < parent.getChildCount(); i++) {
+            if (parent.getChildAt(i).equals(child)) {
+                return true;
+            }
+        }
+        return false;
     }
 
-    public void initializeAll() {
+    void makeNormalView() {
+        screen.setBackgroundResource(R.drawable.background3);
+        screen.removeView(toolsScroll);
+        toolsTable.removeAllViews();
+        if (!contains(screen, yourNumber)) {
+            screen.addView(yourNumber);
+        }
+        if (!contains(screen, dwarf)) {
+            screen.addView(dwarf);
+        }
+    }
+
+    void removeSpin() {
+        screen.removeView(chosenTunnel);
+        screen.removeView(textChosenTunnel);
+        buttonsRow.removeView(spin);
+    }
+
+    void setDiscard() {
+        isDiscard = false;
+    }
+
+    //Initializing
+
+    void initializeAll() {
 
         //controller
-        saboteurApplication = SaboteurApplication.getInstance();
-        controller = saboteurApplication.getController();
+        //saboteurApplication = SaboteurApplication.getInstance();
+        //controller = saboteurApplication.getController();
 
+
+        byte[] controllerCypher = getIntent().getByteArrayExtra("controller");
+
+        controller = Controller.deserialize(new ByteArrayInputStream(controllerCypher));
+
+        controllerByteArray = controllerCypher;
 
         //constraint layout
         screen = (ConstraintLayout) findViewById(R.id.activity_main);
@@ -225,7 +309,7 @@ public class GameActivity extends AppCompatActivity {
         // discard
         discard = new Button(this);
 
-        //spin
+        // spin
         spin = new Button(this);
 
         // switch
@@ -235,56 +319,232 @@ public class GameActivity extends AppCompatActivity {
         buttonsTable = (TableLayout) findViewById(R.id.buttonsTable);
         buttonsRow = new TableRow(this);
 
-        // selected button
-        selected = gameField;
-        updateSelected(gameField);
+        // tools table
+        toolsTable = (TableLayout) findViewById(R.id.toolsTable);
+        toolsScroll = (ScrollView) findViewById(R.id.stableTools);
+
+
+        // style
+        style = new Style();
+
+        // log
+        log = new Button(this);
+        logRows = new ArrayList<>();
+
+        // chosenTunnel
+        chosenTunnel = (ImageView) findViewById(R.id.chosenTunnel);
+        textChosenTunnel = (TextView) findViewById(R.id.textChosenTunnel);
 
     }
 
-    public void makeTools() {
-        tools.setText("TOOLS");
-        tools.setTextSize(13);
-        tools.setBackgroundResource(buttonStyle);
-        tools.setTextColor(Color.WHITE);
-        tools.setTypeface(Typeface.createFromAsset(getAssets(), "comic.ttf"));
+
+    // Making Buttons
+
+    void makeTools() {
+        tools.setText("Tools");
+        style.decorateButton(tools);
 
         tools.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                updateSelected(tools);
+                style.updateSelected(tools);
                 removeSpin();
-                makeToolsTable();
+                makeToolsTable(false);
             }
         });
     }
 
-    public void removeSpin() {
-        buttonsRow.removeView(spin);
+    void makeLog() {
+        log.setText("Log");
+        style.decorateButton(log);
+
+        log.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                style.updateSelected(log);
+                removeSpin();
+                makeLogTable();
+            }
+        });
     }
 
-    public void makeGameField() {
-        gameField.setText("FIELD");
-        gameField.setTextSize(13);
-        gameField.setBackgroundResource(buttonStyle);
-        gameField.setTextColor(Color.WHITE);
-        gameField.setTypeface(Typeface.createFromAsset(getAssets(), "comic.ttf"));
-
+    void makeGameField() {
+        gameField.setText("Field");
+        style.decorateButton(gameField);
         gameField.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                updateSelected(gameField);
+                style.updateSelected(gameField);
                 removeSpin();
                 drawTable();
             }
         });
     }
 
-    public void setDiscard() {
-        isDiscard = false;
+    void makeCards() {
+        cards.setText("Cards");
+        style.decorateButton(cards);
+        cards.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                style.updateSelected(cards);
+                removeSpin();
+                drawCards();
+            }
+        });
+
     }
 
-    public void drawTable() {
-        updateSelected(gameField);
+    void makeSpin() {
+        spin.setText("Spin");
+        style.decorateButton(spin);
+        spin.setBackgroundResource(R.drawable.yellow_button);
+        spin.setTextColor(Color.BLUE);
+
+        spin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ((Tunnel) chosenCard).spin();
+                makeChosenTunnel();
+            }
+        });
+    }
+
+    void makeYou() {
+
+
+        yourNumber.setText("Player " + ((Integer) (controller.currentPlayerNumber() + 1)).toString());
+        yourNumber.setTextSize(30);
+        yourNumber.setGravity(Gravity.CENTER_HORIZONTAL);
+        yourNumber.setTextColor(Color.WHITE);
+        yourNumber.setTypeface(style.textFont);
+
+
+        dwarf.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                boolean isSaboteur = controller.isCurrentPlayerSaboteur();
+
+                if (!isSaboteur) {
+                    if (style.youOpen) {
+                        dwarf.setImageResource(0);
+                        dwarf.setBackgroundResource(0);
+                        dwarf.setBackgroundResource(R.drawable.gnome_animation_out);
+                        ((AnimationDrawable) dwarf.getBackground()).start();
+                    } else {
+                        dwarf.setImageResource(0);
+                        dwarf.setBackgroundResource(0);
+                        dwarf.setBackgroundResource(R.drawable.gnome_animation_in);
+                        ((AnimationDrawable) dwarf.getBackground()).start();
+                    }
+                } else {
+                    if (style.youOpen) {
+                        dwarf.setImageResource(0);
+                        dwarf.setBackgroundResource(0);
+                        dwarf.setBackgroundResource(R.drawable.saboteur_animation_out);
+                        ((AnimationDrawable) dwarf.getBackground()).start();
+                    } else {
+                        dwarf.setImageResource(0);
+                        dwarf.setBackgroundResource(0);
+                        dwarf.setBackgroundResource(R.drawable.saboteur_animation_in);
+                        ((AnimationDrawable) dwarf.getBackground()).start();
+                    }
+                }
+                style.youOpen = !style.youOpen;
+            }
+        });
+
+        dwarf.setImageResource(R.drawable.dark_side_of_the_moon_1);
+    }
+
+    void makeChosenTunnel() {
+        if (!contains(screen, chosenTunnel)) {
+            screen.addView(chosenTunnel);
+        }
+        if (!contains(screen, textChosenTunnel)) {
+            screen.addView(textChosenTunnel);
+        }
+
+        chosenTunnel.setImageResource(getCardImageById[chosenCard.getId()]);
+
+        textChosenTunnel.setText("Tunnel");
+        textChosenTunnel.setTextSize(13);
+        textChosenTunnel.setTextColor(Color.WHITE);
+        textChosenTunnel.setTypeface(style.textFont);
+
+    }
+
+    void makeSwitch() {
+        switchPlayer.setText("Switch");
+        style.decorateButton(switchPlayer);
+
+        switchPlayer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                removeSpin();
+                if (controller.isThisTheEnd()) {
+                    Toast.makeText(getApplicationContext(), "This is the end, congratulations to the winners!", Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+
+                if (!controller.canStartNextTurn()) {
+                    Toast.makeText(getApplicationContext(), "Your turn still! Don't fraud!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                makeLogRow();
+                style.youOpen = false;
+                controller.startNextTurn();
+                setDiscard();
+                makeYou();
+                drawTable();
+                playerChoose = -1;
+
+
+                Intent res = new Intent();
+                byte[] controllerByteArray;
+                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                controller.serialize(byteArrayOutputStream);
+
+                controllerByteArray = byteArrayOutputStream.toByteArray();
+
+                res.putExtra("controller", controllerByteArray);
+
+                setResult(RESULT_OK, res);
+
+            }
+        });
+    }
+
+    void makeDiscard() {
+        discard.setText("Discard");
+        style.decorateButton(discard);
+
+        discard.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (controller.canStartNextTurn()) {
+                    return;
+                }
+                if (isDiscard) {
+                    style.updateSelected(cards);
+                } else {
+                    style.updateSelected(discard);
+                }
+                removeSpin();
+                isDiscard = !isDiscard;
+                drawCards();
+            }
+        });
+    }
+
+
+    // Making tables on "table" Layout
+
+    void drawTable() {
+        makeNormalView();
+
+        style.updateSelected(gameField);
 
         table.removeAllViews();
 
@@ -320,6 +580,7 @@ public class GameActivity extends AppCompatActivity {
                 Tunnel real = controller.getField()[i][j];
                 if (real == null) {
                     tunnel.setImageResource(R.drawable.empty_tunnel);
+                    //tunnel.setBackgroundColor(Color.parseColor("554B2510"));
                 } else {
                     if (real.isClosedTunnel() && ((ClosedTunnel) real).isClosed()) {
                         tunnel.setImageResource(R.drawable.hidden_tunnel);
@@ -340,7 +601,6 @@ public class GameActivity extends AppCompatActivity {
                 tunnel.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        removeSpin();
                         int x = (int) map.get(tunnel).first;
                         int y = (int) map.get(tunnel).second;
                         //System.out.println(x);
@@ -349,6 +609,12 @@ public class GameActivity extends AppCompatActivity {
                             //tunnel.setImageResource(getCardImageById[chosenCard.getId()]);
                             if (((Tunnel) chosenCard).canPlay(x, y)) {
                                 ((Tunnel) chosenCard).play(x, y);
+
+                                removeSpin();
+
+                                chosenX = x;
+                                chosenY = y;
+
                                 drawTable();
                             } else {
                                 Toast.makeText(getApplicationContext(), "This field " + x + ' ' + y + " is unavailable", Toast.LENGTH_SHORT).show();
@@ -359,6 +625,10 @@ public class GameActivity extends AppCompatActivity {
                             //tunnel.setImageResource(getCardImageById[chosenCard.getId()]);
                             if (((Destroy) chosenCard).canPlay(x, y)) {
                                 ((Destroy) chosenCard).play(x, y);
+
+                                chosenX = x;
+                                chosenY = y;
+
                                 drawTable();
                             }
                         }
@@ -374,6 +644,10 @@ public class GameActivity extends AppCompatActivity {
                                     Toast.makeText(getApplicationContext(), "Oh no! Just a simple tunnel(",
                                             Toast.LENGTH_SHORT).show();
                                 }
+
+                                chosenX = x;
+                                chosenY = y;
+
                                 drawTable();
                             }
                         }
@@ -408,9 +682,11 @@ public class GameActivity extends AppCompatActivity {
         }
 
         table.addView(arkenstoneTableRow1);
+
     }
 
-    public void drawCards() {
+    void drawCards() {
+        makeNormalView();
         table.removeAllViews();
         cardsRow.removeAllViews();
         for (int i = 0; i < controller.getCurrentPlayerHand().size(); i++) {
@@ -435,7 +711,6 @@ public class GameActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     removeSpin();
-                    isCardChosen = true;
                     for (int i = 0; i < cardsRow.getVirtualChildCount(); i++) {
                         if (cardsRow.getVirtualChildAt(i).equals(cardImage)) {
                             chosenCard = playerCards.get(i);
@@ -464,6 +739,7 @@ public class GameActivity extends AppCompatActivity {
                     }
 
                     if (chosenCard instanceof Tunnel) {
+                        makeChosenTunnel();
                         makeSpin();
                         buttonsRow.addView(spin, 0);
                         drawTable();
@@ -483,85 +759,42 @@ public class GameActivity extends AppCompatActivity {
         }
     }
 
-    void makeCards() {
-        cards.setText("CARDS");
-        cards.setTextSize(13);
-        cards.setBackgroundResource(buttonStyle);
-        cards.setTextColor(Color.WHITE);
-        cards.setTypeface(Typeface.createFromAsset(getAssets(), "comic.ttf"));
+    void makeToolsTable(final boolean clickable) {
+        style.updateSelected(tools);
 
-        cards.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                updateSelected(cards);
-                removeSpin();
-                drawCards();
-            }
-        });
-
-    }
-
-    void makeSpin() {
-        spin.setText("SPIN");
-        spin.setTextSize(13);
-        spin.setBackgroundResource(R.drawable.red_button);
-        spin.setTextColor(Color.YELLOW);
-        spin.setTypeface(Typeface.createFromAsset(getAssets(), "comicbd.ttf"));
-        spin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ((Tunnel) chosenCard).spin();
-                buttonsRow.removeView(spin);
-                drawCards();
-            }
-        });
-    }
-
-    void makeYou() {
-
-
-        yourNumber.setText("Player " + ((Integer) (controller.currentPlayerNumber() + 1)).toString());
-        yourNumber.setTextSize(30);
-        yourNumber.setGravity(Gravity.CENTER_HORIZONTAL);
-        yourNumber.setTextColor(Color.WHITE);
-        yourNumber.setTypeface(Typeface.createFromAsset(getAssets(), "comicbd.ttf"));
-
-
-        dwarf.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                boolean isSaboteur = controller.isCurrentPlayerSaboteur();
-
-                if (!isSaboteur) {
-                    dwarf.setImageResource(R.drawable.bread_winner);
-                } else {
-                    dwarf.setImageResource(0);
-                    dwarf.setBackgroundResource(R.drawable.saboteur_animation);
-                    ((AnimationDrawable) dwarf.getBackground()).start();
-                }
-            }
-        });
-
-        dwarf.setImageResource(R.drawable.dark_side_of_the_moon);
-    }
-
-    void makeToolsTable() {
         table.removeAllViews();
+
+        /*
+
+        screen.removeView(yourNumber);
+        screen.removeView(dwarf);
+
+        screen.setBackgroundResource(R.drawable.green_menu_tools);
+        if(!contains(screen, toolsScroll)){
+            screen.addView(toolsScroll);
+        }
+
+        */
+
         TableRow[] playerRows = new TableRow[playerCount];
         for (int i = 0; i < playerCount; i++) {
 
             playerRows[i] = new TableRow(this);
             playerRows[i].setGravity(Gravity.CENTER_HORIZONTAL);
+            playerRows[i].setBackgroundColor(style.textBackgroundColor);
 
 
             TextView playerNumber = new TextView(this);
             playerNumber.setText("Player " + ((Integer) (i + 1)).toString());
-            playerNumber.setTextSize(30);
-            playerNumber.setTypeface(Typeface.createFromAsset(getAssets(), "comicbd.ttf"));
-
+            playerNumber.setTextSize(20);
+            playerNumber.setTypeface(style.textFont);
 
             //playerNumber.setGravity(Gravity.);
-            playerNumber.setTextColor(Color.WHITE);
+            if (i == controller.currentPlayerNumber()) {
+                playerNumber.setTextColor(style.selectedPlayerColor);
+            } else {
+                playerNumber.setTextColor(Color.WHITE);
+            }
 
             boolean[] currentDebuffs = controller.getPlayerDebuffs(i);
             ImageView lamp = new ImageView(this);
@@ -590,6 +823,38 @@ public class GameActivity extends AppCompatActivity {
             playerRows[i].addView(lamp);
             playerRows[i].addView(pick);
             playerRows[i].addView(trolley);
+            final TableRow currentRow = playerRows[i];
+            playerRows[i].setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (clickable) {
+                        playerChoose = Character.getNumericValue(((TextView) currentRow.getVirtualChildAt(0)).getText().charAt(7)) - 1;
+                        Toast.makeText(getApplicationContext(), "Player " + Integer.toString(playerChoose + 1),
+                                Toast.LENGTH_SHORT).show();
+                        if (chosenCard instanceof Debuff) {
+                            if (((Debuff) chosenCard).canPlay(playerChoose)) {
+                                ((Debuff) chosenCard).play(playerChoose);
+                                makeToolsTable(false);
+                            } else {
+                                Toast.makeText(getApplicationContext(), "This gnome cannot be played this way!",
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
+                        if (chosenCard instanceof Heal) {
+                            if (((Heal) chosenCard).canPlay(playerChoose)) {
+                                ((Heal) chosenCard).play(playerChoose);
+                                makeToolsTable(false);
+                            } else {
+                                Toast.makeText(getApplicationContext(), "This gnome cannot be played this way!",
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    } else {
+                        return;
+                    }
+                }
+            });
 
 
             table.addView(playerRows[i]);
@@ -597,57 +862,79 @@ public class GameActivity extends AppCompatActivity {
         }
     }
 
-    void makeSwitch() {
-        switchPlayer.setText("SWITCH");
-        switchPlayer.setTextSize(13);
-        switchPlayer.setBackgroundResource(buttonStyle);
-        switchPlayer.setTextColor(Color.WHITE);
-        switchPlayer.setTypeface(Typeface.createFromAsset(getAssets(), "comic.ttf"));
-
-
-        switchPlayer.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                updateSelected(switchPlayer);
-                removeSpin();
-                if (controller.isThisTheEnd()) {
-                    Toast.makeText(getApplicationContext(), "This is the end, congratulations to the winners!", Toast.LENGTH_SHORT).show();
-                    finish();
-                }
-
-                if (!controller.canStartNextTurn()) {
-                    Toast.makeText(getApplicationContext(), "Your turn still! Don't fraud!", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                controller.startNextTurn();
-                setDiscard();
-                makeYou();
-                drawTable();
-                playerChoose = -1;
-            }
-        });
+    void makeLogTable() {
+        makeNormalView();
+        table.removeAllViews();
+        for (int i = 0; i < logRows.size(); i++) {
+            table.addView(logRows.get(i));
+        }
     }
 
-    void makeDiscard() {
-        discard.setTextSize(13);
-        discard.setText("DISCARD");
-        discard.setBackgroundResource(buttonStyle);
-        discard.setTextColor(Color.WHITE);
-        discard.setTypeface(Typeface.createFromAsset(getAssets(), "comic.ttf"));
+    // additional function to update logTable
+    void makeLogRow() {
+        TableRow logRow = new TableRow(this);
+        logRow.setBackgroundColor(style.textBackgroundColor);
 
-        discard.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (isDiscard) {
-                    updateSelected(cards);
+        TextView message = new TextView(this);
+
+        message.setText(((Integer) (logRows.size() + 1)).toString() + ". Player " +
+                ((Integer) (controller.currentPlayerNumber() + 1)).toString());
+
+        if (isDiscard) {
+            message.setText(message.getText() + " : discard");
+        } else if (chosenCard instanceof Tunnel) {
+            message.setText(message.getText() + " put tunnel on (" +
+                    ((Integer) chosenX).toString() + ", " + ((Integer) chosenY).toString() + ") cell");
+
+        } else if (chosenCard instanceof Heal) {
+            message.setText(message.getText() + " repaired Player " +
+                    ((Integer) (playerChoose + 1)).toString() + "'s ");
+            if (((Heal) chosenCard).isHealLamp()) {
+                if (((Heal) chosenCard).isHealTrolley()) {
+                    message.setText(message.getText() + "lamp and trolley");
+                } else if (((Heal) chosenCard).isHealPick()) {
+                    message.setText(message.getText() + "lamp and pick");
                 } else {
-                    updateSelected(discard);
+                    message.setText(message.getText() + "lamp");
                 }
-                removeSpin();
-                isDiscard = !isDiscard;
-                drawCards();
+            } else {
+                if (((Heal) chosenCard).isHealTrolley()) {
+                    if (((Heal) chosenCard).isHealPick()) {
+                        message.setText(message.getText() + "pick and trolley");
+                    } else {
+                        message.setText(message.getText() + "trolley");
+                    }
+                } else {
+                    message.setText(message.getText() + "pick");
+                }
             }
-        });
+        } else if (chosenCard instanceof Debuff) {
+            message.setText(message.getText() + " broke Player " +
+                    ((Integer) (playerChoose + 1)).toString() + "'s ");
+            if (((Debuff) chosenCard).isBreakingLamp()) {
+                message.setText(message.getText() + "lamp");
+            } else if (((Debuff) chosenCard).isBreakingPick()) {
+                message.setText(message.getText() + "pick");
+            } else {
+                message.setText(message.getText() + "trolley");
+            }
+        } else if (chosenCard instanceof Destroy) {
+            message.setText(message.getText() + " destroyed tunnel on (" +
+                    ((Integer) chosenX).toString() + ", " + ((Integer) chosenY).toString() + ") cell");
+        } else if (chosenCard instanceof Watch) {
+            message.setText(message.getText() + " watched at (" +
+                    ((Integer) chosenX).toString() + ", " + ((Integer) chosenY).toString() + ") cell");
+        }
+
+
+        message.setTextSize(12);
+        message.setTextColor(Color.WHITE);
+        message.setTypeface(style.textFont);
+
+
+        logRow.addView(message);
+
+        logRows.add(logRow);
     }
 
     void makeButtonsTable() {
@@ -656,88 +943,42 @@ public class GameActivity extends AppCompatActivity {
         buttonsRow.addView(switchPlayer);
         buttonsRow.addView(discard);
         buttonsRow.addView(tools);
+        buttonsRow.addView(log);
         buttonsTable.addView(buttonsRow);
     }
+
+
+    // Layout params and dependencies
+
 
     void setLayoutParams() {
         screen.setBackgroundResource(R.drawable.background2);
         //screen.setBackgroundColor(Color.parseColor("#FF4B2510"));
     }
 
-    void setDependencies() { // to be called once
-
-    }
-
     void choosePlayer() {
-        table.removeAllViews();
-        for (int i = 0; i < playerCount; i++) {
-            final TableRow playerRow = new TableRow(this);
-            TextView playerNumber = new TextView(this);
-            playerNumber.setText("Player " + ((Integer) (i + 1)).toString());
-            playerNumber.setTextSize(30);
-            playerNumber.setTextColor(Color.WHITE);
-            playerNumber.setTypeface(Typeface.createFromAsset(getAssets(), "comicbd.ttf"));
-            playerRow.addView(playerNumber);
-            playerRow.setBackgroundColor(Color.parseColor("#FF4B2510"));
-            playerRow.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    playerChoose = Character.getNumericValue(((TextView) playerRow.getVirtualChildAt(0)).getText().charAt(7)) - 1;
-                    Toast.makeText(getApplicationContext(), "Player " + Integer.toString(playerChoose + 1),
-                            Toast.LENGTH_SHORT).show();
-                    if (chosenCard instanceof Debuff) {
-                        if (((Debuff) chosenCard).canPlay(playerChoose)) {
-                            ((Debuff) chosenCard).play(playerChoose);
-                        } else {
-                            Toast.makeText(getApplicationContext(), "This gnome cannot be played this way!",
-                                    Toast.LENGTH_SHORT).show();
-                        }
-                    }
-
-                    if (chosenCard instanceof Heal) {
-                        if (((Heal) chosenCard).canPlay(playerChoose)) {
-                            ((Heal) chosenCard).play(playerChoose);
-                        } else {
-                            Toast.makeText(getApplicationContext(), "This gnome cannot be played this way!",
-                                    Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                }
-            });
-            table.addView(playerRow);
-        }
+        //table.removeAllViews();
+        makeToolsTable(true);
     }
 
-    void choosePlayerActivity() {
-        Intent intent = new Intent(this, PlayerChooseActivity.class);
-        intent.putExtra("playerCount", playerCount);
-        intent.putExtra("currentPlayerNumber", controller.currentPlayerNumber());
-        startActivityForResult(intent, PLAYER_CHOOSE);
-    }
+    @Override
+    protected void onStop() {
+        super.onStop();
+        //
 
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == PLAYER_CHOOSE) {
-            if (resultCode == RESULT_OK) {
-                int playerChoose = data.getIntExtra("player", 0);//get player number
-                Toast.makeText(getApplicationContext(), "Player " + Integer.toString(playerChoose + 1),
-                        Toast.LENGTH_SHORT).show();
-                if (chosenCard instanceof Debuff) {
-                    if (((Debuff) chosenCard).canPlay(playerChoose)) {
-                        ((Debuff) chosenCard).play(playerChoose);
-                    }
-                }
+        Intent intent = new Intent();
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        controller.serialize(byteArrayOutputStream);
 
-                if (chosenCard instanceof Heal) {
-                    if (((Heal) chosenCard).canPlay(playerChoose)) {
-                        ((Heal) chosenCard).play(playerChoose);
-                    }
-                }
-            } else {
-                playerChoose = -1;
-                Toast.makeText(getApplicationContext(), "Choose please ",
-                        Toast.LENGTH_SHORT).show();
-            }
-        }
+        controllerByteArray = byteArrayOutputStream.toByteArray();
+        //
+        intent.putExtra("controller", controllerByteArray);
+
+        setResult(RESULT_OK, intent);
+
+        Toast.makeText(getApplicationContext(), "onStop applied", Toast.LENGTH_SHORT).show();
+        //finish();
+
     }
 
 
@@ -751,18 +992,12 @@ public class GameActivity extends AppCompatActivity {
 
         playerCount = getIntent().getIntExtra("playerCount", 2);
 
-        controller.initializeField(playerCount);
-
         fillCardIdArray();
 
         fieldHeight = controller.getHeight();
         fieldWidth = controller.getWidth();
 
         setLayoutParams();
-
-        setDependencies();
-
-        drawTable();
 
         makeCards();
 
@@ -774,9 +1009,13 @@ public class GameActivity extends AppCompatActivity {
 
         makeTools();
 
+        makeLog();
+
         makeGameField();
 
         makeButtonsTable();
+
+        drawTable();
 
     }
 

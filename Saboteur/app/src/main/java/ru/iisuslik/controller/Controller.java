@@ -4,9 +4,15 @@ import ru.iisuslik.cards.Card;
 import ru.iisuslik.cards.Tunnel;
 import ru.iisuslik.field.Field;
 
+import java.io.InputStream;
+import java.io.ObjectInput;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Controller {
+public class Controller implements Serializable {
     private Field field;
     public void initializeField(int playerCount) {
         field = new Field(playerCount);
@@ -56,8 +62,32 @@ public class Controller {
     }
 
 
-
     public void printField() {
         field.print();
     }
+
+    public void serialize(OutputStream out) {
+        try {
+            ObjectOutputStream objectOut = new ObjectOutputStream(out);
+            objectOut.writeObject(this);
+            objectOut.flush();
+            objectOut.close();
+        } catch (Exception ignored) {
+            ignored.printStackTrace();
+        }
+    }
+
+    public static Controller deserialize(InputStream in) {
+       Controller res = null;
+        try {
+            ObjectInputStream objectIn = new ObjectInputStream(in);
+            res = (Controller) objectIn.readObject();
+            objectIn.close();
+        } catch (Exception ignored) {
+            ignored.printStackTrace();
+        }
+        return res;
+    }
+
+
 }

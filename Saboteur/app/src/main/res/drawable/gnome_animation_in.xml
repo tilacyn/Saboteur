@@ -1,0 +1,16 @@
+<animation-list
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:oneshot="true">
+    <item android:drawable="@drawable/gnome_b_and_h_15" android:duration="200"/>
+    <item android:drawable="@drawable/gnome_b_and_h_14" android:duration="200"/>
+    <item android:drawable="@drawable/gnome_b_and_h_13" android:duration="200"/>
+    <item android:drawable="@drawable/gnome_b_and_h_12" android:duration="200"/>
+    <item android:drawable="@drawable/gnome_b_and_h_11" android:duration="200"/>
+    <item android:drawable="@drawable/gnome_b_and_h_10" android:duration="200"/>
+    <item android:drawable="@drawable/gnome_b_and_h_9" android:duration="200"/>
+    <item android:drawable="@drawable/gnome_b_and_h_8" android:duration="200"/>
+    <item android:drawable="@drawable/gnome_b_and_h_7" android:duration="200"/>
+    <item android:drawable="@drawable/gnome_b_and_h_6" android:duration="200"/>
+    <item android:drawable="@drawable/gnome_b_and_h_5" android:duration="200"/>
+    <item android:drawable="@drawable/gnome_b_and_h_4" android:duration="200"/>
+</animation-list>

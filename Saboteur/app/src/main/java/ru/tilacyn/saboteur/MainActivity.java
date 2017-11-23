@@ -2,6 +2,7 @@ package ru.tilacyn.saboteur;
 
 
 //import ru.iisuslik.*;
+
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -18,24 +19,152 @@ import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 
 import ru.iisuslik.controller.Controller;
 
 public class MainActivity extends AppCompatActivity {
 
-    int playerCount;
+    private class Style {
+        Button selected;
+        Button selectedPlayerCount;
+        int selectedButtonStyle = R.drawable.yellow_button;
+        int selectedTextColor = Color.BLACK;
 
-    int buttonStyle;
+        int buttonStyle = R.drawable.brown_button;
+        int buttonTextColor = Color.WHITE;
+
+        Typeface buttonFont = Typeface.createFromAsset(getAssets(), "almendra.ttf");
+        Typeface textFont = Typeface.createFromAsset(getAssets(), "almendra.ttf");
+
+        Style() {
+            selected = null;
+
+        }
+
+        void decorateButton(Button b) {
+            b.setTextSize(13);
+            b.setBackgroundResource(buttonStyle);
+            b.setTextColor(buttonTextColor);
+            b.setTypeface(buttonFont);
+        }
+
+        void updateSelected(Button b) {
+            if (selected != null) {
+                selected.setBackgroundResource(style.buttonStyle);
+                selected.setTextColor(style.buttonTextColor);
+            }
+
+            selected = b;
+            selected.setBackgroundResource(selectedButtonStyle);
+            selected.setTextColor(selectedTextColor);
+        }
+
+        void updateSelectedPlayerCount(Button b) {
+            if (selectedPlayerCount != null) {
+                selectedPlayerCount.setBackgroundResource(buttonStyle);
+                selectedPlayerCount.setTextColor(buttonTextColor);
+            }
+
+            selectedPlayerCount = b;
+            selectedPlayerCount.setBackgroundResource(selectedButtonStyle);
+            selectedPlayerCount.setTextColor(selectedTextColor);
+        }
 
 
-    //private Controller controller = new Controller();
+        void removeSelected() {
+            if (selected != null) {
+                selected.setBackgroundResource(buttonStyle);
+                selected.setTextColor(buttonTextColor);
+            }
+            selected = null;
+        }
+    }
 
-    TableLayout playerCountTable;
-    TableRow playerCountRow;
+    private class Layouts {
+        //Button help;
+        Button newGame;
+        Button continueGame;
+        Button settings;
+        TextView lyrics;
+        TableLayout playerCountTable;
+        TableRow playerCountRow;
+        ConstraintLayout screen;
+        TextView name;
 
-    boolean settingsOpen;
+        Layouts() {
+            screen = (ConstraintLayout) findViewById(R.id.activity_main);
 
-    ConstraintLayout screen;
+            screen.setBackgroundResource(R.drawable.dwarf_lords);
+
+            playerCountRow = new TableRow(MainActivity.this);
+            playerCountTable = (TableLayout) findViewById(R.id.playerCountTable);
+
+            name = (TextView) findViewById(R.id.Saboteur);
+
+            continueGame = (Button) findViewById(R.id.continueGame);
+            newGame = (Button) findViewById(R.id.newGame);
+            //help  = (Button) findViewById(R.id.help);
+            settings = (Button) findViewById(R.id.settings);
+            lyrics = (TextView) findViewById(R.id.lyrics);
+
+        }
+    }
+
+    private Style style;
+
+    private Layouts layouts;
+
+
+    private int playerCount;
+    private int savedPlayerCount;
+
+    private boolean settingsOpen;
+
+    private Controller controller;
+
+    // for managing controller
+
+    private byte[] controllerByteArray;
+    private int reqCode = 43;
+
+    private boolean canContinue;
+
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == reqCode) {
+            if (resultCode == RESULT_OK) {
+                if(data != null) {
+                    controllerByteArray = data.getByteArrayExtra("controller");//get player number
+                    controller = Controller.deserialize(new ByteArrayInputStream(controllerByteArray));
+                    canContinue = true;
+                } else {
+                    Toast.makeText(getApplicationContext(), "data = null",
+                            Toast.LENGTH_SHORT).show();
+                }
+
+            } else {
+                Toast.makeText(getApplicationContext(), "Something went wrong. For probable solutions see https://saboteur.com/pepec",
+                        Toast.LENGTH_SHORT).show();
+            }
+        }
+        style.removeSelected();
+    }
+
+    void initializeAll() {
+        settingsOpen = false;
+
+        playerCount = 2;
+
+        controller = new Controller();
+        layouts = new Layouts();
+        style = new Style();
+
+        canContinue = false;
+    }
 
 
     @Override
@@ -44,101 +173,112 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
 
-        settingsOpen = false;
+        initializeAll();
 
-        playerCount = 2;
-
-        buttonStyle = R.drawable.brown_button;
-
-        screen = (ConstraintLayout) findViewById(R.id.activity_main);
-
-        screen.setBackgroundResource(R.drawable.dwarf_lords);
-
-        playerCountRow = new TableRow(this);
-        playerCountTable = (TableLayout) findViewById(R.id.playerCountTable);
-
-        //ImageView vlad = (ImageView) findViewById(R.id.vlad);
-        //vlad.setImageResource(R.drawable.vlad);
+        layouts.name.setText("Saboteur");
+        layouts.name.setTextSize(60);
+        layouts.name.setTextColor(Color.YELLOW);
+        layouts.name.setTypeface(Typeface.createFromAsset(getAssets(), "AL Fantasy Type.ttf"));
 
 
-        TextView name = (TextView) findViewById(R.id.Saboteur);
-        name.setText("Saboteur");
-        name.setTextSize(60);
-        name.setTextColor(Color.YELLOW);
-        name.setTypeface(Typeface.createFromAsset(getAssets(),"odessa.ttf"));
+        layouts.continueGame.setText("Continue");
+        style.decorateButton(layouts.continueGame);
 
 
+        layouts.newGame.setText("New Game");
+        style.decorateButton(layouts.newGame);
 
-        Button play = (Button) findViewById(R.id.play);
-        play.setText("PLAY");
-        play.setTextSize(15);
-        play.setTextColor(Color.WHITE);
-        play.setOnClickListener(new View.OnClickListener() {
+
+        layouts.continueGame.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (!canContinue) {
+                    return;
+                }
+                style.updateSelected(layouts.continueGame);
                 Intent intent = new Intent(MainActivity.this, GameActivity.class);
-                intent.putExtra("playerCount", playerCount);
-                startActivity(intent);
+
+                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                controller.serialize(byteArrayOutputStream);
+
+                controllerByteArray = byteArrayOutputStream.toByteArray();
+
+                intent.putExtra("playerCount", savedPlayerCount);
+                intent.putExtra("controller", controllerByteArray);
+
+                startActivityForResult(intent, reqCode);
             }
         });
-        play.setBackgroundResource(buttonStyle);
-        play.setTypeface(Typeface.createFromAsset(getAssets(),"comicbd.ttf"));
+
+        layouts.newGame.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                canContinue = true;
+                controller = new Controller();
+                controller.initializeField(playerCount);
+
+                savedPlayerCount = playerCount;
+
+                style.updateSelected(layouts.newGame);
+                Intent intent = new Intent(MainActivity.this, GameActivity.class);
+
+                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                controller.serialize(byteArrayOutputStream);
+
+                controllerByteArray = byteArrayOutputStream.toByteArray();
+
+                intent.putExtra("playerCount", playerCount);
+                intent.putExtra("controller", controllerByteArray);
+
+                startActivityForResult(intent, reqCode);
+            }
+        });
 
 
+        //layouts.help.setText("Help");
+        //style.decorateButton(layouts.help);
 
-        Button help = (Button) findViewById(R.id.help);
-        help.setText("HELP");
-        help.setTextSize(15);
-        help.setTextColor(Color.WHITE);
-        help.setBackgroundResource(buttonStyle);
-        help.setTypeface(Typeface.createFromAsset(getAssets(),"comicbd.ttf"));
+        layouts.settings.setText("Settings");
+        style.decorateButton(layouts.settings);
 
 
-        final Button settings = (Button) findViewById(R.id.settings);
-        settings.setText("SETTINGS");
-        settings.setTextSize(15);
-        settings.setTextColor(Color.WHITE);
-        settings.setBackgroundResource(buttonStyle);
-        settings.setTypeface(Typeface.createFromAsset(getAssets(),"comicbd.ttf"));
-
-
-        settings.setOnClickListener(new View.OnClickListener() {
+        layouts.settings.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!settingsOpen) {
-                    for(int i = 2; i < 8; i++) {
+                if (!settingsOpen) {
+                    style.updateSelected(layouts.settings);
+                    for (int i = 2; i < 8; i++) {
                         final Button b = new Button(MainActivity.this);
                         b.setWidth(30);
-                        b.setBackgroundResource(buttonStyle);
-                        b.setTypeface(Typeface.createFromAsset(getAssets(),"comicbd.ttf"));
+                        b.setBackgroundResource(style.buttonStyle);
+                        b.setTypeface(Typeface.createFromAsset(getAssets(), "almendra.ttf"));
                         b.setText(((Integer) i).toString());
                         b.setTextSize(15);
                         b.setTextColor(Color.WHITE);
                         b.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
+                                style.updateSelectedPlayerCount(b);
                                 playerCount = Character.getNumericValue(b.getText().charAt(0));
                             }
                         });
-                        playerCountRow.addView(b);
+                        layouts.playerCountRow.addView(b);
                     }
-                    playerCountTable.addView(playerCountRow);
+                    layouts.playerCountTable.addView(layouts.playerCountRow);
                     settingsOpen = true;
-                }
-                else {
-                    playerCountRow.removeAllViews();
-                    playerCountTable.removeAllViews();
+                } else {
+                    style.removeSelected();
+                    layouts.playerCountRow.removeAllViews();
+                    layouts.playerCountTable.removeAllViews();
                     settingsOpen = false;
                 }
             }
         });
 
-        TextView lyrics = (TextView) findViewById(R.id.lyrics);
-        lyrics.setText("Seven for the Dwarf-lords\nIn their halls of stone");
-        lyrics.setTextColor(Color.YELLOW);
-        lyrics.setTypeface(Typeface.createFromAsset(getAssets(),"odessa.ttf"));
-        lyrics.setTextSize(30);
-        lyrics.setGravity(Gravity.CENTER_HORIZONTAL);
+        layouts.lyrics.setText("Seven for the Dwarf-lords\nIn their halls of stone");
+        layouts.lyrics.setTextColor(Color.YELLOW);
+        layouts.lyrics.setTypeface(Typeface.createFromAsset(getAssets(), "odessa.ttf"));
+        layouts.lyrics.setTextSize(30);
 
     }
 }

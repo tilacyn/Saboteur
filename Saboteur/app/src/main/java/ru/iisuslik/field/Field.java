@@ -3,10 +3,11 @@ package ru.iisuslik.field;
 import ru.iisuslik.cards.*;
 import ru.iisuslik.player.*;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class Field {
+public class Field implements Serializable {
 
     private boolean currentPlayerPlayedCard = false;
 
@@ -409,4 +410,9 @@ public class Field {
             System.out.println();
         }
     }
+
+
+
+
+
 }
