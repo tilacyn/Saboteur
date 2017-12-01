@@ -1,6 +1,7 @@
 package ru.iisuslik.cards;
 
 import ru.iisuslik.field.Field;
+import ru.iisuslik.gameData.GameData;
 
 public class Heal extends Action {
 
@@ -18,10 +19,23 @@ public class Heal extends Action {
         return !field.didCurrentPlayerPlayCard() && field.players[playerNumber].needHeal(this);
     }
 
-    public void play(int playerNumber) {
+    public void play(final int playerNumber, final boolean needToSend) {
         field.players[playerNumber].heal(this);
-        field.players[playerNumber].playCard(this);
+        field.players[ownerPlayerNumber].playCard(this);
         field.iPlayedCard();
+        if (needToSend) {
+            field.currentGD = new GameData(ownerPlayerNumber,
+                    field.players[ownerPlayerNumber].getCardNumber(this),
+                    -1, -1, playerNumber, this) {
+                @Override
+                public void apply(Card card) {
+                    ((Heal)card).play(targetPlayerNumber, false);
+                }
+            };
+        }
+    }
+    public void play(int playerNumber){
+        play(playerNumber, true);
     }
 
     public boolean isHealLamp() {

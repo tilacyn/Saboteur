@@ -1,15 +1,18 @@
 package ru.iisuslik.cards;
 
-import ru.iisuslik.field.Field;
+import java.io.Serializable;
 
-public class Card {
+import ru.iisuslik.field.Field;
+import ru.iisuslik.gameData.GameData;
+
+public class Card implements Serializable {
 
     public static final int TUNNEL = 1;
     public static final int ACTION = 2;
 
     public static final int NO_PLAYER = -1;
 
-    protected int playerNumber;
+    protected int ownerPlayerNumber;
     protected Field field;
     protected int type;
     protected int id;
@@ -17,16 +20,16 @@ public class Card {
     protected String description;
 
     public void setPlayerNumber(int playerNumber) {
-        this.playerNumber = playerNumber;
+        this.ownerPlayerNumber = playerNumber;
     }
 
-    public Card(int type, int id, String name, String description, Field field, int playerNumber) {
+    public Card(int type, int id, String name, String description, Field field, int ownerPlayerNumber) {
         this.type = type;
         this.id = id;
         this.name = name;
         this.description = description;
         this.field = field;
-        this.playerNumber = playerNumber;
+        this.ownerPlayerNumber = ownerPlayerNumber;
     }
 
     public String getName() {
@@ -50,23 +53,42 @@ public class Card {
     }
 
     public void discard() {
-        field.players[playerNumber].playCard(this);
-        field.iPlayedCard();
+        discard(true);
     }
 
 
+    public void discard(boolean needToSend) {
+        field.players[ownerPlayerNumber].playCard(this);
+        field.iPlayedCard();
+
+        if (needToSend) {
+            field.currentGD = new GameData(ownerPlayerNumber,
+                    field.players[ownerPlayerNumber].getCardNumber(this),
+                    -1, -1, -1, this) {
+                @Override
+                public void apply(Card card) {
+                    card.discard(false);
+                }
+            };
+        }
+    }
 
 
-
-    protected void printSmth(){
+    protected void printSmth() {
         System.out.print("%%%   ");
     }
 
-    public void printFirst(){printSmth();}
+    public void printFirst() {
+        printSmth();
+    }
 
-    public void printSecond(){printSmth();}
+    public void printSecond() {
+        printSmth();
+    }
 
-    public void printThird(){printSmth();}
+    public void printThird() {
+        printSmth();
+    }
 
 }
 

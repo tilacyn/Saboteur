@@ -4,10 +4,11 @@ import ru.iisuslik.cards.Card;
 import ru.iisuslik.cards.Debuff;
 import ru.iisuslik.cards.Heal;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 
-public class Player {
+public class Player implements Serializable {
 
     public static final int SABOTEUR = 1;
     public static final int GNOME = 2;
@@ -59,6 +60,10 @@ public class Player {
 
     public void playCard(Card card) {
         hand.remove(card);
+    }
+
+    public int getCardNumber(Card card) {
+        return hand.indexOf(card);
     }
 
     public boolean needHeal(Heal heal) {
