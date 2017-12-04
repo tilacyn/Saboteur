@@ -26,6 +26,14 @@ public class Controller implements Serializable {
         return field.WIDTH;
     }
 
+    public int getPlayersNumber() {
+        return field.players.length;
+    }
+
+    public boolean isFieldInitialized() {
+        return field != null;
+    }
+
     public int getHeight() {
         return field.HEIGHT;
     }

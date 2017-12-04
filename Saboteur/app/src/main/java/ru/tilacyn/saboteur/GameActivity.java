@@ -4,6 +4,7 @@ package ru.tilacyn.saboteur;
 import ru.iisuslik.controller.*;
 import ru.iisuslik.cards.*;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -16,6 +17,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ScrollView;
@@ -70,8 +72,365 @@ public class GameActivity extends AppCompatActivity {
         }
     }
 
-    private Style style;
+    private class ActionButton extends android.support.v7.widget.AppCompatButton {
+        public ActionButton(Context context) {
+            super(context);
+        }
 
+        public void decorate() {
+            style.decorateButton(this);
+        }
+
+        public void remove() {
+            buttonsRow.removeView(this);
+        }
+
+        public void add() {
+            if(!contains(screen, this)) {
+                buttonsRow.addView(this);
+            }
+        }
+
+        public void makeItSelected() {
+            style.updateSelected(this);
+        }
+
+    }
+
+    public class MainTableLayout extends TableLayout {
+
+        public MainTableLayout(Context context) {
+            super(context);
+        }
+
+        void drawTable() {
+            gameField.makeItSelected();
+
+            removeAllViews();
+
+            TableRow arkenstoneTableRow0 = new TableRow(GameActivity.this);
+            arkenstoneTableRow0.setLayoutParams(params);
+            arkenstoneTableRow0.setGravity(Gravity.CENTER_HORIZONTAL);
+
+
+            for (int i = 0; i < fieldWidth + 2; i++) {
+                ImageView empty_tunnel = new ImageView(GameActivity.this);
+                empty_tunnel.setImageResource(R.drawable.arkenstone);
+                arkenstoneTableRow0.addView(empty_tunnel);
+            }
+
+            addView(arkenstoneTableRow0);
+
+
+            TableRow[] field = new TableRow[fieldHeight];
+
+            for (int i = 0; i < fieldHeight; i++) {
+                field[i] = new TableRow(GameActivity.this);
+                field[i].setLayoutParams(params);
+                field[i].setGravity(Gravity.CENTER_HORIZONTAL);
+            }
+
+            for (int i = 0; i < fieldHeight; i++) {
+                ImageView arkenstone1 = new ImageView(GameActivity.this);
+                arkenstone1.setImageResource(R.drawable.arkenstone);
+                field[i].addView(arkenstone1);
+
+                for (int j = 0; j < fieldWidth; j++) {
+                    final ImageView tunnel = new ImageView(GameActivity.this);
+                    Tunnel real = controller.getField()[i][j];
+                    if (real == null) {
+                        tunnel.setImageResource(R.drawable.empty_tunnel);
+                        //tunnel.setBackgroundColor(Color.parseColor("554B2510"));
+                    } else {
+                        if (real.isClosedTunnel() && ((ClosedTunnel) real).isClosed()) {
+                            tunnel.setImageResource(R.drawable.hidden_tunnel);
+                        } else {
+                            if (real.isClosedTunnel() && ((ClosedTunnel) real).isGold()) {
+                                tunnel.setImageResource(R.drawable.gold);
+                            } else {
+                                tunnel.setImageResource(getCardImageById[real.getId()]);
+                            }
+                        }
+                    }
+                    //tunnel.setImageResource(R.drawable.small_tunnel_pattern);
+                    //tunnel.setScaleX(0.3F);
+                    //tunnel.setScaleY(0.3F);
+
+                    field[i].addView(tunnel);
+
+                    tunnel.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            int x = (int) map.get(tunnel).first;
+                            int y = (int) map.get(tunnel).second;
+                            //System.out.println(x);
+                            //System.out.println(y);
+                            if (chosenCard instanceof Tunnel) {
+                                //tunnel.setImageResource(getCardImageById[chosenCard.getId()]);
+                                if (((Tunnel) chosenCard).canPlay(x, y)) {
+                                    ((Tunnel) chosenCard).play(x, y);
+
+                                    removeSpin();
+
+                                    chosenX = x;
+                                    chosenY = y;
+
+                                    drawTable();
+                                } else {
+                                    Toast.makeText(getApplicationContext(), "This field " + x + ' ' + y + " is unavailable", Toast.LENGTH_SHORT).show();
+
+                                }
+                            }
+                            if (chosenCard instanceof Destroy) {
+                                //tunnel.setImageResource(getCardImageById[chosenCard.getId()]);
+                                if (((Destroy) chosenCard).canPlay(x, y)) {
+                                    ((Destroy) chosenCard).play(x, y);
+
+                                    chosenX = x;
+                                    chosenY = y;
+
+                                    drawTable();
+                                }
+                            }
+
+                            if (chosenCard instanceof Watch) {
+                                //tunnel.setImageResource(getCardImageById[chosenCard.getId()]);
+                                if (((Watch) chosenCard).canPlay(x, y)) {
+                                    if (((Watch) chosenCard).play(x, y)) {
+                                        Toast.makeText(getApplicationContext(), "This is a hidden treasure!",
+                                                Toast.LENGTH_SHORT).show();
+
+                                    } else {
+                                        Toast.makeText(getApplicationContext(), "Oh no! Just a simple tunnel(",
+                                                Toast.LENGTH_SHORT).show();
+                                    }
+
+                                    chosenX = x;
+                                    chosenY = y;
+
+                                    drawTable();
+                                }
+                            }
+
+                        }
+                    });
+
+
+                    map.put((ImageView) field[i].getVirtualChildAt(j + 1), new Pair<Integer, Integer>(i, j));
+                }
+
+                ImageView arkenstone2 = new ImageView(GameActivity.this);
+                arkenstone2.setImageResource(R.drawable.arkenstone);
+                field[i].addView(arkenstone2);
+
+
+            }
+
+            for (int i = 0; i < fieldHeight; i++) {
+                addView(field[i]);
+            }
+
+
+            TableRow arkenstoneTableRow1 = new TableRow(GameActivity.this);
+            arkenstoneTableRow1.setLayoutParams(params);
+            arkenstoneTableRow1.setGravity(Gravity.CENTER_HORIZONTAL);
+
+            for (int i = 0; i < fieldWidth + 2; i++) {
+                ImageView arkenstone = new ImageView(GameActivity.this);
+                arkenstone.setImageResource(R.drawable.arkenstone);
+                arkenstoneTableRow1.addView(arkenstone);
+            }
+
+            addView(arkenstoneTableRow1);
+
+        }
+
+        void drawCards() {
+            removeAllViews();
+            final TableRow cardsRow = new TableRow(GameActivity.this);
+            for (int i = 0; i < controller.getCurrentPlayerHand().size(); i++) {
+                ImageButton empty = new ImageButton(GameActivity.this);
+                empty.setImageResource(R.drawable.dark_side_of_the_moon);
+                cardsRow.addView(empty);
+            }
+            addView(cardsRow);
+
+
+            final ArrayList<Card> playerCards = controller.getCurrentPlayerHand();
+
+            for (int i = 0; i < playerCards.size(); i++) {
+                //final ImageView cardImage = (ImageView) cardsRow.getVirtualChildAt(i);
+                final ImageButton cardImage = (ImageButton) cardsRow.getVirtualChildAt(i);
+                if (playerCards.get(i) instanceof Tunnel) {
+                    cardImage.setImageResource(getCardImageById[playerCards.get(i).getId() + 40]);
+                } else {
+                    cardImage.setImageResource(getCardImageById[playerCards.get(i).getId()]);
+                }
+                cardImage.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        removeSpin();
+                        for (int i = 0; i < cardsRow.getVirtualChildCount(); i++) {
+                            if (cardsRow.getVirtualChildAt(i).equals(cardImage)) {
+                                chosenCard = playerCards.get(i);
+                                break;
+                            }
+                        }
+
+                        if (isDiscard) {
+                            if (chosenCard.canDiscard()) {
+                                chosenCard.discard();
+                            } else {
+                                Toast.makeText(getApplicationContext(), "You cannot discard this card", Toast.LENGTH_SHORT).show();
+                            }
+                            if (controller.canStartNextTurn()) {
+                                cardsRow.removeView(cardImage);
+                            }
+                            return;
+                        }
+
+                        if (chosenCard instanceof Debuff) {
+                            choosePlayer();
+                        }
+
+                        if (chosenCard instanceof Heal) {
+                            choosePlayer();
+                        }
+
+                        if (chosenCard instanceof Tunnel) {
+                            makeChosenTunnel();
+                            makeSpin();
+                            buttonsRow.addView(spin, 0);
+                            drawTable();
+                        }
+
+                        if (chosenCard instanceof Destroy) {
+                            drawTable();
+                        }
+                        if (chosenCard instanceof Watch) {
+                            drawTable();
+                        }
+                        if (controller.canStartNextTurn()) {
+                            cardsRow.removeView(cardImage);
+                        }
+                    }
+                });
+            }
+        }
+
+        void makeToolsTable(final boolean clickable) {
+            tools.makeItSelected();
+
+            removeAllViews();
+
+        /*
+
+        screen.removeView(yourNumber);
+        screen.removeView(dwarf);
+
+        screen.setBackgroundResource(R.drawable.green_menu_tools);
+        if(!contains(screen, toolsScroll)){
+            screen.addView(toolsScroll);
+        }
+
+        */
+
+            TableRow[] playerRows = new TableRow[playerCount];
+            for (int i = 0; i < playerCount; i++) {
+
+                playerRows[i] = new TableRow(GameActivity.this);
+                playerRows[i].setGravity(Gravity.CENTER_HORIZONTAL);
+                playerRows[i].setBackgroundColor(style.textBackgroundColor);
+
+
+                TextView playerNumber = new TextView(GameActivity.this);
+                playerNumber.setText("Player " + ((Integer) (i + 1)).toString());
+                playerNumber.setTextSize(20);
+                playerNumber.setTypeface(style.textFont);
+
+                //playerNumber.setGravity(Gravity.);
+                if (i == controller.currentPlayerNumber()) {
+                    playerNumber.setTextColor(style.selectedPlayerColor);
+                } else {
+                    playerNumber.setTextColor(Color.WHITE);
+                }
+
+                boolean[] currentDebuffs = controller.getPlayerDebuffs(i);
+                ImageView lamp = new ImageView(GameActivity.this);
+                ImageView pick = new ImageView(GameActivity.this);
+                ImageView trolley = new ImageView(GameActivity.this);
+
+                if (!currentDebuffs[0]) {
+                    lamp.setImageResource(R.drawable.lamp);
+                } else {
+                    lamp.setImageResource(R.drawable.broken_lamp);
+                }
+
+                if (!currentDebuffs[1]) {
+                    pick.setImageResource(R.drawable.pick);
+                } else {
+                    pick.setImageResource(R.drawable.broken_pick);
+                }
+
+                if (!currentDebuffs[2]) {
+                    trolley.setImageResource(R.drawable.trolley);
+                } else {
+                    trolley.setImageResource(R.drawable.broken_trolley);
+                }
+
+                playerRows[i].addView(playerNumber);
+                playerRows[i].addView(lamp);
+                playerRows[i].addView(pick);
+                playerRows[i].addView(trolley);
+                final TableRow currentRow = playerRows[i];
+                playerRows[i].setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (clickable) {
+                            playerChoose = Character.getNumericValue(((TextView) currentRow.getVirtualChildAt(0)).getText().charAt(7)) - 1;
+                            Toast.makeText(getApplicationContext(), "Player " + Integer.toString(playerChoose + 1),
+                                    Toast.LENGTH_SHORT).show();
+                            if (chosenCard instanceof Debuff) {
+                                if (((Debuff) chosenCard).canPlay(playerChoose)) {
+                                    ((Debuff) chosenCard).play(playerChoose);
+                                    makeToolsTable(false);
+                                } else {
+                                    Toast.makeText(getApplicationContext(), "This gnome cannot be played this way!",
+                                            Toast.LENGTH_SHORT).show();
+                                }
+                            }
+
+                            if (chosenCard instanceof Heal) {
+                                if (((Heal) chosenCard).canPlay(playerChoose)) {
+                                    ((Heal) chosenCard).play(playerChoose);
+                                    makeToolsTable(false);
+                                } else {
+                                    Toast.makeText(getApplicationContext(), "This gnome cannot be played this way!",
+                                            Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        } else {
+                            return;
+                        }
+                    }
+                });
+
+
+                addView(playerRows[i]);
+
+            }
+        }
+
+        void makeLogTable() {
+            removeAllViews();
+            for (int i = 0; i < logRows.size(); i++) {
+                addView(logRows.get(i));
+            }
+        }
+
+    }
+
+    private Style style;
 
     private int[] getCardImageById = new int[100];
 
@@ -170,7 +529,7 @@ public class GameActivity extends AppCompatActivity {
     private ConstraintLayout screen;
 
     // game field
-    private TableLayout table;
+    private MainTableLayout table;
 
     // table row params for table(game field)
     private TableRow.LayoutParams params;
@@ -182,36 +541,29 @@ public class GameActivity extends AppCompatActivity {
 
     // CardsTable, cardsRow and button cards
 
-    private Button cards;
-    private TableRow cardsRow;
-
-    // toolsTable
+    private ActionButton cards;
 
     // discard
-    private Button discard;
+    private ActionButton discard;
 
     // game field
-    private Button gameField;
+    private ActionButton gameField;
 
     // tools
-    private Button tools;
+    private ActionButton tools;
 
     // switch
-    private Button switchPlayer;
+    private ActionButton switchPlayer;
 
     //spin
-    private Button spin;
+    private ActionButton spin;
 
     // buttons table
     private TableLayout buttonsTable;
     private TableRow buttonsRow;
 
-    // tools table
-    private TableLayout toolsTable;
-    private ScrollView toolsScroll;
-
     // log table
-    private Button log;
+    private ActionButton log;
     private ArrayList<TableRow> logRows;
 
     // chosen cell
@@ -222,6 +574,9 @@ public class GameActivity extends AppCompatActivity {
     private TextView textChosenTunnel;
     private ImageView chosenTunnel;
 
+    // discard indicator
+    private TextView textDiscardIndicator;
+
 
     // choosing player
     private int playerChoose = -1;
@@ -229,6 +584,9 @@ public class GameActivity extends AppCompatActivity {
 
     // return controller
     byte[] controllerByteArray;
+
+    //hscroll
+    HorizontalScrollView hscroll;
 
 
     boolean contains(ViewGroup parent, View child) {
@@ -240,26 +598,15 @@ public class GameActivity extends AppCompatActivity {
         return false;
     }
 
-    void makeNormalView() {
-        screen.setBackgroundResource(R.drawable.background3);
-        screen.removeView(toolsScroll);
-        toolsTable.removeAllViews();
-        if (!contains(screen, yourNumber)) {
-            screen.addView(yourNumber);
-        }
-        if (!contains(screen, dwarf)) {
-            screen.addView(dwarf);
-        }
-    }
-
     void removeSpin() {
         screen.removeView(chosenTunnel);
         screen.removeView(textChosenTunnel);
-        buttonsRow.removeView(spin);
+        spin.remove();
     }
 
-    void setDiscard() {
+    void setDiscardFalse() {
         isDiscard = false;
+        screen.removeView(textDiscardIndicator);
     }
 
     //Initializing
@@ -269,6 +616,8 @@ public class GameActivity extends AppCompatActivity {
         //controller
         //saboteurApplication = SaboteurApplication.getInstance();
         //controller = saboteurApplication.getController();
+
+        hscroll = (HorizontalScrollView) findViewById(R.id.hscroll);
 
 
         byte[] controllerCypher = getIntent().getByteArrayExtra("controller");
@@ -281,7 +630,9 @@ public class GameActivity extends AppCompatActivity {
         screen = (ConstraintLayout) findViewById(R.id.activity_main);
 
         // game field
-        table = (TableLayout) findViewById(R.id.table);
+        //TableLayout lol = (TableLayout) findViewById(R.id.table);
+        table = new MainTableLayout(this);
+        hscroll.addView(table);
 
         // table row params for table(game field)
         params = new TableRow.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT,
@@ -294,46 +645,45 @@ public class GameActivity extends AppCompatActivity {
 
         // CardsTable, cardsRow and button cards
 
-        cards = new Button(this);
-        //cardsTable = (TableLayout)findViewById(R.id.buttonsTable);
-        cardsRow = new TableRow(this);
+        cards = new ActionButton(this);
 
         // game field
-        gameField = new Button(this);
+        gameField = new ActionButton(this);
 
         // tools
-        tools = new Button(this);
-
-        // toolsTable
+        tools = new ActionButton(this);
 
         // discard
-        discard = new Button(this);
+        discard = new ActionButton(this);
 
         // spin
-        spin = new Button(this);
+        spin = new ActionButton(this);
 
         // switch
-        switchPlayer = new Button(this);
+        switchPlayer = new ActionButton(this);
 
         //buttons table
         buttonsTable = (TableLayout) findViewById(R.id.buttonsTable);
         buttonsRow = new TableRow(this);
 
         // tools table
-        toolsTable = (TableLayout) findViewById(R.id.toolsTable);
-        toolsScroll = (ScrollView) findViewById(R.id.stableTools);
+        //toolsTable = (TableLayout) findViewById(R.id.toolsTable);
+        //toolsScroll = (ScrollView) findViewById(R.id.stableTools);
 
 
         // style
         style = new Style();
 
         // log
-        log = new Button(this);
+        log = new ActionButton(this);
         logRows = new ArrayList<>();
 
         // chosenTunnel
         chosenTunnel = (ImageView) findViewById(R.id.chosenTunnel);
         textChosenTunnel = (TextView) findViewById(R.id.textChosenTunnel);
+
+        // discard indicator
+        textDiscardIndicator = (TextView) findViewById(R.id.textDiscardIndicator);
 
     }
 
@@ -342,54 +692,59 @@ public class GameActivity extends AppCompatActivity {
 
     void makeTools() {
         tools.setText("Tools");
-        style.decorateButton(tools);
+        tools.decorate();
 
         tools.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                style.updateSelected(tools);
+                tools.makeItSelected();
+                setDiscardFalse();
                 removeSpin();
-                makeToolsTable(false);
+                table.makeToolsTable(false);
             }
         });
     }
 
     void makeLog() {
         log.setText("Log");
-        style.decorateButton(log);
+        log.decorate();
 
         log.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                style.updateSelected(log);
+                log.makeItSelected();
+                setDiscardFalse();
                 removeSpin();
-                makeLogTable();
+                table.makeLogTable();
             }
         });
     }
 
     void makeGameField() {
         gameField.setText("Field");
-        style.decorateButton(gameField);
+        gameField.decorate();
+
         gameField.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                style.updateSelected(gameField);
+                gameField.makeItSelected();
+                setDiscardFalse();
                 removeSpin();
-                drawTable();
+                table.drawTable();
             }
         });
     }
 
     void makeCards() {
         cards.setText("Cards");
-        style.decorateButton(cards);
+        cards.decorate();
         cards.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                style.updateSelected(cards);
+                cards.makeItSelected();
+                setDiscardFalse();
                 removeSpin();
-                drawCards();
+                table.drawCards();
             }
         });
 
@@ -397,7 +752,7 @@ public class GameActivity extends AppCompatActivity {
 
     void makeSpin() {
         spin.setText("Spin");
-        style.decorateButton(spin);
+        spin.decorate();
         spin.setBackgroundResource(R.drawable.yellow_button);
         spin.setTextColor(Color.BLUE);
 
@@ -474,9 +829,20 @@ public class GameActivity extends AppCompatActivity {
 
     }
 
+    void makeDiscardIndicator() {
+        if (!contains(screen, textDiscardIndicator)) {
+            screen.addView(textDiscardIndicator);
+        }
+
+        textDiscardIndicator.setText("Discard");
+        textDiscardIndicator.setTextSize(13);
+        textDiscardIndicator.setTextColor(Color.WHITE);
+        textDiscardIndicator.setTypeface(style.textFont);
+    }
+
     void makeSwitch() {
-        switchPlayer.setText("Switch");
-        style.decorateButton(switchPlayer);
+        switchPlayer.setText("sWitch");
+        switchPlayer.decorate();
 
         switchPlayer.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -495,9 +861,9 @@ public class GameActivity extends AppCompatActivity {
                 makeLogRow();
                 style.youOpen = false;
                 controller.startNextTurn();
-                setDiscard();
+                setDiscardFalse();
                 makeYou();
-                drawTable();
+                table.drawTable();
                 playerChoose = -1;
 
 
@@ -518,7 +884,8 @@ public class GameActivity extends AppCompatActivity {
 
     void makeDiscard() {
         discard.setText("Discard");
-        style.decorateButton(discard);
+        discard.decorate();
+
 
         discard.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -527,13 +894,18 @@ public class GameActivity extends AppCompatActivity {
                     return;
                 }
                 if (isDiscard) {
-                    style.updateSelected(cards);
+                    cards.makeItSelected();
                 } else {
-                    style.updateSelected(discard);
+                    makeDiscardIndicator();
+                    discard.makeItSelected();
                 }
                 removeSpin();
-                isDiscard = !isDiscard;
-                drawCards();
+                if(isDiscard) {
+                    setDiscardFalse();
+                } else {
+                    isDiscard = true;
+                }
+                table.drawCards();
             }
         });
     }
@@ -541,334 +913,6 @@ public class GameActivity extends AppCompatActivity {
 
     // Making tables on "table" Layout
 
-    void drawTable() {
-        makeNormalView();
-
-        style.updateSelected(gameField);
-
-        table.removeAllViews();
-
-        TableRow arkenstoneTableRow0 = new TableRow(this);
-        arkenstoneTableRow0.setLayoutParams(params);
-        arkenstoneTableRow0.setGravity(Gravity.CENTER_HORIZONTAL);
-
-
-        for (int i = 0; i < fieldWidth + 2; i++) {
-            ImageView empty_tunnel = new ImageView(this);
-            empty_tunnel.setImageResource(R.drawable.arkenstone);
-            arkenstoneTableRow0.addView(empty_tunnel);
-        }
-
-        table.addView(arkenstoneTableRow0);
-
-
-        TableRow[] field = new TableRow[fieldHeight];
-
-        for (int i = 0; i < fieldHeight; i++) {
-            field[i] = new TableRow(this);
-            field[i].setLayoutParams(params);
-            field[i].setGravity(Gravity.CENTER_HORIZONTAL);
-        }
-
-        for (int i = 0; i < fieldHeight; i++) {
-            ImageView arkenstone1 = new ImageView(this);
-            arkenstone1.setImageResource(R.drawable.arkenstone);
-            field[i].addView(arkenstone1);
-
-            for (int j = 0; j < fieldWidth; j++) {
-                final ImageView tunnel = new ImageView(this);
-                Tunnel real = controller.getField()[i][j];
-                if (real == null) {
-                    tunnel.setImageResource(R.drawable.empty_tunnel);
-                    //tunnel.setBackgroundColor(Color.parseColor("554B2510"));
-                } else {
-                    if (real.isClosedTunnel() && ((ClosedTunnel) real).isClosed()) {
-                        tunnel.setImageResource(R.drawable.hidden_tunnel);
-                    } else {
-                        if (real.isClosedTunnel() && ((ClosedTunnel) real).isGold()) {
-                            tunnel.setImageResource(R.drawable.gold);
-                        } else {
-                            tunnel.setImageResource(getCardImageById[real.getId()]);
-                        }
-                    }
-                }
-                //tunnel.setImageResource(R.drawable.small_tunnel_pattern);
-                //tunnel.setScaleX(0.3F);
-                //tunnel.setScaleY(0.3F);
-
-                field[i].addView(tunnel);
-
-                tunnel.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        int x = (int) map.get(tunnel).first;
-                        int y = (int) map.get(tunnel).second;
-                        //System.out.println(x);
-                        //System.out.println(y);
-                        if (chosenCard instanceof Tunnel) {
-                            //tunnel.setImageResource(getCardImageById[chosenCard.getId()]);
-                            if (((Tunnel) chosenCard).canPlay(x, y)) {
-                                ((Tunnel) chosenCard).play(x, y);
-
-                                removeSpin();
-
-                                chosenX = x;
-                                chosenY = y;
-
-                                drawTable();
-                            } else {
-                                Toast.makeText(getApplicationContext(), "This field " + x + ' ' + y + " is unavailable", Toast.LENGTH_SHORT).show();
-
-                            }
-                        }
-                        if (chosenCard instanceof Destroy) {
-                            //tunnel.setImageResource(getCardImageById[chosenCard.getId()]);
-                            if (((Destroy) chosenCard).canPlay(x, y)) {
-                                ((Destroy) chosenCard).play(x, y);
-
-                                chosenX = x;
-                                chosenY = y;
-
-                                drawTable();
-                            }
-                        }
-
-                        if (chosenCard instanceof Watch) {
-                            //tunnel.setImageResource(getCardImageById[chosenCard.getId()]);
-                            if (((Watch) chosenCard).canPlay(x, y)) {
-                                if (((Watch) chosenCard).play(x, y)) {
-                                    Toast.makeText(getApplicationContext(), "This is a hidden treasure!",
-                                            Toast.LENGTH_SHORT).show();
-
-                                } else {
-                                    Toast.makeText(getApplicationContext(), "Oh no! Just a simple tunnel(",
-                                            Toast.LENGTH_SHORT).show();
-                                }
-
-                                chosenX = x;
-                                chosenY = y;
-
-                                drawTable();
-                            }
-                        }
-
-                    }
-                });
-
-
-                map.put((ImageView) field[i].getVirtualChildAt(j + 1), new Pair<Integer, Integer>(i, j));
-            }
-
-            ImageView arkenstone2 = new ImageView(this);
-            arkenstone2.setImageResource(R.drawable.arkenstone);
-            field[i].addView(arkenstone2);
-
-
-        }
-
-        for (int i = 0; i < fieldHeight; i++) {
-            table.addView(field[i]);
-        }
-
-
-        TableRow arkenstoneTableRow1 = new TableRow(this);
-        arkenstoneTableRow1.setLayoutParams(params);
-        arkenstoneTableRow1.setGravity(Gravity.CENTER_HORIZONTAL);
-
-        for (int i = 0; i < fieldWidth + 2; i++) {
-            ImageView arkenstone = new ImageView(this);
-            arkenstone.setImageResource(R.drawable.arkenstone);
-            arkenstoneTableRow1.addView(arkenstone);
-        }
-
-        table.addView(arkenstoneTableRow1);
-
-    }
-
-    void drawCards() {
-        makeNormalView();
-        table.removeAllViews();
-        cardsRow.removeAllViews();
-        for (int i = 0; i < controller.getCurrentPlayerHand().size(); i++) {
-            ImageButton empty = new ImageButton(GameActivity.this);
-            empty.setImageResource(R.drawable.dark_side_of_the_moon);
-            cardsRow.addView(empty);
-        }
-        table.addView(cardsRow);
-
-
-        final ArrayList<Card> playerCards = controller.getCurrentPlayerHand();
-
-        for (int i = 0; i < playerCards.size(); i++) {
-            //final ImageView cardImage = (ImageView) cardsRow.getVirtualChildAt(i);
-            final ImageButton cardImage = (ImageButton) cardsRow.getVirtualChildAt(i);
-            if (playerCards.get(i) instanceof Tunnel) {
-                cardImage.setImageResource(getCardImageById[playerCards.get(i).getId() + 40]);
-            } else {
-                cardImage.setImageResource(getCardImageById[playerCards.get(i).getId()]);
-            }
-            cardImage.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    removeSpin();
-                    for (int i = 0; i < cardsRow.getVirtualChildCount(); i++) {
-                        if (cardsRow.getVirtualChildAt(i).equals(cardImage)) {
-                            chosenCard = playerCards.get(i);
-                            break;
-                        }
-                    }
-
-                    if (isDiscard) {
-                        if (chosenCard.canDiscard()) {
-                            chosenCard.discard();
-                        } else {
-                            Toast.makeText(getApplicationContext(), "You cannot discard this card", Toast.LENGTH_SHORT).show();
-                        }
-                        if (controller.canStartNextTurn()) {
-                            cardsRow.removeView(cardImage);
-                        }
-                        return;
-                    }
-
-                    if (chosenCard instanceof Debuff) {
-                        choosePlayer();
-                    }
-
-                    if (chosenCard instanceof Heal) {
-                        choosePlayer();
-                    }
-
-                    if (chosenCard instanceof Tunnel) {
-                        makeChosenTunnel();
-                        makeSpin();
-                        buttonsRow.addView(spin, 0);
-                        drawTable();
-                    }
-
-                    if (chosenCard instanceof Destroy) {
-                        drawTable();
-                    }
-                    if (chosenCard instanceof Watch) {
-                        drawTable();
-                    }
-                    if (controller.canStartNextTurn()) {
-                        cardsRow.removeView(cardImage);
-                    }
-                }
-            });
-        }
-    }
-
-    void makeToolsTable(final boolean clickable) {
-        style.updateSelected(tools);
-
-        table.removeAllViews();
-
-        /*
-
-        screen.removeView(yourNumber);
-        screen.removeView(dwarf);
-
-        screen.setBackgroundResource(R.drawable.green_menu_tools);
-        if(!contains(screen, toolsScroll)){
-            screen.addView(toolsScroll);
-        }
-
-        */
-
-        TableRow[] playerRows = new TableRow[playerCount];
-        for (int i = 0; i < playerCount; i++) {
-
-            playerRows[i] = new TableRow(this);
-            playerRows[i].setGravity(Gravity.CENTER_HORIZONTAL);
-            playerRows[i].setBackgroundColor(style.textBackgroundColor);
-
-
-            TextView playerNumber = new TextView(this);
-            playerNumber.setText("Player " + ((Integer) (i + 1)).toString());
-            playerNumber.setTextSize(20);
-            playerNumber.setTypeface(style.textFont);
-
-            //playerNumber.setGravity(Gravity.);
-            if (i == controller.currentPlayerNumber()) {
-                playerNumber.setTextColor(style.selectedPlayerColor);
-            } else {
-                playerNumber.setTextColor(Color.WHITE);
-            }
-
-            boolean[] currentDebuffs = controller.getPlayerDebuffs(i);
-            ImageView lamp = new ImageView(this);
-            ImageView pick = new ImageView(this);
-            ImageView trolley = new ImageView(this);
-
-            if (!currentDebuffs[0]) {
-                lamp.setImageResource(R.drawable.lamp);
-            } else {
-                lamp.setImageResource(R.drawable.broken_lamp);
-            }
-
-            if (!currentDebuffs[1]) {
-                pick.setImageResource(R.drawable.pick);
-            } else {
-                pick.setImageResource(R.drawable.broken_pick);
-            }
-
-            if (!currentDebuffs[2]) {
-                trolley.setImageResource(R.drawable.trolley);
-            } else {
-                trolley.setImageResource(R.drawable.broken_trolley);
-            }
-
-            playerRows[i].addView(playerNumber);
-            playerRows[i].addView(lamp);
-            playerRows[i].addView(pick);
-            playerRows[i].addView(trolley);
-            final TableRow currentRow = playerRows[i];
-            playerRows[i].setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (clickable) {
-                        playerChoose = Character.getNumericValue(((TextView) currentRow.getVirtualChildAt(0)).getText().charAt(7)) - 1;
-                        Toast.makeText(getApplicationContext(), "Player " + Integer.toString(playerChoose + 1),
-                                Toast.LENGTH_SHORT).show();
-                        if (chosenCard instanceof Debuff) {
-                            if (((Debuff) chosenCard).canPlay(playerChoose)) {
-                                ((Debuff) chosenCard).play(playerChoose);
-                                makeToolsTable(false);
-                            } else {
-                                Toast.makeText(getApplicationContext(), "This gnome cannot be played this way!",
-                                        Toast.LENGTH_SHORT).show();
-                            }
-                        }
-
-                        if (chosenCard instanceof Heal) {
-                            if (((Heal) chosenCard).canPlay(playerChoose)) {
-                                ((Heal) chosenCard).play(playerChoose);
-                                makeToolsTable(false);
-                            } else {
-                                Toast.makeText(getApplicationContext(), "This gnome cannot be played this way!",
-                                        Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                    } else {
-                        return;
-                    }
-                }
-            });
-
-
-            table.addView(playerRows[i]);
-
-        }
-    }
-
-    void makeLogTable() {
-        makeNormalView();
-        table.removeAllViews();
-        for (int i = 0; i < logRows.size(); i++) {
-            table.addView(logRows.get(i));
-        }
-    }
 
     // additional function to update logTable
     void makeLogRow() {
@@ -938,12 +982,13 @@ public class GameActivity extends AppCompatActivity {
     }
 
     void makeButtonsTable() {
-        buttonsRow.addView(gameField);
-        buttonsRow.addView(cards);
-        buttonsRow.addView(switchPlayer);
-        buttonsRow.addView(discard);
-        buttonsRow.addView(tools);
-        buttonsRow.addView(log);
+        gameField.add();
+        cards.add();
+        switchPlayer.add();
+        tools.add();
+        discard.add();
+        log.add();
+
         buttonsTable.addView(buttonsRow);
     }
 
@@ -952,13 +997,13 @@ public class GameActivity extends AppCompatActivity {
 
 
     void setLayoutParams() {
-        screen.setBackgroundResource(R.drawable.background2);
+        screen.setBackgroundResource(R.drawable.background3);
         //screen.setBackgroundColor(Color.parseColor("#FF4B2510"));
     }
 
     void choosePlayer() {
         //table.removeAllViews();
-        makeToolsTable(true);
+        table.makeToolsTable(true);
     }
 
     @Override
@@ -1015,7 +1060,7 @@ public class GameActivity extends AppCompatActivity {
 
         makeButtonsTable();
 
-        drawTable();
+        table.drawTable();
 
     }
 
