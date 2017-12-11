@@ -20,6 +20,7 @@ import android.widget.TableRow;
 import android.widget.TextView;
 
 import ru.iisuslik.controller.Controller;
+import ru.iisuslik.multiplayer.MultiPlayerActivity;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -92,6 +93,20 @@ public class MainActivity extends AppCompatActivity {
         help.setTextColor(Color.WHITE);
         help.setBackgroundResource(buttonStyle);
         help.setTypeface(Typeface.createFromAsset(getAssets(),"comicbd.ttf"));
+
+        Button multiplayer = (Button) findViewById(R.id.multiplayer);///my multiplayer
+        multiplayer.setText("MULTIPLAYER");
+        multiplayer.setTextSize(15);
+        multiplayer.setTextColor(Color.WHITE);
+        multiplayer.setBackgroundResource(buttonStyle);
+        multiplayer.setTypeface(Typeface.createFromAsset(getAssets(),"comicbd.ttf"));
+        multiplayer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, MultiPlayerActivity.class);
+                startActivity(intent);
+            }
+        });
 
 
         final Button settings = (Button) findViewById(R.id.settings);

@@ -1,7 +1,7 @@
 package ru.iisuslik.cards;
 
 import ru.iisuslik.field.Field;
-import ru.iisuslik.gameData.GameData;
+import ru.iisuslik.gameData.TurnData;
 
 public class Tunnel extends Card {
 
@@ -41,7 +41,7 @@ public class Tunnel extends Card {
         field.iPlayedCard();
         field.startDfs();
         if (needToSend) {
-            field.currentGD = new GameData(ownerPlayerNumber,
+            field.currentTD = new TurnData(ownerPlayerNumber,
                     field.players[ownerPlayerNumber].getCardNumber(this),
                     i, j, -1, this) {
                 @Override

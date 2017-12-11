@@ -1,6 +1,10 @@
 package ru.tilacyn.saboteur;
 
 import org.junit.Test;
+import org.junit.runner.manipulation.Filter;
+
+import ru.iisuslik.controller.Controller;
+import ru.iisuslik.field.Field;
 
 import static org.junit.Assert.*;
 
@@ -12,6 +16,7 @@ import static org.junit.Assert.*;
 public class ExampleUnitTest {
     @Test
     public void addition_isCorrect() throws Exception {
-        assertEquals(4, 2 + 2);
+        Controller c = new Controller();
+        Field field = new Field(3, c);
     }
 }

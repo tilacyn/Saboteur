@@ -1,4 +1,4 @@
-package ru.iisuslik.field;
+package ru.iisuslik.gameData;
 
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -42,29 +42,6 @@ public class Shuffle implements Serializable {
             arr[index] = arr[i];
             arr[i] = a;
         }
-    }
-
-    public void serialize(OutputStream out) {
-        try {
-            ObjectOutputStream myOut = new ObjectOutputStream(out);
-            myOut.writeObject(this);
-            myOut.flush();
-            myOut.close();
-        } catch (Exception ignored) {
-        }
-    }
-
-    public static Shuffle deserialize(InputStream in) {
-        Shuffle next = null;
-        try {
-            ObjectInputStream myIn = new ObjectInputStream(in);
-            next = (Shuffle) myIn.readObject();
-            myIn.close();
-
-        } catch (Exception ignored) {
-        }
-        return next;
-
     }
 
 }

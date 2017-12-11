@@ -1,8 +1,7 @@
 package ru.iisuslik.cards;
 
 import ru.iisuslik.field.Field;
-import ru.iisuslik.gameData.GameData;
-import ru.iisuslik.player.Player;
+import ru.iisuslik.gameData.TurnData;
 
 public class Debuff extends Action {
 
@@ -23,7 +22,7 @@ public class Debuff extends Action {
         field.players[ownerPlayerNumber].playCard(this);
         field.iPlayedCard();
         if (needToSend) {
-            field.currentGD = new GameData(ownerPlayerNumber,
+            field.currentTD = new TurnData(ownerPlayerNumber,
                     field.players[ownerPlayerNumber].getCardNumber(this),
                     -1, -1, playerNumber, this) {
                 @Override

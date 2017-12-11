@@ -1,27 +1,18 @@
 package ru.iisuslik.gameData;
 
-import java.io.*;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.io.Serializable;
+import java.util.ArrayList;
 
-import ru.iisuslik.cards.Card;
 
-public abstract class GameData implements Serializable {
-    public abstract void apply(Card card);
+public class GameData implements Serializable {
 
-    public int ownerPlayerNumber;
-    public int targetPlayerNumber;
-    public int cardNumber;
-    public int i, j;
-    public boolean [] spins = new boolean[6];
-    public Card card;
+    public ArrayList<TurnData> turns = new ArrayList<>();
+    public Shuffle shuffle;
 
-    public GameData(int ownerPlayerNumber, int cardNumber, int i, int j, int targetPlayerNumber, Card card) {
-        this.ownerPlayerNumber = ownerPlayerNumber;
-        this.targetPlayerNumber = targetPlayerNumber;
-        this.cardNumber = cardNumber;
-        this.i = i;
-        this.j = j;
-        this.card = card;
-    }
 
     public void serialize(OutputStream out) {
         try {

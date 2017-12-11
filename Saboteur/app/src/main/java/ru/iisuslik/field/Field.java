@@ -2,7 +2,8 @@ package ru.iisuslik.field;
 
 import ru.iisuslik.cards.*;
 import ru.iisuslik.controller.Controller;
-import ru.iisuslik.gameData.GameData;
+import ru.iisuslik.gameData.Shuffle;
+import ru.iisuslik.gameData.TurnData;
 import ru.iisuslik.player.*;
 
 import java.io.Serializable;
@@ -13,7 +14,7 @@ import java.util.Random;
 public class Field implements Serializable {
 
     private boolean currentPlayerPlayedCard = false;
-    public GameData currentGD;
+    public TurnData currentTD;
     public boolean[] spins = new boolean[6];
     //public Shuffle shuffle;
 
@@ -49,13 +50,14 @@ public class Field implements Serializable {
     public ArrayList<Card> deck = new ArrayList<>();
 
 
-    public void applyGameData(GameData gameData) {
+    public void applyTurnData(TurnData gameData) {
         int playerFrom = gameData.ownerPlayerNumber;
         int cardNumber = gameData.cardNumber;
-        gameData.apply(players[playerFrom].getHand().get(cardNumber));
-        for (int i = 0; i < getCurrentPlayerHand().size(); i++) {
+        ArrayList<Card> hand = players[playerFrom].getHand();
+        gameData.apply(hand.get(cardNumber));
+        for (int i = 0; i < hand.size(); i++) {
             if (gameData.spins[i]) {
-                ((Tunnel) getCurrentPlayerHand().get(i)).spin();
+                ((Tunnel) hand.get(i)).spin();
             }
         }
 
@@ -64,13 +66,9 @@ public class Field implements Serializable {
 
 
     public ArrayList<Card> getCurrentPlayerHand() {
-        return players[currentPlayer].getHand();
-    }
-
-    public boolean[] getCurrentPlayerDebuffs() {
-        return new boolean[]{players[currentPlayer].isBrokenLamp(),
-                players[currentPlayer].isBrokenPick(),
-                players[currentPlayer].isBrokenTrolley()};
+        if(!controller.isSinglePlayer())
+            return players[currentPlayer].getHand();
+        return players[controller.multiPlayer.getMyNumber()].getHand();
     }
 
     public boolean[] getPlayerDebuffs(int index) {
@@ -105,12 +103,11 @@ public class Field implements Serializable {
             currentPlayer %= players.length;
         }
         currentPlayerPlayedCard = false;
-        if (currentGD != null && !needToSend) {
-            currentGD.spins = spins;
-            controller.sendData(currentGD);
+        if (currentTD != null && !needToSend) {
+            currentTD.spins = spins;
+            controller.takeTurn(currentTD);
         }
-        controller.log.add(currentGD);
-        currentGD = null;
+        currentTD = null;
         spins = new boolean[6];
         for (int k = 0; k < 6; k++)
             spins[k] = false;
@@ -140,7 +137,7 @@ public class Field implements Serializable {
         }
     }
 
-    private int getSaboteurCount(int playersCount) {
+    public static int getSaboteurCount(int playersCount) {
         if (playersCount <= 4)
             return 1;
         if (playersCount <= 6)

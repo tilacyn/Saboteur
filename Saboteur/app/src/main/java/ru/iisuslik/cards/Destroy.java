@@ -1,7 +1,7 @@
 package ru.iisuslik.cards;
 
 import ru.iisuslik.field.Field;
-import ru.iisuslik.gameData.GameData;
+import ru.iisuslik.gameData.TurnData;
 
 public class Destroy extends Action {
     public Destroy(int id, String name, String description, Field field, int playerNumber) {
@@ -20,7 +20,7 @@ public class Destroy extends Action {
         field.players[ownerPlayerNumber].playCard(this);
         field.iPlayedCard();
         if (needToSend) {
-            field.currentGD = new GameData(ownerPlayerNumber,
+            field.currentTD = new TurnData(ownerPlayerNumber,
                     field.players[ownerPlayerNumber].getCardNumber(this),
                     i, j, -1, this) {
                 @Override

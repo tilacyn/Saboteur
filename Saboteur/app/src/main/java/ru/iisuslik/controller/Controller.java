@@ -1,11 +1,12 @@
 package ru.iisuslik.controller;
 
+
 import ru.iisuslik.cards.Card;
-import ru.iisuslik.cards.Debuff;
 import ru.iisuslik.cards.Tunnel;
 import ru.iisuslik.field.Field;
-import ru.iisuslik.field.Shuffle;
 import ru.iisuslik.gameData.GameData;
+import ru.iisuslik.gameData.Shuffle;
+import ru.iisuslik.gameData.TurnData;
 import ru.iisuslik.multiplayer.MultiPlayer;
 
 import java.io.*;
@@ -13,9 +14,9 @@ import java.util.ArrayList;
 
 public class Controller implements Serializable {
     private Field field;
-    private MultiPlayer multiPlayer = null;
+    public MultiPlayer multiPlayer = null;
 
-    public ArrayList<GameData> log = new ArrayList<>();
+    public GameData gameData = new GameData();
 
     public void initializeField(int playerCount) {
         initializeField(playerCount, null);
@@ -25,12 +26,17 @@ public class Controller implements Serializable {
         field = new Field(playerCount, this, shuffle);
     }
 
+    public void initializeMultiplayer() {
+        multiPlayer = new MultiPlayer();
+    }
+
     public void initializeField(Shuffle shuffle) {
         initializeField(shuffle.whoAreSaboteur.length, shuffle);
     }
 
     public static final int ENTRY_POS_I = Field.ENTRY_POS_I;
     public static final int ENTRY_POS_J = Field.ENTRY_POS_J;
+    public static final int DECK_SIZE = 70;
 
 
     public int getWidth() {
@@ -45,9 +51,6 @@ public class Controller implements Serializable {
         return field.getCurrentPlayerHand();
     }
 
-    public boolean[] getCurrentPlayerDebuffs() {
-        return field.getCurrentPlayerDebuffs();//Lamp Pick Trolley
-    }
 
     public boolean[] getPlayerDebuffs(int index) {
         return field.getPlayerDebuffs(index);//Lamp Pick Trolley
@@ -84,6 +87,16 @@ public class Controller implements Serializable {
     }
 
 
+    public void takeTurn(TurnData turn) {
+        gameData.turns.add(turn);
+        sendData(gameData);
+    }
+
+    public void update() {
+        if(!isSinglePlayer())
+            multiPlayer.updateMatch(multiPlayer.curMatch);
+    }
+
     public void sendData(GameData gameData) {
         if (isSinglePlayer() || gameData == null)
             return;
@@ -98,7 +111,21 @@ public class Controller implements Serializable {
     }
 
     public void applyGameData(GameData gameData) {
-        field.applyGameData(gameData);
+        if(field == null) {
+            initializeField(gameData.shuffle);
+        }
+        for(int i = this.gameData.turns.size(); i < gameData.turns.size(); i++) {
+            field.applyTurnData(gameData.turns.get(i));
+        }
+        this.gameData = gameData;
+
+    }
+
+    public void applyData(byte [] data) {
+        try{
+            ByteArrayInputStream in = new ByteArrayInputStream(data);
+            applyGameData(GameData.deserialize(in));
+        }catch (Exception ignored) {}
     }
 
     public void serialize(OutputStream out) {

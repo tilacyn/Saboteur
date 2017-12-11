@@ -3,7 +3,7 @@ package ru.iisuslik.cards;
 import java.io.Serializable;
 
 import ru.iisuslik.field.Field;
-import ru.iisuslik.gameData.GameData;
+import ru.iisuslik.gameData.TurnData;
 
 public class Card implements Serializable {
 
@@ -62,7 +62,7 @@ public class Card implements Serializable {
         field.iPlayedCard();
 
         if (needToSend) {
-            field.currentGD = new GameData(ownerPlayerNumber,
+            field.currentTD = new TurnData(ownerPlayerNumber,
                     field.players[ownerPlayerNumber].getCardNumber(this),
                     -1, -1, -1, this) {
                 @Override
