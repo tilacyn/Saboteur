@@ -36,9 +36,9 @@ import java.io.ByteArrayOutputStream;
 import java.math.BigInteger;
 
 import ru.iisuslik.controller.Controller;
+import ru.iisuslik.multiplayer.MultiPlayerActivity;
 
 public class MainActivity extends AppCompatActivity {
-
 
     private Style style;
 
@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
 
     String byteArrayToString(byte[] b) {
         String res = "";
-        for(int i = 0; i < b.length; i++) {
+        for (int i = 0; i < b.length; i++) {
             res = res + (char) b[i];
         }
         return res;
@@ -174,6 +174,7 @@ public class MainActivity extends AppCompatActivity {
     private class Layouts {
         //Button help;
         Button newGame;
+        Button multiplayer;
         Button continueGame;
         Button loadGame;
         Button loadOrSave;
@@ -190,7 +191,6 @@ public class MainActivity extends AppCompatActivity {
         TextView name;
         Log log;
         String textInput;
-
 
 
         private class Log {
@@ -328,6 +328,7 @@ public class MainActivity extends AppCompatActivity {
 
             continueGame = (Button) findViewById(R.id.continueGame);
             newGame = (Button) findViewById(R.id.newGame);
+            multiplayer = (Button) findViewById(R.id.multiplayer);
             loadGame = (Button) findViewById(R.id.loadGame);
             loadOrSave = (Button) findViewById(R.id.loadOrSave);
             settings = (Button) findViewById(R.id.settings);
@@ -402,7 +403,7 @@ public class MainActivity extends AppCompatActivity {
                                     dialog.cancel();
                                     Cursor checkCursor = logDb.rawQuery("select * from " + logDatabaseHelper.TABLE + " where name = '" + textInput + "'", null);
 
-                                    if(checkCursor.getCount() != 0) {
+                                    if (checkCursor.getCount() != 0) {
                                         Toast.makeText(getApplicationContext(), "This name already exists!",
                                                 Toast.LENGTH_SHORT).show();
                                         return;
@@ -425,14 +426,14 @@ public class MainActivity extends AppCompatActivity {
                                 public void onClick(DialogInterface dialog, int which) {
                                     textInput = editGameName.getText().toString();
                                     dialog.cancel();
-                                    if(textInput.length() == 0) {
+                                    if (textInput.length() == 0) {
                                         Toast.makeText(getApplicationContext(), "No input, try again!",
                                                 Toast.LENGTH_SHORT).show();
                                         return;
                                     }
                                     Cursor checkCursor = logDb.rawQuery("select * from " + logDatabaseHelper.TABLE + " where name = '" + textInput + "'", null);
 
-                                    if(checkCursor.getCount() != 0) {
+                                    if (checkCursor.getCount() != 0) {
                                         Toast.makeText(getApplicationContext(), "This name already exists!",
                                                 Toast.LENGTH_SHORT).show();
                                         return;
@@ -450,11 +451,11 @@ public class MainActivity extends AppCompatActivity {
                                     log.updateList();
                                 }
                             }).setNeutralButton("Close", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    dialog.cancel();
-                                }
-                            });
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                        }
+                    });
 
                     AlertDialog alert = builder.create();
                     alert.show();
@@ -500,6 +501,20 @@ public class MainActivity extends AppCompatActivity {
                     startActivityForResult(intent, reqCode);
                 }
             });
+        }
+
+        void makeMultiPlayer() {
+            style.decorateButton(multiplayer);
+            multiplayer.setText("Multiplayer");
+
+            multiplayer.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(MainActivity.this, MultiPlayerActivity.class);
+                    startActivity(intent);
+                }
+            });
+
         }
 
         void makeLoadGame() {
@@ -583,6 +598,7 @@ public class MainActivity extends AppCompatActivity {
             makeLyrics();
             makeBack();
             makeSave();
+            makeMultiPlayer();
             log.makeAllViews();
         }
 
@@ -591,6 +607,7 @@ public class MainActivity extends AppCompatActivity {
             screen.addView(name);
             screen.addView(continueGame);
             screen.addView(newGame);
+            screen.addView(multiplayer);
             screen.addView(settings);
             screen.addView(lyrics);
             screen.addView(loadOrSave);
@@ -619,7 +636,6 @@ public class MainActivity extends AppCompatActivity {
         layouts.makeAllViews();
 
         layouts.showMainMenu();
-
 
     }
 }

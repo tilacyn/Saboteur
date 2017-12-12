@@ -62,6 +62,10 @@ public class Player implements Serializable {
         hand.remove(card);
     }
 
+    public int getCardNumber(Card card) {
+        return hand.indexOf(card);
+    }
+
     public boolean needHeal(Heal heal) {
         return heal.isHealLamp() && brokenLamp ||
                 heal.isHealPick() && brokenPick ||

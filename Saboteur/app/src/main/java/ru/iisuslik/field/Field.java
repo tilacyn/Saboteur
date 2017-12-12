@@ -1,15 +1,22 @@
 package ru.iisuslik.field;
 
 import ru.iisuslik.cards.*;
+import ru.iisuslik.controller.Controller;
+import ru.iisuslik.gameData.Shuffle;
+import ru.iisuslik.gameData.TurnData;
 import ru.iisuslik.player.*;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 
 public class Field implements Serializable {
 
     private boolean currentPlayerPlayedCard = false;
+    public TurnData currentTD;
+    public boolean[] spins = new boolean[6];
+    //public Shuffle shuffle;
 
     public boolean didCurrentPlayerPlayCard() {
         return currentPlayerPlayedCard;
@@ -28,6 +35,7 @@ public class Field implements Serializable {
     private int playingCount;
     private int currentPlayer = 0;
     private boolean theEnd = false;
+    public Controller controller;
 
     public int getCurrentPlayer() {
         return currentPlayer;
@@ -42,14 +50,25 @@ public class Field implements Serializable {
     public ArrayList<Card> deck = new ArrayList<>();
 
 
-    public ArrayList<Card> getCurrentPlayerHand() {
-        return players[currentPlayer].getHand();
+    public void applyTurnData(TurnData gameData) {
+        int playerFrom = gameData.ownerPlayerNumber;
+        int cardNumber = gameData.cardNumber;
+        ArrayList<Card> hand = players[playerFrom].getHand();
+        gameData.apply(hand.get(cardNumber));
+        for (int i = 0; i < hand.size(); i++) {
+            if (gameData.spins[i]) {
+                ((Tunnel) hand.get(i)).spin();
+            }
+        }
+
+        startNextTurn(false);
     }
 
-    public boolean[] getCurrentPlayerDebuffs() {
-        return new boolean[]{players[currentPlayer].isBrokenLamp(),
-                players[currentPlayer].isBrokenPick(),
-                players[currentPlayer].isBrokenTrolley()};
+
+    public ArrayList<Card> getCurrentPlayerHand() {
+        if(controller.isSinglePlayer())
+            return players[currentPlayer].getHand();
+        return players[controller.multiPlayer.getMyNumber()].getHand();
     }
 
     public boolean[] getPlayerDebuffs(int index) {
@@ -62,7 +81,7 @@ public class Field implements Serializable {
         return players[currentPlayer].getPersonality() == Player.SABOTEUR;
     }
 
-    public void startNextTurn() {
+    public void startNextTurn(boolean needToSend) {
         if (deck.size() != 0) {
             Card next = deck.remove(deck.size() - 1);
             next.setPlayerNumber(currentPlayer);
@@ -84,6 +103,18 @@ public class Field implements Serializable {
             currentPlayer %= players.length;
         }
         currentPlayerPlayedCard = false;
+        if (currentTD != null && !needToSend) {
+            currentTD.spins = spins;
+            controller.takeTurn(currentTD);
+        }
+        currentTD = null;
+        spins = new boolean[6];
+        for (int k = 0; k < 6; k++)
+            spins[k] = false;
+    }
+
+    public void startNextTurn() {
+        startNextTurn(true);
     }
 
     private void randomShuffle(int arr[]) {
@@ -106,7 +137,7 @@ public class Field implements Serializable {
         }
     }
 
-    private int getSaboteurCount(int playersCount) {
+    public static int getSaboteurCount(int playersCount) {
         if (playersCount <= 4)
             return 1;
         if (playersCount <= 6)
@@ -181,29 +212,18 @@ public class Field implements Serializable {
         field[i][j] = tunnel;
     }
 
-    private void initializePlayers() {
-        int[] badOrGood = new int[playingCount];
-        int saboteurCount = getSaboteurCount(playingCount);
+    private void initializePlayers(Shuffle shuffle) {
         for (int i = 0; i < playingCount; i++) {
-            if (i < saboteurCount) {
-                badOrGood[i] = Player.SABOTEUR;
-            } else {
-                badOrGood[i] = Player.GNOME;
-            }
-        }
-        randomShuffle(badOrGood);
-        for (int i = 0; i < playingCount; i++) {
-            players[i] = new Player(badOrGood[i]);
+            players[i] = new Player(shuffle.whoAreSaboteur[i]);
         }
     }
 
-    private void initializeField() {
-        field[ENTRY_POS_I][ENTRY_POS_J] = new Tunnel("ENTRY", //TODO id
+    private void initializeField(Shuffle shuffle) {
+        field[ENTRY_POS_I][ENTRY_POS_J] = new Tunnel("ENTRY",
                 "First tunnel in the way",
                 this, Card.NO_PLAYER,
                 true, true, true, true, true);
-        int[] perestanovka = {0, 1, 2};
-        randomShuffle(perestanovka);
+        int[] perestanovka = shuffle.closedTunnelsShuffle;
         ClosedTunnel[] tunnels = new ClosedTunnel[3];
         tunnels[0] = new ClosedTunnel("Closed Tunnel", "Probably has gold", this, -1,
                 true, true, true, true, true, true);
@@ -213,11 +233,8 @@ public class Field implements Serializable {
                 true, false, true, false, true, false);
         int firstTunnelI = ENTRY_POS_I - 8;
         int firstTunnelJ = ENTRY_POS_J - 2;
-        Random rnd = new Random();
         for (int k = 0; k < 3; k++) {
             field[firstTunnelI][firstTunnelJ + k * 2] = tunnels[perestanovka[k]];
-            if (rnd.nextBoolean())
-                field[firstTunnelI][firstTunnelJ + k * 2].spin();
         }
     }
 
@@ -260,7 +277,7 @@ public class Field implements Serializable {
                     return false;
                 } else {
                     if (!wayTo)
-                        ct.spin();
+                        ct.spin(false);
                     return false;
                 }
             }
@@ -291,12 +308,9 @@ public class Field implements Serializable {
     }
 
     private void addTunnel(int count, int up, int down, int left, int right, int centre, int id) {
-        Random rnd = new Random();
         for (int i = 0; i < count; i++) {
             Tunnel tunnel = new Tunnel("Tunnel", "Just a tunnel", this, -1,
                     up == 1, down == 1, left == 1, right == 1, centre == 1);
-            if (rnd.nextBoolean())
-                tunnel.spin();
             deck.add(tunnel);
         }
     }
@@ -366,16 +380,27 @@ public class Field implements Serializable {
         addDestroyCards();
     }
 
+    public Field(int playersCount, Controller controller) {
+        this(playersCount, controller, null);
+    }
 
-    public Field(int playersCount) {
+    public Field(int playersCount, Controller controller, Shuffle shuffle) {
+
+        initializeDeck();
+        if (shuffle == null)
+            shuffle = new Shuffle(playersCount, deck.size(), getSaboteurCount(playersCount));
+        this.controller = controller;
         playingCount = playersCount;
         players = new Player[playingCount];
-        initializeField();
-        initializePlayers();
-        initializeDeck();
-        randomShuffle(deck);
+        initializeField(shuffle);
+        initializePlayers(shuffle);
+        Card [] shuffled = new Card[deck.size()];
+        for (int i = 0; i < deck.size(); i++) {
+            shuffled[shuffle.deckShuffle[i]]= deck.get(i);
+        }
+        deck.clear();
+        deck.addAll(Arrays.asList(shuffled));
         giveCards();
-        //TODO
     }
 
 

@@ -1,6 +1,7 @@
 package ru.iisuslik.cards;
 
 import ru.iisuslik.field.Field;
+import ru.iisuslik.gameData.TurnData;
 
 public class Destroy extends Action {
     public Destroy(int id, String name, String description, Field field, int playerNumber) {
@@ -14,9 +15,23 @@ public class Destroy extends Action {
                 toCheck != null && !toCheck.isClosedTunnel();
     }
 
-    public void play(int i, int j) {
+    public void play(int i, int j, boolean needToSend) {
         field.field[i][j] = null;
-        field.players[playerNumber].playCard(this);
+        field.players[ownerPlayerNumber].playCard(this);
         field.iPlayedCard();
+        if (needToSend) {
+            field.currentTD = new TurnData(ownerPlayerNumber,
+                    field.players[ownerPlayerNumber].getCardNumber(this),
+                    i, j, -1, this) {
+                @Override
+                public void apply(Card card) {
+                    ((Destroy) card).play(i, j, false);
+                }
+            };
+        }
+    }
+
+    public void play(int i, int j) {
+        play(i, j, true);
     }
 }

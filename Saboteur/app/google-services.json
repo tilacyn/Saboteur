@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "794692037707",
+    "project_id": "saboteur-186516"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:794692037707:android:e85f8cb4ee89773c",
+        "android_client_info": {
+          "package_name": "ru.iisuslik"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "794692037707-r0kebh4th35rs9bopbsu6h17hh6nrfm2.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "794692037707-v6kb4qaqv789s8ve7891jsdkc58kd4vu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "ru.iisuslik",
+            "certificate_hash": "79d525cfe66965f1adf4730ecf06f80ff67d761b"
+          }
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDjm7qxVz2CbXmLIvk_TaVjUF86cTMhZr4"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
