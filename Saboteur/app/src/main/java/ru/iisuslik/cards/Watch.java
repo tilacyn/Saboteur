@@ -13,7 +13,7 @@ public class Watch extends Action {
         return !field.didCurrentPlayerPlayCard() && toCheck != null && toCheck.isClosedTunnel();
     }
 
-    public boolean play(int i, int j, boolean needToSend) {
+    public boolean play(int i, int j) {
         ClosedTunnel ct = (ClosedTunnel) field.field[i][j];
         field.players[ownerPlayerNumber].playCard(this);
         field.iPlayedCard();
@@ -22,7 +22,7 @@ public class Watch extends Action {
                 i, j, -1, this) {
             @Override
             public void apply(Card card) {
-                ((Watch) card).play(i, j, false);
+                ((Watch) card).play(i, j);
                 card.field.startNextTurn(false);
             }
         };

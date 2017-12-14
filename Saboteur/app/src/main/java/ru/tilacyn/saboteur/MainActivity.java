@@ -17,6 +17,7 @@ import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
@@ -24,7 +25,9 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.HorizontalScrollView;
+import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.ScrollView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -122,7 +125,9 @@ public class MainActivity extends AppCompatActivity {
         int selectedButtonStyle = R.drawable.yellow_button;
         int selectedTextColor = Color.BLACK;
 
-        int buttonStyle = R.drawable.brown_button;
+        int textBackgroundColor = Color.parseColor("#FF4B2510");
+
+        int buttonStyle = R.drawable.red_button;
         int buttonTextColor = Color.WHITE;
 
         Typeface buttonFont = Typeface.createFromAsset(getAssets(), "almendra.ttf");
@@ -172,386 +177,376 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private class Layouts {
-        //Button help;
-        Button newGame;
-        Button multiplayer;
-        Button continueGame;
-        Button loadGame;
-        Button loadOrSave;
-        Button settings;
-        TextView lyrics;
-        Button save;
-        Button back;
-
-        HorizontalScrollView hscrollPCT;
-        TableLayout playerCountTable;
-        Cursor cursor;
-        TableRow playerCountRow;
         ConstraintLayout screen;
         TextView name;
-        Log log;
-        String textInput;
+        TextView lyrics;
+
+        Main main;
+        SinglePlayer singlePlayer;
+        MultiPlayer multiPlayer;
 
 
-        private class Log {
-            ListView list;
-            Button back;
-            Button load;
-            Button show;
 
-            String chosenGame;
+        private class Main {
+            Button multiPlayerButton;
+            Button singlePlayerButton;
+            Button help;
 
-            Log() {
-                list = (ListView) findViewById(R.id.logList);
-                load = (Button) findViewById(R.id.load);
-                show = (Button) findViewById(R.id.show);
-                this.back = (Button) findViewById(R.id.logBack);
-                chosenGame = null;
-            }
+            Help helpClass;
 
-            void makeLoadValid() {
-                load.setTextColor(Color.WHITE);
-            }
+            private class Help {
+                TextView rules;
 
-            void makeLoadInvalid() {
-                load.setTextColor(Color.GRAY);
-            }
+                TextView helpText;
 
-            void makeList() {
-                list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> parent, View itemClicked, int position, long id) {
-                        String gameName = ((TextView) itemClicked).getText().toString();
-                        if (chosenGame != gameName) {
-                            chosenGame = gameName;
-                            makeLoadValid();
-                        } else {
-                            chosenGame = null;
-                            makeLoadInvalid();
+                ScrollView helpScroll;
+
+                Button back;
+
+                Help() {
+                    back = (Button) findViewById(R.id.helpBack);
+                    helpText = (TextView) findViewById(R.id.helpText);
+                    rules = (TextView) findViewById(R.id.rules);
+                    helpScroll = (ScrollView) findViewById(R.id.helpScrollView);
+                }
+
+                void show() {
+                    screen.removeAllViews();
+                    screen.addView(helpScroll);
+                    screen.addView(rules);
+                    screen.addView(back);
+                }
+
+                void makeRules() {
+                    rules.setTextSize(25);
+                    rules.setTextColor(Color.YELLOW);
+                    rules.setTypeface(style.textFont);
+
+                    rules.setText("Rules");
+                }
+
+                void makeHelpText() {
+                    helpText.setTextSize(13);
+                    helpText.setBackgroundColor(style.textBackgroundColor);
+                    helpText.setTextColor(Color.WHITE);
+                    helpText.setTypeface(style.textFont);
+                    helpText.setText("Here are the sacred rules\n\n\n" +
+                            "Prelude:\n" +
+                            "1. This game is our own invention, all rights reserved. " +
+                            "Though it is an open source project still copying, spreading and using our code for money " +
+                            "is against the law and will be punished immediately.\n" +
+                            "2. All the events and heroes are entirely fictional, even those based on the real characters.\n" +
+                            "3. Game content is rather irrelevant for people aged more than 16\n" +
+                            "Beware! Violence scenes in the game might badly influence young children\n\n" +
+                            "Best wishes and have a good time!\n" +
+                            "Maksim Kryuchkov and SDT (Saboteur Developers Team)\n\n\n" +
+                            "Game rules:\n" +
+                            "1. Before the game starts...\n" +
+                            "Saboteur is a team game, actually there are two teams: Saboteurs and Breadwinners. " +
+                            "Breadwinners is a team of good and honest gnomes which prefer making fair wealth to robbery and sabotage. " +
+                            "While Saboteurs is a team of completely dishonest dangerous and deleterious gnomes (like Vlad Golubtsov)");
+                }
+
+                void makeBack() {
+                    style.decorateButton(back);
+                    back.setText("back");
+
+                    back.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            main.show();
                         }
+                    });
+                }
+
+                void makeAllViews() {
+                    makeBack();
+                    makeHelpText();
+                    makeRules();
+                }
+
+            }
+
+            Main() {
+                multiPlayerButton = (Button) findViewById(R.id.multiPlayerButton);
+                singlePlayerButton = (Button) findViewById(R.id.singlePlayerButton);
+                help = (Button) findViewById(R.id.help);
+                helpClass = new Help();
+            }
+
+            //ok
+            void makeSinglePlayerButton() {
+                style.decorateButton(singlePlayerButton);
+                singlePlayerButton.setText("single player");
+
+                singlePlayerButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        singlePlayer.show();
                     }
                 });
             }
 
-            void updateList() {
-                cursor = logDb.rawQuery("select * from " + logDatabaseHelper.TABLE, null);
+            //ok
+            void makeMultiPlayerButton() {
+                style.decorateButton(multiPlayerButton);
+                multiPlayerButton.setText("multiplayer");
 
-                cursor.moveToFirst();
-                final String[] names = new String[cursor.getCount()];
-                for (int i = 0; i < names.length; i++) {
-                    names[i] = cursor.getString(0);
-                    cursor.moveToNext();
-                }
-
-
-                ArrayAdapter<String> adapter = new ArrayAdapter<String>(MainActivity.this, R.layout.log_list_item1
-                        , names);
-
-                log.list.setAdapter(adapter);
-            }
-
-            void makeLoad() {
-                load.setText("load");
-                style.decorateButton(load);
-                makeLoadInvalid();
-
-                load.setOnClickListener(new View.OnClickListener() {
+                multiPlayerButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        if (chosenGame == null) {
+                        multiPlayer.show();
+                    }
+                });
+            }
+
+            //ok
+            void makeHelp() {
+                style.decorateButton(help);
+                help.setText("help");
+
+                help.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        helpClass.show();
+                    }
+                });
+            }
+
+
+            void makeAllViews() {
+                makeMultiPlayerButton();
+                makeSinglePlayerButton();
+                makeHelp();
+                helpClass.makeAllViews();
+            }
+
+            //ok
+            void show() {
+                screen.removeAllViews();
+                addCoolViews();
+
+                screen.addView(multiPlayerButton);
+                screen.addView(singlePlayerButton);
+                screen.addView(help);
+            }
+
+        }
+
+        private class SinglePlayer {
+            Button continueGame;
+            Button loadGame;
+            Button settings;
+            Button newGame;
+            Button save;
+            Button back;
+
+            Cursor cursor;
+
+            String textInput;
+
+            GameLoader gameLoader;
+
+            ScrollView scrollPCT;
+            TableLayout playerCountTable;
+
+            SinglePlayer() {
+                playerCountTable = (TableLayout) findViewById(R.id.playerCountTable);
+                scrollPCT = (ScrollView) findViewById(R.id.playerCountScrollView);
+
+                continueGame = (Button) findViewById(R.id.continueGame);
+                newGame = (Button) findViewById(R.id.newGame);
+
+                loadGame = (Button) findViewById(R.id.loadGame);
+                settings = (Button) findViewById(R.id.settings);
+
+
+                save = (Button) findViewById(R.id.save);
+                back = (Button) findViewById(R.id.singlePlayerBack);
+
+                gameLoader = new GameLoader();
+            }
+
+            void makeContinue() {
+                continueGame.setText("Continue");
+                style.decorateButton(continueGame);
+                continueGame.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if (!canContinue) {
                             return;
                         }
-                        style.updateSelected(load);
-                        cursor.moveToFirst();
-                        cursor = logDb.rawQuery("select * from " + logDatabaseHelper.TABLE + " where name = '" + chosenGame + "'", null);
-                        cursor.moveToFirst();
-                        controllerByteArray = stringToByteArray(cursor.getString(1));
-
-                        controller = Controller.deserialize(new ByteArrayInputStream(controllerByteArray));
-                        savedPlayerCount = controller.getPlayersNumber();
+                        style.updateSelected(continueGame);
                         Intent intent = new Intent(MainActivity.this, GameActivity.class);
+
+                        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                        controller.serialize(byteArrayOutputStream);
+
+                        controllerByteArray = byteArrayOutputStream.toByteArray();
 
                         intent.putExtra("playerCount", savedPlayerCount);
                         intent.putExtra("controller", controllerByteArray);
 
                         startActivityForResult(intent, reqCode);
-
                     }
                 });
+
             }
 
-            void makeShow() {
-                show.setText("show");
-                style.decorateButton(show);
-                show.setTextColor(Color.GRAY);
+            void makeSave() {
+                save.setText("Save");
+                style.decorateButton(save);
+                save.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (controller == null || !controller.isFieldInitialized()) {
+                            Toast.makeText(getApplicationContext(), "No active game",
+                                    Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
+                        cursor = logDb.rawQuery("select * from " + logDatabaseHelper.TABLE, null);
+                        cursor.moveToFirst();
+
+                        LayoutInflater inflater = getLayoutInflater();
+                        View dialogLayout = inflater.inflate(R.layout.dialog_layout, null);
+                        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                        builder.setView(dialogLayout);
+
+                        final EditText editGameName = (EditText) dialogLayout.findViewById(R.id.editGameName);
+
+                        builder.setTitle("Save")
+                                .setMessage("Enter game name")
+                                .setIcon(R.drawable.arkenstone)
+                                .setCancelable(false)
+                                .setNegativeButton("Default", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        textInput = "game" + ((Integer) cursor.getCount()).toString();
+                                        dialog.cancel();
+                                        Cursor checkCursor = logDb.rawQuery("select * from " + logDatabaseHelper.TABLE + " where name = '" + textInput + "'", null);
+
+                                        if (checkCursor.getCount() != 0) {
+                                            Toast.makeText(getApplicationContext(), "This name already exists!",
+                                                    Toast.LENGTH_SHORT).show();
+                                            return;
+                                        }
+
+
+                                        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                                        controller.serialize(byteArrayOutputStream);
+                                        ContentValues values = new ContentValues();
+                                        values.put(logDatabaseHelper.COLUMN_NAME, textInput);
+                                        values.put(logDatabaseHelper.COLUMN_LOG, byteArrayToString(byteArrayOutputStream.toByteArray()));
+
+
+                                        long newRowId = logDb.insert(logDatabaseHelper.TABLE, null, values);
+                                        gameLoader.updateList("*");
+                                    }
+                                })
+                                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        textInput = editGameName.getText().toString();
+                                        dialog.cancel();
+                                        if (textInput.length() == 0) {
+                                            Toast.makeText(getApplicationContext(), "No input, try again!",
+                                                    Toast.LENGTH_SHORT).show();
+                                            return;
+                                        }
+                                        Cursor checkCursor = logDb.rawQuery("select * from " + logDatabaseHelper.TABLE + " where name = '" + textInput + "'", null);
+
+                                        if (checkCursor.getCount() != 0) {
+                                            Toast.makeText(getApplicationContext(), "This name already exists!",
+                                                    Toast.LENGTH_SHORT).show();
+                                            return;
+                                        }
+
+
+                                        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                                        controller.serialize(byteArrayOutputStream);
+                                        ContentValues values = new ContentValues();
+                                        values.put(logDatabaseHelper.COLUMN_NAME, textInput);
+                                        values.put(logDatabaseHelper.COLUMN_LOG, byteArrayToString(byteArrayOutputStream.toByteArray()));
+
+                                        long newRowId = logDb.insert(logDatabaseHelper.TABLE, null, values);
+
+                                        gameLoader.updateList("*");
+                                    }
+                                }).setNeutralButton("Close", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.cancel();
+                            }
+                        });
+
+                        AlertDialog alert = builder.create();
+                        alert.show();
+                    }
+                });
             }
 
             void makeBack() {
-                this.back.setText("back");
-                style.decorateButton(this.back);
-                this.back.setOnClickListener(new View.OnClickListener() {
+                back.setText("back");
+                style.decorateButton(back);
+                back.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        style.updateSelected(Log.this.back);
-                        showMainMenu();
+                        main.show();
                     }
                 });
             }
 
-            void makeAllViews() {
-                this.makeBack();
-                makeShow();
-                makeLoad();
-                makeList();
+            void makeNewGame() {
+                newGame.setText("New Game");
+                style.decorateButton(newGame);
+
+                newGame.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        canContinue = true;
+                        controller = new Controller();
+                        controller.initializeField(playerCount);
+
+                        savedPlayerCount = playerCount;
+
+                        style.updateSelected(newGame);
+                        Intent intent = new Intent(MainActivity.this, GameActivity.class);
+
+                        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                        controller.serialize(byteArrayOutputStream);
+
+                        controllerByteArray = byteArrayOutputStream.toByteArray();
+
+                        intent.putExtra("playerCount", playerCount);
+                        intent.putExtra("controller", controllerByteArray);
+
+                        startActivityForResult(intent, reqCode);
+                    }
+                });
             }
 
-            void showList() {
-                screen.removeAllViews();
-                screen.addView(list);
-                screen.addView(load);
-                screen.addView(show);
-                screen.addView(back);
+            void makeLoadGame() {
+                loadGame.setText("Load Game");
+                style.decorateButton(loadGame);
+
+                loadGame.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        style.updateSelected(loadGame);
+                        gameLoader.updateList("*");
+                        gameLoader.show();
+                    }
+                });
             }
-        }
 
+            void makeSettings() {
+                settings.setText("Settings");
+                style.decorateButton(settings);
 
-        Layouts() {
-            screen = (ConstraintLayout) findViewById(R.id.activity_main);
-
-            screen.setBackgroundResource(R.drawable.dwarf_lords);
-
-            playerCountRow = new TableRow(MainActivity.this);
-            playerCountTable = (TableLayout) findViewById(R.id.playerCountTable);
-            hscrollPCT = (HorizontalScrollView) findViewById(R.id.playerCountScrollView);
-
-            name = (TextView) findViewById(R.id.Saboteur);
-
-            continueGame = (Button) findViewById(R.id.continueGame);
-            newGame = (Button) findViewById(R.id.newGame);
-            multiplayer = (Button) findViewById(R.id.multiplayer);
-            loadGame = (Button) findViewById(R.id.loadGame);
-            loadOrSave = (Button) findViewById(R.id.loadOrSave);
-            settings = (Button) findViewById(R.id.settings);
-            lyrics = (TextView) findViewById(R.id.lyrics);
-            save = (Button) findViewById(R.id.save);
-            back = (Button) findViewById(R.id.back);
-            log = new Log();
-        }
-
-        void makeName() {
-            name.setText("Saboteur");
-            name.setTextSize(60);
-            name.setTextColor(Color.YELLOW);
-            name.setTypeface(Typeface.createFromAsset(getAssets(), "AL Fantasy Type.ttf"));
-        }
-
-        void makeContinue() {
-            continueGame.setText("Continue");
-            style.decorateButton(continueGame);
-            continueGame.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (!canContinue) {
-                        return;
-                    }
-                    style.updateSelected(layouts.continueGame);
-                    Intent intent = new Intent(MainActivity.this, GameActivity.class);
-
-                    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                    controller.serialize(byteArrayOutputStream);
-
-                    controllerByteArray = byteArrayOutputStream.toByteArray();
-
-                    intent.putExtra("playerCount", savedPlayerCount);
-                    intent.putExtra("controller", controllerByteArray);
-
-                    startActivityForResult(intent, reqCode);
-                }
-            });
-
-        }
-
-        void makeSave() {
-            save.setText("Save");
-            style.decorateButton(save);
-            save.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (controller == null || !controller.isFieldInitialized()) {
-                        Toast.makeText(getApplicationContext(), "No active game",
-                                Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-
-                    cursor = logDb.rawQuery("select * from " + logDatabaseHelper.TABLE, null);
-                    cursor.moveToFirst();
-
-                    LayoutInflater inflater = getLayoutInflater();
-                    View dialogLayout = inflater.inflate(R.layout.dialog_layout, null);
-                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                    builder.setView(dialogLayout);
-
-                    final EditText editGameName = (EditText) dialogLayout.findViewById(R.id.editGameName);
-
-                    builder.setTitle("Save")
-                            .setMessage("Enter game name")
-                            .setIcon(R.drawable.arkenstone)
-                            .setCancelable(false)
-                            .setNegativeButton("Default", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    textInput = "game" + ((Integer) cursor.getCount()).toString();
-                                    dialog.cancel();
-                                    Cursor checkCursor = logDb.rawQuery("select * from " + logDatabaseHelper.TABLE + " where name = '" + textInput + "'", null);
-
-                                    if (checkCursor.getCount() != 0) {
-                                        Toast.makeText(getApplicationContext(), "This name already exists!",
-                                                Toast.LENGTH_SHORT).show();
-                                        return;
-                                    }
-
-
-                                    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                                    controller.serialize(byteArrayOutputStream);
-                                    ContentValues values = new ContentValues();
-                                    values.put(logDatabaseHelper.COLUMN_NAME, textInput);
-                                    values.put(logDatabaseHelper.COLUMN_LOG, byteArrayToString(byteArrayOutputStream.toByteArray()));
-
-
-                                    long newRowId = logDb.insert(logDatabaseHelper.TABLE, null, values);
-                                    log.updateList();
-                                }
-                            })
-                            .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    textInput = editGameName.getText().toString();
-                                    dialog.cancel();
-                                    if (textInput.length() == 0) {
-                                        Toast.makeText(getApplicationContext(), "No input, try again!",
-                                                Toast.LENGTH_SHORT).show();
-                                        return;
-                                    }
-                                    Cursor checkCursor = logDb.rawQuery("select * from " + logDatabaseHelper.TABLE + " where name = '" + textInput + "'", null);
-
-                                    if (checkCursor.getCount() != 0) {
-                                        Toast.makeText(getApplicationContext(), "This name already exists!",
-                                                Toast.LENGTH_SHORT).show();
-                                        return;
-                                    }
-
-
-                                    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                                    controller.serialize(byteArrayOutputStream);
-                                    ContentValues values = new ContentValues();
-                                    values.put(logDatabaseHelper.COLUMN_NAME, textInput);
-                                    values.put(logDatabaseHelper.COLUMN_LOG, byteArrayToString(byteArrayOutputStream.toByteArray()));
-
-                                    long newRowId = logDb.insert(logDatabaseHelper.TABLE, null, values);
-
-                                    log.updateList();
-                                }
-                            }).setNeutralButton("Close", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.cancel();
-                        }
-                    });
-
-                    AlertDialog alert = builder.create();
-                    alert.show();
-                }
-            });
-        }
-
-        void makeBack() {
-            back.setText("back");
-            style.decorateButton(back);
-            back.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    showMainMenu();
-                }
-            });
-        }
-
-        void makeNewGame() {
-            newGame.setText("New Game");
-            style.decorateButton(newGame);
-
-            newGame.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    canContinue = true;
-                    controller = new Controller();
-                    controller.initializeField(playerCount);
-
-                    savedPlayerCount = playerCount;
-
-                    style.updateSelected(newGame);
-                    Intent intent = new Intent(MainActivity.this, GameActivity.class);
-
-                    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                    controller.serialize(byteArrayOutputStream);
-
-                    controllerByteArray = byteArrayOutputStream.toByteArray();
-
-                    intent.putExtra("playerCount", playerCount);
-                    intent.putExtra("controller", controllerByteArray);
-
-                    startActivityForResult(intent, reqCode);
-                }
-            });
-        }
-
-        void makeMultiPlayer() {
-            style.decorateButton(multiplayer);
-            multiplayer.setText("Multiplayer");
-
-            multiplayer.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent intent = new Intent(MainActivity.this, MultiPlayerActivity.class);
-                    startActivity(intent);
-                }
-            });
-
-        }
-
-        void makeLoadGame() {
-            loadGame.setText("Load Game");
-            style.decorateButton(loadGame);
-
-            loadGame.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    style.updateSelected(loadGame);
-                    log.updateList();
-                    log.showList();
-                }
-            });
-        }
-
-        void makeLoadOrSave() {
-            loadOrSave.setText("Load/Save");
-            style.decorateButton(loadOrSave);
-            loadOrSave.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    showSaveLoad();
-                }
-            });
-        }
-
-        void makeSettings() {
-            layouts.settings.setText("Settings");
-            style.decorateButton(layouts.settings);
-
-
-            layouts.settings.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (!settingsOpen) {
-                        style.updateSelected(settings);
+                settings.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        showSettings();
                         for (int i = 2; i < 8; i++) {
                             final Button b = new Button(MainActivity.this);
                             b.setWidth(30);
@@ -560,25 +555,294 @@ public class MainActivity extends AppCompatActivity {
                             b.setText(((Integer) i).toString());
                             b.setTextSize(15);
                             b.setTextColor(Color.WHITE);
+                            b.setScaleX((float) 0.8);
+                            b.setScaleY((float) 0.8);
                             b.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
                                     style.updateSelectedPlayerCount(b);
                                     playerCount = Character.getNumericValue(b.getText().charAt(0));
+                                    singlePlayer.show();
+                                    playerCountTable.removeAllViews();
                                 }
                             });
+                            TableRow playerCountRow = new TableRow(MainActivity.this);
                             playerCountRow.addView(b);
+                            playerCountTable.addView(playerCountRow);
                         }
-                        playerCountTable.addView(playerCountRow);
-                        settingsOpen = true;
-                    } else {
-                        style.removeSelected();
-                        playerCountRow.removeAllViews();
-                        playerCountTable.removeAllViews();
-                        settingsOpen = false;
                     }
+                });
+            }
+
+            void makeAllViews() {
+                makeContinue();
+                makeNewGame();
+                makeBack();
+                makeLoadGame();
+                makeSave();
+                makeSettings();
+                gameLoader.makeAllViews();
+            }
+
+            void show() {
+                screen.removeAllViews();
+                addCoolViews();
+                screen.addView(continueGame);
+                screen.addView(newGame);
+                screen.addView(loadGame);
+                screen.addView(save);
+                screen.addView(settings);
+                screen.addView(back);
+            }
+
+            void showSettings() {
+                screen.removeAllViews();
+                addCoolViews();
+                screen.addView(scrollPCT);
+            }
+
+            private class GameLoader {
+                ListView list;
+                Button back;
+                Button load;
+                Button show;
+                EditText search;
+                ImageButton magnifier;
+
+
+                String chosenGame;
+
+                GameLoader() {
+                    list = (ListView) findViewById(R.id.gameLoaderList);
+                    load = (Button) findViewById(R.id.gameLoaderLoad);
+                    show = (Button) findViewById(R.id.show);
+                    search = (EditText) findViewById(R.id.search);
+                    magnifier = (ImageButton) findViewById(R.id.magnifier);
+                    this.back = (Button) findViewById(R.id.gameLoaderBack);
+                    chosenGame = null;
                 }
-            });
+
+                void makeLoadValid() {
+                    load.setTextColor(Color.WHITE);
+                }
+
+                void makeLoadInvalid() {
+                    load.setTextColor(Color.GRAY);
+                }
+
+                void makeList() {
+                    list.setBackgroundColor(style.textBackgroundColor);
+                    list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(AdapterView<?> parent, View itemClicked, int position, long id) {
+                            String gameName = ((TextView) itemClicked).getText().toString();
+                            if (chosenGame != gameName) {
+                                chosenGame = gameName;
+                                makeLoadValid();
+                            } else {
+                                chosenGame = null;
+                                makeLoadInvalid();
+                            }
+                        }
+                    });
+                }
+
+                void updateList(String textInput) {
+                    if (textInput == "*") {
+                        cursor = logDb.rawQuery("select * from " + logDatabaseHelper.TABLE, null);
+                    } else {
+                        cursor = logDb.rawQuery("select * from " + logDatabaseHelper.TABLE + " where name like '%" + textInput + "%'", null);
+                    }
+
+
+                    cursor.moveToFirst();
+                    final String[] names = new String[cursor.getCount()];
+                    for (int i = 0; i < names.length; i++) {
+                        names[i] = cursor.getString(0);
+                        cursor.moveToNext();
+                    }
+
+
+                    ArrayAdapter<String> adapter = new ArrayAdapter<String>(MainActivity.this, R.layout.log_list_item1
+                            , names);
+
+                    list.setAdapter(adapter);
+                }
+
+                void makeLoad() {
+                    load.setText("load");
+                    style.decorateButton(load);
+                    makeLoadInvalid();
+
+                    load.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            if (chosenGame == null) {
+                                return;
+                            }
+                            style.updateSelected(load);
+                            cursor.moveToFirst();
+                            cursor = logDb.rawQuery("select * from " + logDatabaseHelper.TABLE + " where name = '" + chosenGame + "'", null);
+                            cursor.moveToFirst();
+                            controllerByteArray = stringToByteArray(cursor.getString(1));
+
+                            controller = Controller.deserialize(new ByteArrayInputStream(controllerByteArray));
+                            savedPlayerCount = controller.getPlayersNumber();
+                            Intent intent = new Intent(MainActivity.this, GameActivity.class);
+
+                            intent.putExtra("playerCount", savedPlayerCount);
+                            intent.putExtra("controller", controllerByteArray);
+
+                            startActivityForResult(intent, reqCode);
+
+                        }
+                    });
+                }
+
+                void makeShow() {
+                    show.setText("show");
+                    style.decorateButton(show);
+                    show.setTextColor(Color.GRAY);
+                }
+
+                void makeBack() {
+                    this.back.setText("back");
+                    style.decorateButton(this.back);
+                    this.back.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            style.updateSelected(back);
+                            singlePlayer.show();
+                        }
+                    });
+                }
+
+                void makeSearch() {
+                    //search.setTextColor(Color.WHITE);
+                    search.setBackgroundColor(Color.WHITE);
+                    search.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+                        @Override
+                        public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                            String textInput = search.getText().toString();
+                            if(textInput == null) {
+                                textInput = "*";
+                            } else if (textInput.length() == 0) {
+                                textInput = "*";
+                            }
+                            updateList(textInput);
+                            return false;
+                        }
+                    });
+                }
+
+                void makeMagnifier() {
+                    magnifier.setImageResource(R.drawable.search);
+                    magnifier.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            String textInput = search.getText().toString();
+                            if(textInput == null) {
+                                textInput = "*";
+                            } else if (textInput.length() == 0) {
+                                textInput = "*";
+                            }
+                            updateList(textInput);
+                        }
+                    });
+                }
+
+                void makeAllViews() {
+                    this.makeBack();
+                    makeShow();
+                    makeLoad();
+                    makeList();
+                    makeMagnifier();
+                    makeSearch();
+                }
+
+                void show() {
+                    screen.removeAllViews();
+                    screen.addView(list);
+                    screen.addView(load);
+                    screen.addView(show);
+                    screen.addView(back);
+                    screen.addView(magnifier);
+                    screen.addView(search);
+                }
+            }
+        }
+
+
+        // ok
+        private class MultiPlayer {
+            Button newGame;
+            Button back;
+
+            MultiPlayer() {
+                back = (Button) findViewById(R.id.multiPlayerBack);
+                newGame = (Button) findViewById(R.id.multiPlayerNewGame);
+            }
+
+
+            void makeNewGame() {
+                style.decorateButton(newGame);
+                newGame.setText("Multiplayer");
+
+                newGame.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent intent = new Intent(MainActivity.this, MultiPlayerActivity.class);
+                        startActivity(intent);
+                    }
+                });
+
+            }
+
+            void makeBack() {
+                style.decorateButton(back);
+                back.setText("back");
+
+                back.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        main.show();
+                    }
+                });
+            }
+
+            void makeAllViews() {
+                makeNewGame();
+                makeBack();
+            }
+
+            void show() {
+                screen.removeAllViews();
+                addCoolViews();
+
+                screen.addView(back);
+                screen.addView(newGame);
+            }
+        }
+
+        Layouts() {
+            screen = (ConstraintLayout) findViewById(R.id.activity_main);
+
+            screen.setBackgroundResource(R.drawable.dwarf_lords);
+
+            name = (TextView) findViewById(R.id.Saboteur);
+
+            lyrics = (TextView) findViewById(R.id.lyrics);
+
+            singlePlayer = new SinglePlayer();
+            multiPlayer = new MultiPlayer();
+            main = new Main();
+        }
+
+        void makeName() {
+            name.setText("Saboteur");
+            name.setTextSize(60);
+            name.setTextColor(Color.YELLOW);
+            name.setTypeface(Typeface.createFromAsset(getAssets(), "AL Fantasy Type.ttf"));
         }
 
         void makeLyrics() {
@@ -590,39 +854,18 @@ public class MainActivity extends AppCompatActivity {
 
         void makeAllViews() {
             makeName();
-            makeContinue();
-            makeNewGame();
-            makeLoadGame();
-            makeLoadOrSave();
-            makeSettings();
             makeLyrics();
-            makeBack();
-            makeSave();
-            makeMultiPlayer();
-            log.makeAllViews();
+
+            multiPlayer.makeAllViews();
+            singlePlayer.makeAllViews();
+            main.makeAllViews();
         }
 
-        void showMainMenu() {
-            screen.removeAllViews();
+        void addCoolViews() {
             screen.addView(name);
-            screen.addView(continueGame);
-            screen.addView(newGame);
-            screen.addView(multiplayer);
-            screen.addView(settings);
             screen.addView(lyrics);
-            screen.addView(loadOrSave);
-            screen.addView(hscrollPCT);
-            style.removeSelected();
         }
 
-        void showSaveLoad() {
-            screen.removeAllViews();
-            screen.addView(name);
-            screen.addView(loadGame);
-            screen.addView(save);
-            screen.addView(back);
-            screen.addView(lyrics);
-        }
     }
 
 
@@ -635,7 +878,7 @@ public class MainActivity extends AppCompatActivity {
 
         layouts.makeAllViews();
 
-        layouts.showMainMenu();
+        layouts.main.show();
 
     }
 }

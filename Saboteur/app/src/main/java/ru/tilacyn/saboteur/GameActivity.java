@@ -3,6 +3,7 @@ package ru.tilacyn.saboteur;
 
 import ru.iisuslik.controller.*;
 import ru.iisuslik.cards.*;
+import ru.iisuslik.gameData.TurnData;
 
 import android.content.Context;
 import android.content.Intent;
@@ -197,18 +198,15 @@ public class GameActivity extends AppCompatActivity {
                                 //tunnel.setImageResource(getCardImageById[chosenCard.getId()]);
                                 if (((Watch) chosenCard).canPlay(x, y)) {
                                     if (((Watch) chosenCard).play(x, y)) {
-                                        Toast.makeText(getApplicationContext(), "This is a hidden treasure!",
-                                                Toast.LENGTH_SHORT).show();
-
+                                        tunnel.setImageResource(R.drawable.gold);
                                     } else {
-                                        Toast.makeText(getApplicationContext(), "Oh no! Just a simple tunnel(",
-                                                Toast.LENGTH_SHORT).show();
+                                        tunnel.setImageResource(R.drawable.not_gold);
                                     }
 
                                     chosenX = x;
                                     chosenY = y;
 
-                                    drawTable();
+                                    //drawTable();
                                 }
                             }
 
@@ -858,7 +856,7 @@ public class GameActivity extends AppCompatActivity {
                     return;
                 }
 
-                makeLogRow();
+                updateLogRows();
                 style.youOpen = false;
                 controller.startNextTurn();
                 setDiscardFalse();
@@ -915,70 +913,83 @@ public class GameActivity extends AppCompatActivity {
 
 
     // additional function to update logTable
-    void makeLogRow() {
-        TableRow logRow = new TableRow(this);
-        logRow.setBackgroundColor(style.textBackgroundColor);
+    void updateLogRows() {
 
-        TextView message = new TextView(this);
+        logRows.clear();
 
-        message.setText(((Integer) (logRows.size() + 1)).toString() + ". Player " +
-                ((Integer) (controller.currentPlayerNumber() + 1)).toString());
+        //Toast.makeText(getApplicationContext(), ((Integer) controller.gameData.turns.size()).toString(), Toast.LENGTH_SHORT).show();
 
-        if (isDiscard) {
-            message.setText(message.getText() + " : discard");
-        } else if (chosenCard instanceof Tunnel) {
-            message.setText(message.getText() + " put tunnel on (" +
-                    ((Integer) chosenX).toString() + ", " + ((Integer) chosenY).toString() + ") cell");
+        for (TurnData turn : controller.gameData.turns) {
+            TableRow logRow = new TableRow(this);
+            logRow.setBackgroundColor(style.textBackgroundColor);
 
-        } else if (chosenCard instanceof Heal) {
-            message.setText(message.getText() + " repaired Player " +
-                    ((Integer) (playerChoose + 1)).toString() + "'s ");
-            if (((Heal) chosenCard).isHealLamp()) {
-                if (((Heal) chosenCard).isHealTrolley()) {
-                    message.setText(message.getText() + "lamp and trolley");
-                } else if (((Heal) chosenCard).isHealPick()) {
-                    message.setText(message.getText() + "lamp and pick");
-                } else {
-                    message.setText(message.getText() + "lamp");
-                }
-            } else {
-                if (((Heal) chosenCard).isHealTrolley()) {
-                    if (((Heal) chosenCard).isHealPick()) {
-                        message.setText(message.getText() + "pick and trolley");
+            TextView message = new TextView(this);
+
+            message.setText("Player " + turn.ownerPlayerNumber);
+
+            if (turn.card instanceof Heal) {
+                message.setText(message.getText() + " repaired Player " +
+                        ((Integer) (turn.targetPlayerNumber + 1)).toString() + "'s ");
+                if (((Heal) turn.card).isHealLamp()) {
+                    if (((Heal) turn.card).isHealTrolley()) {
+                        message.setText(message.getText() + "lamp and trolley");
+                    } else if (((Heal) turn.card).isHealPick()) {
+                        message.setText(message.getText() + "lamp and pick");
                     } else {
-                        message.setText(message.getText() + "trolley");
+                        message.setText(message.getText() + "lamp");
                     }
                 } else {
-                    message.setText(message.getText() + "pick");
+                    if (((Heal) turn.card).isHealTrolley()) {
+                        if (((Heal) turn.card).isHealPick()) {
+                            message.setText(message.getText() + "pick and trolley");
+                        } else {
+                            message.setText(message.getText() + "trolley");
+                        }
+                    } else {
+                        message.setText(message.getText() + "pick");
+                    }
                 }
             }
-        } else if (chosenCard instanceof Debuff) {
-            message.setText(message.getText() + " broke Player " +
-                    ((Integer) (playerChoose + 1)).toString() + "'s ");
-            if (((Debuff) chosenCard).isBreakingLamp()) {
-                message.setText(message.getText() + "lamp");
-            } else if (((Debuff) chosenCard).isBreakingPick()) {
-                message.setText(message.getText() + "pick");
-            } else {
-                message.setText(message.getText() + "trolley");
+
+            if (turn.card instanceof Debuff) {
+                message.setText(message.getText() + " broke Player " +
+                        ((Integer) (turn.targetPlayerNumber + 1)).toString() + "'s ");
+                if (((Debuff) turn.card).isBreakingLamp()) {
+                    message.setText(message.getText() + "lamp");
+                } else if (((Debuff) turn.card).isBreakingPick()) {
+                    message.setText(message.getText() + "pick");
+                } else {
+                    message.setText(message.getText() + "trolley");
+                }
             }
-        } else if (chosenCard instanceof Destroy) {
-            message.setText(message.getText() + " destroyed tunnel on (" +
-                    ((Integer) chosenX).toString() + ", " + ((Integer) chosenY).toString() + ") cell");
-        } else if (chosenCard instanceof Watch) {
-            message.setText(message.getText() + " watched at (" +
-                    ((Integer) chosenX).toString() + ", " + ((Integer) chosenY).toString() + ") cell");
+
+            if (turn.card instanceof Tunnel) {
+                message.setText(message.getText() + " put tunnel on (" +
+                        ((Integer) turn.i).toString() + ", " + ((Integer) turn.j).toString() + ") cell");
+            }
+
+            if (turn.card instanceof Destroy) {
+                message.setText(message.getText() + " destroyed tunnel on (" +
+                        ((Integer) turn.i).toString() + ", " + ((Integer) turn.j).toString() + ") cell");
+
+            }
+
+            if (turn.card instanceof Watch) {
+                message.setText(message.getText() + " watched at (" +
+                        ((Integer) turn.i).toString() + ", " + ((Integer) turn.j).toString() + ") cell");
+            }
+            message.setTextSize(12);
+            message.setTextColor(Color.WHITE);
+            message.setTypeface(style.textFont);
+
+
+            logRow.addView(message);
+
+            logRows.add(logRow);
+            //TODO discard
         }
 
 
-        message.setTextSize(12);
-        message.setTextColor(Color.WHITE);
-        message.setTypeface(style.textFont);
-
-
-        logRow.addView(message);
-
-        logRows.add(logRow);
     }
 
     void makeButtonsTable() {
