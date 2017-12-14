@@ -13,6 +13,17 @@ public abstract class TurnData implements Serializable {
     public int i, j;
     public boolean [] spins = new boolean[6];
     public Card card;
+    public boolean isDiscard;
+
+    public TurnData(int ownerPlayerNumber, int cardNumber, int i, int j, int targetPlayerNumber, boolean isDiscard, Card card) {
+        this.ownerPlayerNumber = ownerPlayerNumber;
+        this.targetPlayerNumber = targetPlayerNumber;
+        this.cardNumber = cardNumber;
+        this.i = i;
+        this.j = j;
+        this.card = card;
+        this.isDiscard = isDiscard;
+    }
 
     public TurnData(int ownerPlayerNumber, int cardNumber, int i, int j, int targetPlayerNumber, Card card) {
         this.ownerPlayerNumber = ownerPlayerNumber;
@@ -21,6 +32,7 @@ public abstract class TurnData implements Serializable {
         this.i = i;
         this.j = j;
         this.card = card;
+        this.isDiscard = false;
     }
 
 

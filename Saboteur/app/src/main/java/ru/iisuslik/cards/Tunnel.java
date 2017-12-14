@@ -35,26 +35,23 @@ public class Tunnel extends Card {
         return !field.didCurrentPlayerPlayCard() && field.players[ownerPlayerNumber].canPutTunnels() && field.canPutTunnel(this, i, j);
     }
 
-    public void play(int i, int j, boolean needToSend) {
+    public void play(int i, int j) {
         field.putTunnel(this, i, j);
         field.players[ownerPlayerNumber].playCard(this);
         field.iPlayedCard();
         field.startDfs();
-        if (needToSend) {
-            field.currentTD = new TurnData(ownerPlayerNumber,
-                    field.players[ownerPlayerNumber].getCardNumber(this),
-                    i, j, -1, this) {
-                @Override
-                public void apply(Card card) {
-                    ((Tunnel) card).play(i, j, false);
-                }
-            };
-        }
+        field.currentTD = new TurnData(ownerPlayerNumber,
+                field.players[ownerPlayerNumber].getCardNumber(this),
+                i, j, -1, this) {
+            @Override
+            public void apply(Card card) {
+                ((Tunnel) card).play(i, j);
+                card.field.startNextTurn(false);
+            }
+        };
+
     }
 
-    public void play(int i, int j) {
-        play(i, j, true);
-    }
 
     public void spin(boolean needToSend) {
         boolean temp = up;

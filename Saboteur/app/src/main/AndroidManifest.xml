@@ -29,8 +29,8 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="ru.tilacyn.saboteur.GameActivity" />
         </activity>
-	
-	<activity android:name="ru.iisuslik.multiplayer.MultiPlayerActivity"></activity>
+
+        <activity android:name="ru.iisuslik.multiplayer.MultiPlayerActivity" />
     </application>
 
 </manifest>

@@ -19,7 +19,9 @@ public class Field implements Serializable {
     //public Shuffle shuffle;
 
     public boolean didCurrentPlayerPlayCard() {
-        return currentPlayerPlayedCard;
+        if(controller.isSinglePlayer())
+            return currentPlayerPlayedCard;
+        return currentPlayerPlayedCard || controller.multiPlayer.getMyNumber() != currentPlayer;
     }
 
     public void iPlayedCard() {
@@ -78,6 +80,8 @@ public class Field implements Serializable {
     }
 
     public boolean isCurrentPlayerSaboteur() {
+        if(!controller.isSinglePlayer())
+            return players[controller.multiPlayer.getMyNumber()].getPersonality() == Player.SABOTEUR;
         return players[currentPlayer].getPersonality() == Player.SABOTEUR;
     }
 
@@ -103,9 +107,9 @@ public class Field implements Serializable {
             currentPlayer %= players.length;
         }
         currentPlayerPlayedCard = false;
-        if (currentTD != null && !needToSend) {
+        if (currentTD != null) {
             currentTD.spins = spins;
-            controller.takeTurn(currentTD);
+            controller.takeTurn(currentTD, needToSend);
         }
         currentTD = null;
         spins = new boolean[6];

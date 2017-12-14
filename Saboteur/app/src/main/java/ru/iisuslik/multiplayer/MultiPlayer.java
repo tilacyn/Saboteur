@@ -18,9 +18,7 @@ import ru.iisuslik.field.Field;
 import ru.iisuslik.gameData.Shuffle;
 import ru.tilacyn.saboteur.SaboteurApplication;
 
-/**
- * Created by iisus on 03.12.2017.
- */
+
 
 public class MultiPlayer {
     public String playerId;
@@ -38,7 +36,6 @@ public class MultiPlayer {
 
     public int getMyNumber() {
         ArrayList<String> ids = curMatch.getParticipantIds();
-        Collections.sort(ids);
         for(int i = 0; i < ids.size(); i++) {
             if(ids.get(i).equals(playerId)) {
                 return i;

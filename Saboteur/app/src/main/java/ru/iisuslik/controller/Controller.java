@@ -19,7 +19,9 @@ public class Controller implements Serializable {
     public GameData gameData = new GameData();
 
     public void initializeField(int playerCount) {
-        initializeField(playerCount, null);
+        if (isSinglePlayer())
+            initializeField(playerCount, null);
+        initializeField(playerCount, gameData.shuffle);
     }
 
     public void initializeField(int playerCount, Shuffle shuffle) {
@@ -95,13 +97,14 @@ public class Controller implements Serializable {
     }
 
 
-    public void takeTurn(TurnData turn) {
+    public void takeTurn(TurnData turn, boolean needToSend) {
         gameData.turns.add(turn);
-        sendData(gameData);
+        if(needToSend)
+            sendData(gameData);
     }
 
     public void update() {
-        if(!isSinglePlayer())
+        if (!isSinglePlayer())
             multiPlayer.updateMatch(multiPlayer.curMatch);
     }
 
@@ -119,21 +122,22 @@ public class Controller implements Serializable {
     }
 
     public void applyGameData(GameData gameData) {
-        if(field == null) {
+        if (field == null) {
             initializeField(gameData.shuffle);
         }
-        for(int i = this.gameData.turns.size(); i < gameData.turns.size(); i++) {
+        for (int i = this.gameData.turns.size(); i < gameData.turns.size(); i++) {
             field.applyTurnData(gameData.turns.get(i));
         }
         this.gameData = gameData;
 
     }
 
-    public void applyData(byte [] data) {
-        try{
+    public void applyData(byte[] data) {
+        try {
             ByteArrayInputStream in = new ByteArrayInputStream(data);
             applyGameData(GameData.deserialize(in));
-        }catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
     }
 
     public void serialize(OutputStream out) {

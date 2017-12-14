@@ -15,23 +15,20 @@ public class Destroy extends Action {
                 toCheck != null && !toCheck.isClosedTunnel();
     }
 
-    public void play(int i, int j, boolean needToSend) {
+    public void play(int i, int j) {
         field.field[i][j] = null;
         field.players[ownerPlayerNumber].playCard(this);
         field.iPlayedCard();
-        if (needToSend) {
-            field.currentTD = new TurnData(ownerPlayerNumber,
-                    field.players[ownerPlayerNumber].getCardNumber(this),
-                    i, j, -1, this) {
-                @Override
-                public void apply(Card card) {
-                    ((Destroy) card).play(i, j, false);
-                }
-            };
-        }
-    }
-
-    public void play(int i, int j) {
-        play(i, j, true);
+        field.currentTD = new TurnData(ownerPlayerNumber,
+                field.players[ownerPlayerNumber].getCardNumber(this),
+                i, j, -1, this) {
+            @Override
+            public void apply(Card card) {
+                ((Destroy) card).play(i, j);
+                card.field.startNextTurn(false);
+            }
+        };
     }
 }
+
+

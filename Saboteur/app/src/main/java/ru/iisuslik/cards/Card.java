@@ -52,25 +52,21 @@ public class Card implements Serializable {
         return !field.didCurrentPlayerPlayCard();
     }
 
+
     public void discard() {
-        discard(true);
-    }
-
-
-    public void discard(boolean needToSend) {
         field.players[ownerPlayerNumber].playCard(this);
         field.iPlayedCard();
 
-        if (needToSend) {
-            field.currentTD = new TurnData(ownerPlayerNumber,
-                    field.players[ownerPlayerNumber].getCardNumber(this),
-                    -1, -1, -1, this) {
-                @Override
-                public void apply(Card card) {
-                    card.discard(false);
-                }
-            };
-        }
+        field.currentTD = new TurnData(ownerPlayerNumber,
+                field.players[ownerPlayerNumber].getCardNumber(this),
+                -1, -1, -1, true, this) {
+            @Override
+            public void apply(Card card) {
+                card.discard();
+                card.field.startNextTurn(false);
+            }
+        };
+
     }
 
 

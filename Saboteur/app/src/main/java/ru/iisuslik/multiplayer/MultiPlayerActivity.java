@@ -4,9 +4,12 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -15,20 +18,22 @@ import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.games.Games;
 import com.google.android.gms.games.GamesClient;
 import com.google.android.gms.games.Player;
+import com.google.android.gms.games.TurnBasedMultiplayerClient;
 import com.google.android.gms.games.multiplayer.Multiplayer;
 import com.google.android.gms.games.multiplayer.realtime.RoomConfig;
 import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatch;
 import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatchConfig;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 
 import ru.iisuslik.controller.Controller;
 import ru.tilacyn.saboteur.GameActivity;
-import ru.tilacyn.saboteur.MainActivity;
 import ru.tilacyn.saboteur.R;
-import ru.tilacyn.saboteur.SaboteurApplication;
 
 public class MultiPlayerActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -45,11 +50,20 @@ public class MultiPlayerActivity extends AppCompatActivity implements View.OnCli
     public void startGame(int playerCount){
         Intent intent = new Intent(MultiPlayerActivity.this, GameActivity.class);
         intent.putExtra("playerCount", playerCount);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        controller.serialize(out);
+        intent.putExtra("controller", out.toByteArray());
         startActivity(intent);
     }
 
     public void startSignInIntent() {
-        startActivityForResult(multiPlayer.signInClient.getSignInIntent(), RC_SIGN_IN);
+        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
+        if(account == null)
+            startActivityForResult(multiPlayer.signInClient.getSignInIntent(), RC_SIGN_IN);
+        else{
+            showToast("there is last signed in account");
+            onConnected(account);
+        }
     }
 
     // Open the create-game UI. You will get back an onActivityResult
@@ -93,7 +107,10 @@ public class MultiPlayerActivity extends AppCompatActivity implements View.OnCli
         controller = new Controller();
         controller.initializeMultiplayer();
         multiPlayer = controller.multiPlayer;
-        multiPlayer.signInClient = GoogleSignIn.getClient(this, GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN);
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .build();
+        multiPlayer.signInClient = GoogleSignIn.getClient(this, gso);
     }
 
     @Override
@@ -101,6 +118,9 @@ public class MultiPlayerActivity extends AppCompatActivity implements View.OnCli
         switch (view.getId()) {
             case R.id.sign_in:
                 startSignInIntent();
+                break;
+            case R.id.sign_out:
+                signOut();
                 break;
             case R.id.start:
                 onStartMatchClicked();
@@ -112,23 +132,37 @@ public class MultiPlayerActivity extends AppCompatActivity implements View.OnCli
 
         }
     }
+    private void showToast(String str) {
+        Toast.makeText(getApplicationContext(), str, Toast.LENGTH_SHORT).show();
+
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
 
         if (requestCode == RC_SIGN_IN) {
+            if(resultCode != RESULT_OK) {
+                showToast("bad sign in");
+            }
+            if(resultCode == RESULT_OK)
+                showToast("Nice sign in");
 
             Task<GoogleSignInAccount> task =
                     GoogleSignIn.getSignedInAccountFromIntent(intent);
 
             try {
                 GoogleSignInAccount account = task.getResult(ApiException.class);
-                onConnected(account);
+                //onConnected(account);
+                //showToast("done2");
             } catch (ApiException apiException) {
                 String message = apiException.getMessage();
                 if (message == null || message.isEmpty()) {
                     //message = getString(R.string.signin_other_error);
                 }
+                else {
+                    showToast(message);
+                }
+                showToast("done3");
 
                 onDisconnected();
                 /*
@@ -138,6 +172,7 @@ public class MultiPlayerActivity extends AppCompatActivity implements View.OnCli
                         .show();
                 */
             }
+            showToast("pass all");
         } else if (requestCode == RC_LOOK_AT_MATCHES) {
             // Returning from the 'Select Match' dialog
 
@@ -208,6 +243,9 @@ public class MultiPlayerActivity extends AppCompatActivity implements View.OnCli
         multiPlayer.multiplayerClient = Games.getTurnBasedMultiplayerClient(this, googleSignInAccount);
         multiPlayer.invitationsClient = Games.getInvitationsClient(this, googleSignInAccount);
 
+        //showToast(String.valueOf(multiPlayer.multiplayerClient == null));
+        //showToast(String.valueOf(multiPlayer.invitationsClient == null));
+
         Games.getPlayersClient(this, googleSignInAccount)
                 .getCurrentPlayer()
                 .addOnSuccessListener(
@@ -215,20 +253,23 @@ public class MultiPlayerActivity extends AppCompatActivity implements View.OnCli
                             @Override
                             public void onSuccess(Player player) {
                                 //mDisplayName = player.getDisplayName();
+                                showToast("getId");
                                 multiPlayer.playerId = player.getPlayerId();
 
                                 //setViewVisibility();
                             }
                         }
-                );
+                ).addOnFailureListener(createFailureListener("There was a problem getting the player!"));
 
         // Retrieve the TurnBasedMatch from the connectionHint
+
         GamesClient gamesClient = Games.getGamesClient(this, googleSignInAccount);
         gamesClient.getActivationHint()
                 .addOnSuccessListener(new OnSuccessListener<Bundle>() {
                     @Override
                     public void onSuccess(Bundle hint) {
                         if (hint != null) {
+                            showToast("getHint");
                             TurnBasedMatch match = hint.getParcelable(Multiplayer.EXTRA_TURN_BASED_MATCH);
 
                             if (match != null) {
@@ -236,7 +277,10 @@ public class MultiPlayerActivity extends AppCompatActivity implements View.OnCli
                             }
                         }
                     }
-                });
+                }).addOnFailureListener(createFailureListener(
+                "There was a problem getting the activation hint!"));
+
+        showToast("connect done");
         //setViewVisibility();
     }
 
@@ -248,5 +292,74 @@ public class MultiPlayerActivity extends AppCompatActivity implements View.OnCli
         multiPlayer.invitationsClient = null;
 
         //setViewVisibility();
+    }
+
+    public void signOut() {
+
+        multiPlayer.signInClient.signOut().addOnCompleteListener(this,
+                new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+
+                        if (task.isSuccessful()) {
+                            Log.d("AAAAAAAA", "signOut(): success");
+                            showToast("sign out complete");
+                        } else {
+                            Log.d("AAAAAAAA", "signOut(): error");
+                        }
+
+                        onDisconnected();
+                    }
+                });
+    }
+
+
+    private OnFailureListener createFailureListener(final String string) {
+        return new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                showToast("fail");
+                handleException(e, string);
+            }
+        };
+    }
+
+    private void handleException(Exception exception, String details) {
+        int status = 0;
+
+        if (exception instanceof TurnBasedMultiplayerClient.MatchOutOfDateApiException) {
+            TurnBasedMultiplayerClient.MatchOutOfDateApiException matchOutOfDateApiException =
+                    (TurnBasedMultiplayerClient.MatchOutOfDateApiException) exception;
+
+            new AlertDialog.Builder(this)
+                    .setMessage("Match was out of date, updating with latest match data...")
+                    .setNeutralButton(android.R.string.ok, null)
+                    .show();
+
+            TurnBasedMatch match = matchOutOfDateApiException.getMatch();
+            multiPlayer.updateMatch(match);
+            status = matchOutOfDateApiException.getStatusCode();
+            showToast("match out of date api exception: " + status + ": " + details);
+
+            return;
+        }
+
+        if (exception instanceof ApiException) {
+            ApiException apiException = (ApiException) exception;
+            status = apiException.getStatusCode();
+            showToast("apiException: " + status + ": " + details);
+        }
+        /*
+        if (!checkStatusCode(status)) {
+            return;
+        }
+
+        String message = getString(R.string.status_exception_error, details, status, exception);
+
+        new AlertDialog.Builder(this)
+                .setMessage(message)
+                .setNeutralButton(android.R.string.ok, null)
+                .show();
+        */
     }
 }
