@@ -16,8 +16,6 @@ import java.util.stream.Collectors;
 import ru.iisuslik.controller.Controller;
 import ru.iisuslik.field.Field;
 import ru.iisuslik.gameData.Shuffle;
-import ru.tilacyn.saboteur.SaboteurApplication;
-
 
 
 public class MultiPlayer {
@@ -26,25 +24,25 @@ public class MultiPlayer {
     public TurnBasedMultiplayerClient multiplayerClient;
     public InvitationsClient invitationsClient;
     public TurnBasedMatch curMatch;
-    public  boolean isDoingTurn;
+    public boolean isDoingTurn;
     public Controller controller;
 
-    public MultiPlayer() {
-        controller = SaboteurApplication.getInstance().getController();
+    public MultiPlayer(Controller controller) {
+        this.controller = controller;
     }
 
 
     public int getMyNumber() {
         ArrayList<String> ids = curMatch.getParticipantIds();
-        for(int i = 0; i < ids.size(); i++) {
-            if(ids.get(i).equals(playerId)) {
+        for (int i = 0; i < ids.size(); i++) {
+            if (ids.get(i).equals(playerId)) {
                 return i;
             }
         }
         return -1;
     }
 
-    public void sendData(byte [] data) {
+    public void sendData(byte[] data) {
 
         String nextParticipantId = getNextParticipantId();
         // Create the next turn
@@ -92,18 +90,19 @@ public class MultiPlayer {
                 //showWarning("Canceled!", "This game was canceled!");
                 return;
             case TurnBasedMatch.MATCH_STATUS_EXPIRED:
-               // showWarning("Expired!", "This game is expired.  So sad!");
+                // showWarning("Expired!", "This game is expired.  So sad!");
                 return;
             case TurnBasedMatch.MATCH_STATUS_AUTO_MATCHING:
                 //showWarning("Waiting for auto-match...",
-                        //"We're still waiting for an automatch partner.");
+                //"We're still waiting for an automatch partner.");
                 return;
             case TurnBasedMatch.MATCH_STATUS_COMPLETE:
                 if (turnStatus == TurnBasedMatch.MATCH_TURN_STATUS_COMPLETE) {
                    /* showWarning("Complete!",
                             "This game is over; someone finished it, and so did you!  " +
                                     "There is nothing to be done.");
-                    */break;
+                    */
+                    break;
                 }
 
                 // Note that in this state, you must still call "Finish" yourself,
@@ -126,7 +125,7 @@ public class MultiPlayer {
                 break;
             case TurnBasedMatch.MATCH_TURN_STATUS_INVITED:
                 //showWarning("Good inititative!",
-                       // "Still waiting for invitations.\n\nBe patient!");
+                // "Still waiting for invitations.\n\nBe patient!");
         }
 
         //mTurnData = null;
@@ -139,10 +138,8 @@ public class MultiPlayer {
         if (match.getData() != null) {
             // This is a game that has already started, so I'll just start
             updateMatch(match);
-            return;
-        }
-
-        startMatch(match);
+        } else
+            startMatch(match);
     }
 
     // startMatch() happens in response to the createTurnBasedMatch()

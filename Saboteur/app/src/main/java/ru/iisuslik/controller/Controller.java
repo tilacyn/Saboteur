@@ -29,7 +29,7 @@ public class Controller implements Serializable {
     }
 
     public void initializeMultiplayer() {
-        multiPlayer = new MultiPlayer();
+        multiPlayer = new MultiPlayer(this);
     }
 
     public void initializeField(Shuffle shuffle) {
@@ -41,6 +41,7 @@ public class Controller implements Serializable {
     }
 
     public int getPlayersNumber() {
+        update();
         return field.players.length;
     }
 
@@ -50,44 +51,54 @@ public class Controller implements Serializable {
 
 
     public int getWidth() {
+        update();
         return field.WIDTH;
     }
 
     public int getHeight() {
+        update();
         return field.HEIGHT;
     }
 
     public ArrayList<Card> getCurrentPlayerHand() {
+        update();
         return field.getCurrentPlayerHand();
     }
 
 
     public boolean[] getPlayerDebuffs(int index) {
+        update();
         return field.getPlayerDebuffs(index);//Lamp Pick Trolley
     }
 
 
     public void startNextTurn() {
+        update();
         field.startNextTurn();
     }
 
     public Tunnel[][] getField() {
+        update();
         return field.field;
     }
 
     public boolean canStartNextTurn() {
+        update();
         return field.didCurrentPlayerPlayCard();
     }
 
     public boolean isCurrentPlayerSaboteur() {
+        update();
         return field.isCurrentPlayerSaboteur();
     }
 
     public boolean isThisTheEnd() {
+        update();
         return field.isThisTheEnd();
     }
 
     public int currentPlayerNumber() {
+        update();
         return field.getCurrentPlayer();
     }
 
@@ -137,6 +148,7 @@ public class Controller implements Serializable {
             ByteArrayInputStream in = new ByteArrayInputStream(data);
             applyGameData(GameData.deserialize(in));
         } catch (Exception ignored) {
+            ignored.printStackTrace();
         }
     }
 

@@ -16,7 +16,6 @@ public class Field implements Serializable {
     private boolean currentPlayerPlayedCard = false;
     public TurnData currentTD;
     public boolean[] spins = new boolean[6];
-    //public Shuffle shuffle;
 
     public boolean didCurrentPlayerPlayCard() {
         if(controller.isSinglePlayer())

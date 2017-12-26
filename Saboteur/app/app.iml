@@ -125,7 +125,6 @@
     <orderEntry type="library" name="com.google.android.gms:play-services-drive-11.6.2" level="project" />
     <orderEntry type="library" name="com.google.android.gms:play-services-base-license-11.6.2" level="project" />
     <orderEntry type="library" scope="TEST" name="com.squareup:javawriter:2.1.1@jar" level="project" />
-    <orderEntry type="library" name="com.google.firebase:firebase-auth-license-11.6.2" level="project" />
     <orderEntry type="library" name="com.google.android.gms:play-services-basement-license-11.6.2" level="project" />
     <orderEntry type="library" name="com.google.android.gms:play-services-drive-license-11.6.2" level="project" />
     <orderEntry type="library" name="com.android.support.constraint:constraint-layout-solver:1.0.2@jar" level="project" />
@@ -147,7 +146,6 @@
     <orderEntry type="library" scope="TEST" name="com.android.support.test.espresso:espresso-idling-resource-2.2.2" level="project" />
     <orderEntry type="library" scope="TEST" name="javax.annotation:javax.annotation-api:1.2@jar" level="project" />
     <orderEntry type="library" name="com.google.android.gms:play-services-auth-api-phone-license-11.6.2" level="project" />
-    <orderEntry type="library" name="com.google.firebase:firebase-auth-11.6.2" level="project" />
     <orderEntry type="library" name="com.google.android.gms:play-services-base-11.6.2" level="project" />
     <orderEntry type="library" name="com.google.firebase:firebase-analytics-impl-11.6.2" level="project" />
     <orderEntry type="library" name="com.google.firebase:firebase-iid-license-11.6.2" level="project" />

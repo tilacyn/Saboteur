@@ -74,7 +74,8 @@ public class Tunnel extends Card {
             if (up) this.id += 4;
             if (right) this.id += 8;
         }
-        field.spins[field.players[ownerPlayerNumber].getCardNumber(this)] ^= true;
+        if(!this.isClosedTunnel())
+            field.spins[field.players[ownerPlayerNumber].getCardNumber(this)] ^= true;
     }
 
     public void spin() {

@@ -1035,6 +1035,8 @@ public class GameActivity extends AppCompatActivity {
 
         initializeAll();
 
+        controller.update();//IT IS MINE
+
         playerCount = getIntent().getIntExtra("playerCount", 2);
 
         fillCardIdArray();

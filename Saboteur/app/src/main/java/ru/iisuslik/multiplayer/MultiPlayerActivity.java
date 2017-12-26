@@ -2,7 +2,6 @@ package ru.iisuslik.multiplayer;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -47,7 +46,7 @@ public class MultiPlayerActivity extends AppCompatActivity implements View.OnCli
     MultiPlayer multiPlayer;
 
 
-    public void startGame(int playerCount){
+    public void startGame(int playerCount) {
         Intent intent = new Intent(MultiPlayerActivity.this, GameActivity.class);
         intent.putExtra("playerCount", playerCount);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -58,10 +57,10 @@ public class MultiPlayerActivity extends AppCompatActivity implements View.OnCli
 
     public void startSignInIntent() {
         GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
-        if(account == null)
+        if (account == null)
             startActivityForResult(multiPlayer.signInClient.getSignInIntent(), RC_SIGN_IN);
-        else{
-            showToast("there is last signed in account");
+        else {
+            //showToast("there is last signed in account");
             onConnected(account);
         }
     }
@@ -69,7 +68,7 @@ public class MultiPlayerActivity extends AppCompatActivity implements View.OnCli
     // Open the create-game UI. You will get back an onActivityResult
     // and figure out what to do.
     public void onStartMatchClicked() {
-        if(multiPlayer.multiplayerClient == null){
+        if (multiPlayer.multiplayerClient == null) {
             return;
         }
         multiPlayer.multiplayerClient.getSelectOpponentsIntent(1, 7, true)
@@ -84,7 +83,7 @@ public class MultiPlayerActivity extends AppCompatActivity implements View.OnCli
     // Displays your inbox. You will get back onActivityResult where
     // you will need to figure out what you clicked on.
     public void onCheckGamesClicked() {
-        if(multiPlayer.multiplayerClient == null){
+        if (multiPlayer.multiplayerClient == null) {
             return;
         }
         multiPlayer.multiplayerClient.getInboxIntent()
@@ -95,6 +94,9 @@ public class MultiPlayerActivity extends AppCompatActivity implements View.OnCli
                     }
                 });
     }
+
+    // Create a one-on-one automatch game.
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,10 +109,11 @@ public class MultiPlayerActivity extends AppCompatActivity implements View.OnCli
         controller = new Controller();
         controller.initializeMultiplayer();
         multiPlayer = controller.multiPlayer;
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN)
                 .requestEmail()
                 .build();
         multiPlayer.signInClient = GoogleSignIn.getClient(this, gso);
+        startSignInIntent();
     }
 
     @Override
@@ -132,6 +135,7 @@ public class MultiPlayerActivity extends AppCompatActivity implements View.OnCli
 
         }
     }
+
     private void showToast(String str) {
         Toast.makeText(getApplicationContext(), str, Toast.LENGTH_SHORT).show();
 
@@ -141,10 +145,10 @@ public class MultiPlayerActivity extends AppCompatActivity implements View.OnCli
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
 
         if (requestCode == RC_SIGN_IN) {
-            if(resultCode != RESULT_OK) {
+            if (resultCode != RESULT_OK) {
                 showToast("bad sign in");
             }
-            if(resultCode == RESULT_OK)
+            if (resultCode == RESULT_OK)
                 showToast("Nice sign in");
 
             Task<GoogleSignInAccount> task =
@@ -152,17 +156,14 @@ public class MultiPlayerActivity extends AppCompatActivity implements View.OnCli
 
             try {
                 GoogleSignInAccount account = task.getResult(ApiException.class);
-                //onConnected(account);
-                //showToast("done2");
+                onConnected(account);
             } catch (ApiException apiException) {
                 String message = apiException.getMessage();
                 if (message == null || message.isEmpty()) {
                     //message = getString(R.string.signin_other_error);
-                }
-                else {
+                } else {
                     showToast(message);
                 }
-                showToast("done3");
 
                 onDisconnected();
                 /*
@@ -172,13 +173,13 @@ public class MultiPlayerActivity extends AppCompatActivity implements View.OnCli
                         .show();
                 */
             }
-            showToast("pass all");
         } else if (requestCode == RC_LOOK_AT_MATCHES) {
             // Returning from the 'Select Match' dialog
 
             if (resultCode != Activity.RESULT_OK) {
                 //logBadActivityResult(requestCode, resultCode,
                 //       "User cancelled returning from the 'Select Match' dialog.");
+                showToast("Look at matches bad result");
                 return;
             }
 
@@ -187,11 +188,10 @@ public class MultiPlayerActivity extends AppCompatActivity implements View.OnCli
 
             if (match != null) {
                 multiPlayer.updateMatch(match);
+                int playerCount = match.getParticipantIds().size();
+                startGame(playerCount);
+
             }
-
-            int playerCount = match.getParticipantIds().size();
-            startGame(playerCount);
-
             //Log.d(TAG, "Match = " + match);
         } else if (requestCode == RC_SELECT_PLAYERS) {
             // Returning from 'Select players to Invite' dialog
@@ -200,6 +200,7 @@ public class MultiPlayerActivity extends AppCompatActivity implements View.OnCli
                 // user canceled
                 //logBadActivityResult(requestCode, resultCode,
                 //        "User cancelled returning from 'Select players to Invite' dialog");
+                showToast("Select Players bad result");
                 return;
             }
 
@@ -219,16 +220,17 @@ public class MultiPlayerActivity extends AppCompatActivity implements View.OnCli
             } else {
                 autoMatchCriteria = null;
             }
-
             TurnBasedMatchConfig tbmc = TurnBasedMatchConfig.builder()
                     .addInvitedPlayers(invitees)
                     .setAutoMatchCriteria(autoMatchCriteria).build();
+            showToast("so close");
 
             // Start the match
             multiPlayer.multiplayerClient.createMatch(tbmc)
                     .addOnSuccessListener(new OnSuccessListener<TurnBasedMatch>() {
                         @Override
                         public void onSuccess(TurnBasedMatch turnBasedMatch) {
+                            showToast("initiate");
                             multiPlayer.onInitiateMatch(turnBasedMatch);
                             int playerCount = turnBasedMatch.getParticipantIds().size();
                             startGame(playerCount);
@@ -239,12 +241,12 @@ public class MultiPlayerActivity extends AppCompatActivity implements View.OnCli
     }
 
     private void onConnected(GoogleSignInAccount googleSignInAccount) {
-
+        if (!GoogleSignIn.hasPermissions(googleSignInAccount, Games.SCOPE_GAMES_LITE)) {
+            showToast("Doesn't have permissions");
+            return;
+        }
         multiPlayer.multiplayerClient = Games.getTurnBasedMultiplayerClient(this, googleSignInAccount);
         multiPlayer.invitationsClient = Games.getInvitationsClient(this, googleSignInAccount);
-
-        //showToast(String.valueOf(multiPlayer.multiplayerClient == null));
-        //showToast(String.valueOf(multiPlayer.invitationsClient == null));
 
         Games.getPlayersClient(this, googleSignInAccount)
                 .getCurrentPlayer()
@@ -253,7 +255,6 @@ public class MultiPlayerActivity extends AppCompatActivity implements View.OnCli
                             @Override
                             public void onSuccess(Player player) {
                                 //mDisplayName = player.getDisplayName();
-                                showToast("getId");
                                 multiPlayer.playerId = player.getPlayerId();
 
                                 //setViewVisibility();
@@ -279,9 +280,8 @@ public class MultiPlayerActivity extends AppCompatActivity implements View.OnCli
                     }
                 }).addOnFailureListener(createFailureListener(
                 "There was a problem getting the activation hint!"));
-
-        showToast("connect done");
         //setViewVisibility();
+
     }
 
     private void onDisconnected() {
