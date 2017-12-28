@@ -16,7 +16,8 @@ public class Heal extends Action {
     }
 
     public boolean canPlay(int playerNumber) {
-        return !field.didCurrentPlayerPlayCard() && field.players[playerNumber].needHeal(this);
+        return !field.didCurrentPlayerPlayCard() && field.players[playerNumber].needHeal(this)
+                && field.controller.isMyTurn();
     }
 
     public void play(final int playerNumber) {

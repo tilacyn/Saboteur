@@ -1,6 +1,8 @@
 package ru.iisuslik.controller;
 
 
+import android.util.Log;
+
 import ru.iisuslik.cards.Card;
 import ru.iisuslik.cards.Tunnel;
 import ru.iisuslik.field.Field;
@@ -11,6 +13,7 @@ import ru.iisuslik.multiplayer.MultiPlayer;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class Controller implements Serializable {
     private Field field;
@@ -41,7 +44,7 @@ public class Controller implements Serializable {
     }
 
     public int getPlayersNumber() {
-        update();
+        //update();
         return field.players.length;
     }
 
@@ -51,12 +54,12 @@ public class Controller implements Serializable {
 
 
     public int getWidth() {
-        update();
+        //update();
         return field.WIDTH;
     }
 
     public int getHeight() {
-        update();
+        //update();
         return field.HEIGHT;
     }
 
@@ -73,22 +76,30 @@ public class Controller implements Serializable {
 
 
     public void startNextTurn() {
-        update();
+        //update();
         field.startNextTurn();
     }
 
     public Tunnel[][] getField() {
-        update();
+        //update();
         return field.field;
     }
 
     public boolean canStartNextTurn() {
         update();
-        return field.didCurrentPlayerPlayCard();
+        boolean single = field.didCurrentPlayerPlayCard();
+        if(isSinglePlayer())
+            return single;
+        return single && isMyTurn();
+    }
+
+    public boolean isMyTurn() {
+        update();
+        return isSinglePlayer() || multiPlayer.isMyTurn();
     }
 
     public boolean isCurrentPlayerSaboteur() {
-        update();
+        //update();
         return field.isCurrentPlayerSaboteur();
     }
 
@@ -133,9 +144,11 @@ public class Controller implements Serializable {
     }
 
     public void applyGameData(GameData gameData) {
+        Log.d("EEEEEEEEEE", "game data null? " + (gameData == null));
         if (field == null) {
             initializeField(gameData.shuffle);
         }
+        Log.d("AAAAAAAA", "data length " + gameData.turns.size() + " " + (gameData.shuffle==null));
         for (int i = this.gameData.turns.size(); i < gameData.turns.size(); i++) {
             field.applyTurnData(gameData.turns.get(i));
         }
@@ -144,11 +157,21 @@ public class Controller implements Serializable {
     }
 
     public void applyData(byte[] data) {
+        if(data == null) {
+            Log.d("A", "initiate");
+            multiPlayer.onInitiateMatch(multiPlayer.curMatch);
+            return;
+        }
+        Log.d("E222", "byte[] data = " + Arrays.toString(data));
         try {
             ByteArrayInputStream in = new ByteArrayInputStream(data);
-            applyGameData(GameData.deserialize(in));
+            Log.d("MMMMMMMMMM", "null" + (data == null));
+            GameData gd = GameData.deserialize(in);
+            Log.d("MMMMMMMMMM", "null" + (gd == null));
+            applyGameData(gd);
         } catch (Exception ignored) {
             ignored.printStackTrace();
+            Log.d("E", "apply data problem " + ignored.getMessage());
         }
     }
 
@@ -163,13 +186,13 @@ public class Controller implements Serializable {
     }
 
     public static Controller deserialize(InputStream in) {
-        Controller res = null;
         try {
             ObjectInputStream objectIn = new ObjectInputStream(in);
-            res = (Controller) objectIn.readObject();
+            Controller res = (Controller) objectIn.readObject();
             objectIn.close();
+            return res;
         } catch (Exception ignored) {
+            return null;
         }
-        return res;
     }
 }

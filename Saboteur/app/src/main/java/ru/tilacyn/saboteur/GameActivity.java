@@ -13,6 +13,7 @@ import android.graphics.drawable.AnimationDrawable;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.Pair;
 import android.view.Gravity;
 import android.view.View;
@@ -618,12 +619,15 @@ public class GameActivity extends AppCompatActivity {
         hscroll = (HorizontalScrollView) findViewById(R.id.hscroll);
 
 
-        byte[] controllerCypher = getIntent().getByteArrayExtra("controller");
-
-        controller = Controller.deserialize(new ByteArrayInputStream(controllerCypher));
-
-        controllerByteArray = controllerCypher;
-
+        if(getIntent().getByteArrayExtra("controller") != null) {
+            byte[] controllerCypher = getIntent().getByteArrayExtra("controller");
+            controller = Controller.deserialize(new ByteArrayInputStream(controllerCypher));
+            controllerByteArray = controllerCypher;
+        }
+        else {
+            controller = SaboteurApplication.getInstance().getController();
+            controllerByteArray = null;
+        }
         //constraint layout
         screen = (ConstraintLayout) findViewById(R.id.activity_main);
 
@@ -1045,7 +1049,10 @@ public class GameActivity extends AppCompatActivity {
         setContentView(R.layout.activity_game);
 
         initializeAll();
-
+        Log.d("EEEE", "EEEEEEExperimenty");
+        //controller.multiPlayer.sendData(new byte[2]);//strange
+        //controller.update();
+        controller.multiPlayer.onInitiateMatch(controller.multiPlayer.curMatch);
         playerCount = getIntent().getIntExtra("playerCount", 2);
 
         fillCardIdArray();

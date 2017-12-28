@@ -1,5 +1,7 @@
 package ru.iisuslik.cards;
 
+import android.util.Log;
+
 import ru.iisuslik.field.Field;
 import ru.iisuslik.gameData.TurnData;
 
@@ -32,11 +34,15 @@ public class Tunnel extends Card {
     }
 
     public boolean canPlay(int i, int j) {
-        return !field.didCurrentPlayerPlayCard() && field.players[ownerPlayerNumber].canPutTunnels() && field.canPutTunnel(this, i, j);
+        Log.d("AAAAAAAA", "play tunnel " + "did play card " +
+                field.didCurrentPlayerPlayCard() + " isMyTurn " + field.controller.isMyTurn());
+        return !field.didCurrentPlayerPlayCard() && field.players[ownerPlayerNumber].canPutTunnels()
+                && field.canPutTunnel(this, i, j) && field.controller.isMyTurn();
     }
 
     public void play(int i, int j) {
         field.putTunnel(this, i, j);
+        Log.d("AAAAAAAA", "put tunnel player " + ownerPlayerNumber + ' ' + (field.field[i][j] == null));
         field.players[ownerPlayerNumber].playCard(this);
         field.iPlayedCard();
         field.startDfs();
@@ -49,11 +55,11 @@ public class Tunnel extends Card {
                 card.field.startNextTurn(false);
             }
         };
-
+        Log.d("AAAAAAAA", "finish play tunnel " + field.didCurrentPlayerPlayCard());
     }
 
 
-    public void spin(boolean needToSend) {
+    public void spin() {
         boolean temp = up;
         up = down;
         down = temp;
@@ -74,12 +80,8 @@ public class Tunnel extends Card {
             if (up) this.id += 4;
             if (right) this.id += 8;
         }
-        if(!this.isClosedTunnel())
+        if (!this.isClosedTunnel())
             field.spins[field.players[ownerPlayerNumber].getCardNumber(this)] ^= true;
-    }
-
-    public void spin() {
-        spin(true);
     }
 
     public boolean isClosedTunnel() {

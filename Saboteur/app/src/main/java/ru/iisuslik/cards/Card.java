@@ -49,7 +49,7 @@ public class Card implements Serializable {
     }
 
     public boolean canDiscard() {
-        return !field.didCurrentPlayerPlayCard();
+        return !field.didCurrentPlayerPlayCard() && field.controller.isMyTurn();
     }
 
 

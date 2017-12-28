@@ -1,15 +1,20 @@
 package ru.iisuslik.multiplayer;
 
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.games.InvitationsClient;
 import com.google.android.gms.games.TurnBasedMultiplayerClient;
 import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatch;
 import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatchUpdateCallback;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.stream.Collectors;
 
@@ -18,12 +23,13 @@ import ru.iisuslik.field.Field;
 import ru.iisuslik.gameData.Shuffle;
 
 
-public class MultiPlayer {
+public class MultiPlayer implements Serializable {
+    boolean sendingData = false;
     public String playerId;
     public GoogleSignInClient signInClient;
     public TurnBasedMultiplayerClient multiplayerClient;
     public InvitationsClient invitationsClient;
-    public TurnBasedMatch curMatch;
+        public TurnBasedMatch curMatch;
     public boolean isDoingTurn;
     public Controller controller;
 
@@ -33,9 +39,12 @@ public class MultiPlayer {
 
 
     public int getMyNumber() {
+        String myParticipantId = curMatch.getParticipantId(playerId);
         ArrayList<String> ids = curMatch.getParticipantIds();
+        String id1 = ids.get(0);
+        String id2 = ids.get(1);
         for (int i = 0; i < ids.size(); i++) {
-            if (ids.get(i).equals(playerId)) {
+            if (ids.get(i).equals(myParticipantId)) {
                 return i;
             }
         }
@@ -46,8 +55,28 @@ public class MultiPlayer {
 
         String nextParticipantId = getNextParticipantId();
         // Create the next turn
+        if(sendingData) {
+            Log.d("EEEEEE", "SENDING DATA");
+            return;
+        }
+        sendingData = true;
+        Log.d("S", "send in my turn? " + isMyTurn());
+        Log.d("M", "match status " + curMatch.getStatus());
         multiplayerClient.takeTurn(curMatch.getMatchId(),
-                data, nextParticipantId);
+                data, nextParticipantId).addOnCompleteListener(new OnCompleteListener<TurnBasedMatch>() {
+            @Override
+            public void onComplete(@NonNull Task<TurnBasedMatch> task) {
+                if (task.isSuccessful()) {
+                    curMatch = task.getResult();
+                    updateMatch(curMatch);
+                    sendingData = false;
+                    Log.d("VICTORY", "nice send data " + (controller.gameData.shuffle != null));
+                } else {
+                    sendingData = false;
+                    Log.d("B", "send data problem" + task.getException().getMessage());
+                }
+            }
+        });
     }
 
     public String getNextParticipantId() {
@@ -115,12 +144,14 @@ public class MultiPlayer {
         switch (turnStatus) {
             case TurnBasedMatch.MATCH_TURN_STATUS_MY_TURN:
 
-                controller.applyData(curMatch.getData());
+                if(!sendingData)
+                    controller.applyData(curMatch.getData());
                 //setGameplayUI();
                 return;
             case TurnBasedMatch.MATCH_TURN_STATUS_THEIR_TURN:
                 // Should return results.
-                controller.applyData(curMatch.getData());
+                if(!sendingData)
+                    controller.applyData(curMatch.getData());
                 //showWarning("Alas...", "It's not your turn.");
                 break;
             case TurnBasedMatch.MATCH_TURN_STATUS_INVITED:
@@ -133,9 +164,14 @@ public class MultiPlayer {
         //setViewVisibility();
     }
 
-    public void onInitiateMatch(TurnBasedMatch match) {
+    public boolean isMyTurn() {
+        int turnStatus = curMatch.getTurnStatus();
+        return turnStatus == TurnBasedMatch.MATCH_TURN_STATUS_MY_TURN;
+    }
 
-        if (match.getData() != null) {
+    public void onInitiateMatch(TurnBasedMatch match) {
+        Log.d("EEEEEE", "match == null? " + (match == null));
+        if (!sendingData && match.getData() != null) {
             // This is a game that has already started, so I'll just start
             updateMatch(match);
         } else
@@ -149,12 +185,13 @@ public class MultiPlayer {
     // callback to OnTurnBasedMatchUpdated(), which will show the game
     // UI.
     public void startMatch(TurnBasedMatch match) {
-
         curMatch = match;
         int playerCount = match.getParticipantIds().size();
         controller.gameData.shuffle = new Shuffle(playerCount, Controller.DECK_SIZE,
                 Field.getSaboteurCount(playerCount));
+        controller.initializeField(controller.gameData.shuffle);
         controller.sendData(controller.gameData);
+        Log.d("A", "start Match");
     }
 
 

@@ -12,7 +12,8 @@ public class Destroy extends Action {
         Tunnel toCheck = field.field[i][j];
         return !(i == Field.ENTRY_POS_I && j == Field.ENTRY_POS_J) &&
                 !field.didCurrentPlayerPlayCard() &&
-                toCheck != null && !toCheck.isClosedTunnel();
+                toCheck != null && !toCheck.isClosedTunnel()
+                && field.controller.isMyTurn();
     }
 
     public void play(int i, int j) {

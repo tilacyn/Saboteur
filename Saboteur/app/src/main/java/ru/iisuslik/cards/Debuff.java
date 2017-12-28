@@ -16,7 +16,8 @@ public class Debuff extends Action {
     }
 
     public boolean canPlay(int playerNumber) {
-        return !field.didCurrentPlayerPlayCard() && !field.didCurrentPlayerPlayCard() && field.players[playerNumber].canBreak(this);
+        return !field.didCurrentPlayerPlayCard() && field.players[playerNumber].canBreak(this)
+                && field.controller.isMyTurn();
     }
 
     public void play(final int playerNumber) {

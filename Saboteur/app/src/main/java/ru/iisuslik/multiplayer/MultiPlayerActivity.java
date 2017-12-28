@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import ru.iisuslik.controller.Controller;
 import ru.tilacyn.saboteur.GameActivity;
 import ru.tilacyn.saboteur.R;
+import ru.tilacyn.saboteur.SaboteurApplication;
 
 public class MultiPlayerActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -48,10 +49,14 @@ public class MultiPlayerActivity extends AppCompatActivity implements View.OnCli
 
     public void startGame(int playerCount) {
         Intent intent = new Intent(MultiPlayerActivity.this, GameActivity.class);
+
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        controller.serialize(byteArrayOutputStream);
+
+        byte [] controllerByteArray = byteArrayOutputStream.toByteArray();
+
         intent.putExtra("playerCount", playerCount);
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        controller.serialize(out);
-        intent.putExtra("controller", out.toByteArray());
+        //intent.putExtra("controller", controllerByteArray);
         startActivity(intent);
     }
 
@@ -106,7 +111,7 @@ public class MultiPlayerActivity extends AppCompatActivity implements View.OnCli
         findViewById(R.id.sign_in).setOnClickListener(this);
         findViewById(R.id.start).setOnClickListener(this);
         findViewById(R.id.check).setOnClickListener(this);
-        controller = new Controller();
+        controller = SaboteurApplication.getInstance().getController();
         controller.initializeMultiplayer();
         multiPlayer = controller.multiPlayer;
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN)
@@ -187,7 +192,8 @@ public class MultiPlayerActivity extends AppCompatActivity implements View.OnCli
                     .getParcelableExtra(Multiplayer.EXTRA_TURN_BASED_MATCH);
 
             if (match != null) {
-                multiPlayer.updateMatch(match);
+                //multiPlayer.updateMatch(match);
+                multiPlayer.curMatch = match;
                 int playerCount = match.getParticipantIds().size();
                 startGame(playerCount);
 
@@ -200,7 +206,7 @@ public class MultiPlayerActivity extends AppCompatActivity implements View.OnCli
                 // user canceled
                 //logBadActivityResult(requestCode, resultCode,
                 //        "User cancelled returning from 'Select players to Invite' dialog");
-                showToast("Select Players bad result");
+                showToast("Invite bad result");
                 return;
             }
 
@@ -231,7 +237,8 @@ public class MultiPlayerActivity extends AppCompatActivity implements View.OnCli
                         @Override
                         public void onSuccess(TurnBasedMatch turnBasedMatch) {
                             showToast("initiate");
-                            multiPlayer.onInitiateMatch(turnBasedMatch);
+                            //multiPlayer.onInitiateMatch(turnBasedMatch);
+                            multiPlayer.curMatch = turnBasedMatch;
                             int playerCount = turnBasedMatch.getParticipantIds().size();
                             startGame(playerCount);
                         }

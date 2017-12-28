@@ -18,9 +18,9 @@ public class Field implements Serializable {
     public boolean[] spins = new boolean[6];
 
     public boolean didCurrentPlayerPlayCard() {
-        if(controller.isSinglePlayer())
+        //if(controller.isSinglePlayer())
             return currentPlayerPlayedCard;
-        return currentPlayerPlayedCard || controller.multiPlayer.getMyNumber() != currentPlayer;
+        //return currentPlayerPlayedCard || controller.multiPlayer.getMyNumber() != currentPlayer;
     }
 
     public void iPlayedCard() {
@@ -280,7 +280,7 @@ public class Field implements Serializable {
                     return false;
                 } else {
                     if (!wayTo)
-                        ct.spin(false);
+                        ct.spin();
                     return false;
                 }
             }
