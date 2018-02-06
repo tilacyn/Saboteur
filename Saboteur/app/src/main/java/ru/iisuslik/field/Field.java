@@ -112,32 +112,10 @@ public class Field implements Serializable {
         }
         currentTD = null;
         spins = new boolean[6];
-        for (int k = 0; k < 6; k++)
-            spins[k] = false;
     }
 
     public void startNextTurn() {
         startNextTurn(true);
-    }
-
-    private void randomShuffle(int arr[]) {
-        Random rnd = new Random();
-        for (int i = arr.length - 1; i > 0; i--) {
-            int index = rnd.nextInt(i + 1);
-            int a = arr[index];
-            arr[index] = arr[i];
-            arr[i] = a;
-        }
-    }
-
-    private <T> void randomShuffle(ArrayList<T> arr) {
-        Random rnd = new Random();
-        for (int i = arr.size() - 1; i > 0; i--) {
-            int index = rnd.nextInt(i + 1);
-            T a = arr.get(index);
-            arr.set(index, arr.get(i));
-            arr.set(i, a);
-        }
     }
 
     public static int getSaboteurCount(int playersCount) {
@@ -404,39 +382,6 @@ public class Field implements Serializable {
         deck.clear();
         deck.addAll(Arrays.asList(shuffled));
         giveCards();
-    }
-
-
-    public void print() {
-        for (int i = 0; i < HEIGHT; i++) {
-            for (Card card : field[i]) {
-                if (card != null) {
-                    Tunnel t = (Tunnel) card;
-                    t.printFirst();
-                } else {
-                    System.out.print("      ");
-                }
-            }
-            System.out.println();
-            for (Card card : field[i]) {
-                if (card != null) {
-                    Tunnel t = (Tunnel) card;
-                    t.printSecond();
-                } else {
-                    System.out.print("      ");
-                }
-            }
-            System.out.println();
-            for (Card card : field[i]) {
-                if (card != null) {
-                    Tunnel t = (Tunnel) card;
-                    t.printThird();
-                } else {
-                    System.out.print("      ");
-                }
-            }
-            System.out.println();
-        }
     }
 
 

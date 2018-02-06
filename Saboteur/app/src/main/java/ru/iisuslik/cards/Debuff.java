@@ -3,13 +3,13 @@ package ru.iisuslik.cards;
 import ru.iisuslik.field.Field;
 import ru.iisuslik.gameData.TurnData;
 
-public class Debuff extends Action {
+public class Debuff extends Card {
 
     private boolean breakingLamp, breakingTrolley, breakingPick;
 
     public Debuff(int id, String name, String description, Field field, int playerNumber,
                   boolean breakingLamp, boolean breakingTrolley, boolean breakingPick) {
-        super(id, name, description, field, playerNumber, DEBUFF);
+        super(id, name, description, field, playerNumber);
         this.breakingLamp = breakingLamp;
         this.breakingPick = breakingPick;
         this.breakingTrolley = breakingTrolley;

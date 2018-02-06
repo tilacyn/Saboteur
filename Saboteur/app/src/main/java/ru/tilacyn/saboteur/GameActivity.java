@@ -1049,10 +1049,11 @@ public class GameActivity extends AppCompatActivity {
         setContentView(R.layout.activity_game);
 
         initializeAll();
-        Log.d("EEEE", "EEEEEEExperimenty");
+        //Log.d("EEEE", "EEEEEEExperimenty");
         //controller.multiPlayer.sendData(new byte[2]);//strange
         //controller.update();
-        controller.multiPlayer.onInitiateMatch(controller.multiPlayer.curMatch);
+        if(!controller.isSinglePlayer())
+            controller.multiPlayer.onInitiateMatch(controller.multiPlayer.curMatch);
         playerCount = getIntent().getIntExtra("playerCount", 2);
 
         fillCardIdArray();

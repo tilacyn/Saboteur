@@ -3,13 +3,13 @@ package ru.iisuslik.cards;
 import ru.iisuslik.field.Field;
 import ru.iisuslik.gameData.TurnData;
 
-public class Heal extends Action {
+public class Heal extends Card {
 
     private boolean healLamp, healTrolley, healPick;
 
     public Heal(int id, String name, String description, Field field, int playerNumber,
                 boolean healLamp, boolean healTrolley, boolean healPick) {
-        super(id, name, description, field, playerNumber, HEAL);
+        super(id, name, description, field, playerNumber);
         this.healLamp = healLamp;
         this.healPick = healPick;
         this.healTrolley = healTrolley;

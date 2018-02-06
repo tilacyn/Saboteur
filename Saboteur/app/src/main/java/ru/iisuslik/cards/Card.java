@@ -6,15 +6,10 @@ import ru.iisuslik.field.Field;
 import ru.iisuslik.gameData.TurnData;
 
 public class Card implements Serializable {
-
-    public static final int TUNNEL = 1;
-    public static final int ACTION = 2;
-
     public static final int NO_PLAYER = -1;
 
     protected int ownerPlayerNumber;
     protected Field field;
-    protected int type;
     protected int id;
     protected String name;
     protected String description;
@@ -23,8 +18,7 @@ public class Card implements Serializable {
         this.ownerPlayerNumber = playerNumber;
     }
 
-    public Card(int type, int id, String name, String description, Field field, int ownerPlayerNumber) {
-        this.type = type;
+    public Card(int id, String name, String description, Field field, int ownerPlayerNumber) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -42,10 +36,6 @@ public class Card implements Serializable {
 
     public String getDescription() {
         return description;
-    }
-
-    public int getType() {
-        return type;
     }
 
     public boolean canDiscard() {
@@ -67,23 +57,6 @@ public class Card implements Serializable {
             }
         };
 
-    }
-
-
-    protected void printSmth() {
-        System.out.print("%%%   ");
-    }
-
-    public void printFirst() {
-        printSmth();
-    }
-
-    public void printSecond() {
-        printSmth();
-    }
-
-    public void printThird() {
-        printSmth();
     }
 
 }

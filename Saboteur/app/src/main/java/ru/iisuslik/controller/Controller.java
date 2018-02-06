@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class Controller implements Serializable {
+    private static final String TAG = "CCCCCCCC";
     private Field field;
     public MultiPlayer multiPlayer = null;
 
@@ -88,7 +89,7 @@ public class Controller implements Serializable {
     public boolean canStartNextTurn() {
         update();
         boolean single = field.didCurrentPlayerPlayCard();
-        if(isSinglePlayer())
+        if (isSinglePlayer())
             return single;
         return single && isMyTurn();
     }
@@ -114,14 +115,9 @@ public class Controller implements Serializable {
     }
 
 
-    public void printField() {
-        field.print();
-    }
-
-
     public void takeTurn(TurnData turn, boolean needToSend) {
         gameData.turns.add(turn);
-        if(needToSend)
+        if (needToSend)
             sendData(gameData);
     }
 
@@ -134,7 +130,11 @@ public class Controller implements Serializable {
         if (isSinglePlayer() || gameData == null)
             return;
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        gameData.serialize(out);
+        try {
+            gameData.serialize(out);
+        } catch (IOException e) {
+            Log.d(TAG, "sendData() problem with serialize " + e.getMessage());
+        }
         byte[] data = out.toByteArray();
         multiPlayer.sendData(data);
     }
@@ -144,11 +144,11 @@ public class Controller implements Serializable {
     }
 
     public void applyGameData(GameData gameData) {
-        Log.d("EEEEEEEEEE", "game data null? " + (gameData == null));
+        Log.d(TAG, "applyGameData(), game data null? " + (gameData == null) + " game data turns null?" + (gameData.turns == null));
         if (field == null) {
             initializeField(gameData.shuffle);
         }
-        Log.d("AAAAAAAA", "data length " + gameData.turns.size() + " " + (gameData.shuffle==null));
+        Log.d(TAG, "applyGameData(), data length " + gameData.turns.size() + ", shuffle null? " + (gameData.shuffle == null));
         for (int i = this.gameData.turns.size(); i < gameData.turns.size(); i++) {
             field.applyTurnData(gameData.turns.get(i));
         }
@@ -157,21 +157,21 @@ public class Controller implements Serializable {
     }
 
     public void applyData(byte[] data) {
-        if(data == null) {
-            Log.d("A", "initiate");
+        if (data == null) {
+            Log.d(TAG, "applyData() data null");
             multiPlayer.onInitiateMatch(multiPlayer.curMatch);
             return;
         }
-        Log.d("E222", "byte[] data = " + Arrays.toString(data));
+        Log.d(TAG, "applyData() byte[] data = " + Arrays.toString(data));
         try {
             ByteArrayInputStream in = new ByteArrayInputStream(data);
-            Log.d("MMMMMMMMMM", "null" + (data == null));
+            //Log.d(TAG, "applyData() null" + (data == null));
             GameData gd = GameData.deserialize(in);
-            Log.d("MMMMMMMMMM", "null" + (gd == null));
+            Log.d(TAG, "applyData() null? " + (gd == null));
             applyGameData(gd);
-        } catch (Exception ignored) {
-            ignored.printStackTrace();
-            Log.d("E", "apply data problem " + ignored.getMessage());
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+            Log.d(TAG, "applyData() problem with deserialize " + e.getMessage());
         }
     }
 

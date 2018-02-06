@@ -12,7 +12,7 @@ public class Tunnel extends Card {
 
     public Tunnel(String name, String description, Field field, int playerNumber,
                   boolean up, boolean down, boolean left, boolean right, boolean centre) {
-        super(TUNNEL, 0, name, description, field, playerNumber);
+        super(0, name, description, field, playerNumber);
         this.up = up;
         this.down = down;
         this.right = right;
@@ -42,7 +42,7 @@ public class Tunnel extends Card {
 
     public void play(int i, int j) {
         field.putTunnel(this, i, j);
-        Log.d("AAAAAAAA", "put tunnel player " + ownerPlayerNumber + ' ' + (field.field[i][j] == null));
+        Log.d("AAAAAAAA", "put tunnel player " + ownerPlayerNumber + " field i j empty " + (field.field[i][j] == null));
         field.players[ownerPlayerNumber].playCard(this);
         field.iPlayedCard();
         field.startDfs();
@@ -91,28 +91,5 @@ public class Tunnel extends Card {
     private void printBoolean(boolean b) {
         if (b) System.out.print('+');
         else System.out.print(' ');
-    }
-
-    @Override
-    public void printFirst() {
-        System.out.print(' ');
-        printBoolean(up);
-        System.out.print("   ");
-    }
-
-    @Override
-    public void printSecond() {
-        printBoolean(left);
-        if (centre) System.out.print('@');
-        else System.out.print(' ');
-        printBoolean(right);
-        System.out.print("  ");
-    }
-
-    @Override
-    public void printThird() {
-        System.out.print(' ');
-        printBoolean(down);
-        System.out.print("   ");
     }
 }

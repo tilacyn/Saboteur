@@ -37,7 +37,7 @@ import ru.tilacyn.saboteur.SaboteurApplication;
 
 public class MultiPlayerActivity extends AppCompatActivity implements View.OnClickListener {
 
-
+    private static final String TAG = "AAAAAAAA";
     private static final int RC_SIGN_IN = 9001;
     final static int RC_SELECT_PLAYERS = 10000;
     final static int RC_LOOK_AT_MATCHES = 10001;
@@ -236,10 +236,11 @@ public class MultiPlayerActivity extends AppCompatActivity implements View.OnCli
                     .addOnSuccessListener(new OnSuccessListener<TurnBasedMatch>() {
                         @Override
                         public void onSuccess(TurnBasedMatch turnBasedMatch) {
-                            showToast("initiate");
+                            showToast("success createMatch");
                             //multiPlayer.onInitiateMatch(turnBasedMatch);
                             multiPlayer.curMatch = turnBasedMatch;
                             int playerCount = turnBasedMatch.getParticipantIds().size();
+                            Log.d(TAG, "onActivityResult() - success createMatch");
                             startGame(playerCount);
                         }
                     });
@@ -293,7 +294,7 @@ public class MultiPlayerActivity extends AppCompatActivity implements View.OnCli
 
     private void onDisconnected() {
 
-        //Log.d(TAG, "onDisconnected()");
+        Log.d(TAG, "onDisconnected()");
 
         multiPlayer.multiplayerClient = null;
         multiPlayer.invitationsClient = null;
@@ -309,10 +310,10 @@ public class MultiPlayerActivity extends AppCompatActivity implements View.OnCli
                     public void onComplete(@NonNull Task<Void> task) {
 
                         if (task.isSuccessful()) {
-                            Log.d("AAAAAAAA", "signOut(): success");
+                            Log.d(TAG, "signOut(): success");
                             showToast("sign out complete");
                         } else {
-                            Log.d("AAAAAAAA", "signOut(): error");
+                            Log.d(TAG, "signOut(): error");
                         }
 
                         onDisconnected();
