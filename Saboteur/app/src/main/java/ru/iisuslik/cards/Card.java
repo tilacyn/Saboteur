@@ -6,6 +6,8 @@ import ru.iisuslik.field.Field;
 import ru.iisuslik.gameData.TurnData;
 
 public class Card implements Serializable {
+    public enum CARD_TYPE {TUNNEL, HEAL, DESTROY, WATCH, DEBUFF, UNKNOWN}
+
     public static final int NO_PLAYER = -1;
 
     protected int ownerPlayerNumber;
@@ -44,19 +46,11 @@ public class Card implements Serializable {
 
 
     public void discard() {
+        field.currentTD = new TurnData(CARD_TYPE.UNKNOWN, ownerPlayerNumber,
+                field.players[ownerPlayerNumber].getCardNumber(this),
+                -1, -1, -1, true);
         field.players[ownerPlayerNumber].playCard(this);
         field.iPlayedCard();
-
-        field.currentTD = new TurnData(ownerPlayerNumber,
-                field.players[ownerPlayerNumber].getCardNumber(this),
-                -1, -1, -1, true, this) {
-            @Override
-            public void apply(Card card) {
-                card.discard();
-                card.field.startNextTurn(false);
-            }
-        };
-
     }
 
 }

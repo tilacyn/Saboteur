@@ -21,18 +21,13 @@ public class Debuff extends Card {
     }
 
     public void play(final int playerNumber) {
+        field.currentTD = new TurnData(CARD_TYPE.DEBUFF, ownerPlayerNumber,
+                field.players[ownerPlayerNumber].getCardNumber(this),
+                -1, -1, playerNumber,
+                isBreakingLamp(), isBreakingTrolley(), isBreakingPick());
         field.players[playerNumber].breakIt(this);
         field.players[ownerPlayerNumber].playCard(this);
         field.iPlayedCard();
-        field.currentTD = new TurnData(ownerPlayerNumber,
-                field.players[ownerPlayerNumber].getCardNumber(this),
-                -1, -1, playerNumber, this) {
-            @Override
-            public void apply(Card card) {
-                ((Debuff) card).play(targetPlayerNumber);
-                card.field.startNextTurn(false);
-            }
-        };
 
     }
 

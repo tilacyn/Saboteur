@@ -15,18 +15,12 @@ public class Watch extends Card {
     }
 
     public boolean play(int i, int j) {
+        field.currentTD = new TurnData(CARD_TYPE.WATCH, ownerPlayerNumber,
+                field.players[ownerPlayerNumber].getCardNumber(this),
+                i, j, -1);
         ClosedTunnel ct = (ClosedTunnel) field.field[i][j];
         field.players[ownerPlayerNumber].playCard(this);
         field.iPlayedCard();
-        field.currentTD = new TurnData(ownerPlayerNumber,
-                field.players[ownerPlayerNumber].getCardNumber(this),
-                i, j, -1, this) {
-            @Override
-            public void apply(Card card) {
-                ((Watch) card).play(i, j);
-                card.field.startNextTurn(false);
-            }
-        };
         return ct.isGold();
     }
 }

@@ -134,6 +134,7 @@ public class Controller implements Serializable {
             gameData.serialize(out);
         } catch (IOException e) {
             Log.d(TAG, "sendData() problem with serialize " + e.getMessage());
+            e.printStackTrace();
         }
         byte[] data = out.toByteArray();
         multiPlayer.sendData(data);
@@ -150,10 +151,13 @@ public class Controller implements Serializable {
         }
         Log.d(TAG, "applyGameData(), data length " + gameData.turns.size() + ", shuffle null? " + (gameData.shuffle == null));
         for (int i = this.gameData.turns.size(); i < gameData.turns.size(); i++) {
+            Log.d(TAG, "applyGameData() apply new turn №" + i + 1);
             field.applyTurnData(gameData.turns.get(i));
         }
-        this.gameData = gameData;
-
+        if (gameData.turns.size() > this.gameData.turns.size()) {
+            Log.d(TAG, "applyGameData() we have new turns");
+            this.gameData = gameData;
+        }
     }
 
     public void applyData(byte[] data) {

@@ -931,20 +931,20 @@ public class GameActivity extends AppCompatActivity {
 
             message.setText("Player " + turn.ownerPlayerNumber);
 
-            if (turn.card instanceof Heal) {
+            if (turn.type == Card.CARD_TYPE.HEAL) {
                 message.setText(message.getText() + " repaired Player " +
                         ((Integer) (turn.targetPlayerNumber + 1)).toString() + "'s ");
-                if (((Heal) turn.card).isHealLamp()) {
-                    if (((Heal) turn.card).isHealTrolley()) {
+                if (turn.lamp) {
+                    if (turn.trolley) {
                         message.setText(message.getText() + "lamp and trolley");
-                    } else if (((Heal) turn.card).isHealPick()) {
+                    } else if (turn.pick) {
                         message.setText(message.getText() + "lamp and pick");
                     } else {
                         message.setText(message.getText() + "lamp");
                     }
                 } else {
-                    if (((Heal) turn.card).isHealTrolley()) {
-                        if (((Heal) turn.card).isHealPick()) {
+                    if (turn.trolley) {
+                        if (turn.pick) {
                             message.setText(message.getText() + "pick and trolley");
                         } else {
                             message.setText(message.getText() + "trolley");
@@ -955,30 +955,30 @@ public class GameActivity extends AppCompatActivity {
                 }
             }
 
-            if (turn.card instanceof Debuff) {
+            if (turn.type == Card.CARD_TYPE.DEBUFF) {
                 message.setText(message.getText() + " broke Player " +
                         ((Integer) (turn.targetPlayerNumber + 1)).toString() + "'s ");
-                if (((Debuff) turn.card).isBreakingLamp()) {
+                if (turn.lamp) {
                     message.setText(message.getText() + "lamp");
-                } else if (((Debuff) turn.card).isBreakingPick()) {
+                } else if (turn.pick) {
                     message.setText(message.getText() + "pick");
                 } else {
                     message.setText(message.getText() + "trolley");
                 }
             }
 
-            if (turn.card instanceof Tunnel) {
+            if (turn.type == Card.CARD_TYPE.TUNNEL) {
                 message.setText(message.getText() + " put tunnel on (" +
                         ((Integer) turn.i).toString() + ", " + ((Integer) turn.j).toString() + ") cell");
             }
 
-            if (turn.card instanceof Destroy) {
+            if (turn.type == Card.CARD_TYPE.DESTROY) {
                 message.setText(message.getText() + " destroyed tunnel on (" +
                         ((Integer) turn.i).toString() + ", " + ((Integer) turn.j).toString() + ") cell");
 
             }
 
-            if (turn.card instanceof Watch) {
+            if (turn.type == Card.CARD_TYPE.WATCH) {
                 message.setText(message.getText() + " watched at (" +
                         ((Integer) turn.i).toString() + ", " + ((Integer) turn.j).toString() + ") cell");
             }

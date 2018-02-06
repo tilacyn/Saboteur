@@ -1,5 +1,7 @@
 package ru.iisuslik.field;
 
+import android.util.Log;
+
 import ru.iisuslik.cards.*;
 import ru.iisuslik.controller.Controller;
 import ru.iisuslik.gameData.Shuffle;
@@ -13,6 +15,7 @@ import java.util.Random;
 
 public class Field implements Serializable {
 
+    private static final String TAG = "FFFFFFF";
     private boolean currentPlayerPlayedCard = false;
     public TurnData currentTD;
     public boolean[] spins = new boolean[6];
@@ -51,17 +54,37 @@ public class Field implements Serializable {
     public ArrayList<Card> deck = new ArrayList<>();
 
 
-    public void applyTurnData(TurnData gameData) {
-        int playerFrom = gameData.ownerPlayerNumber;
-        int cardNumber = gameData.cardNumber;
+    public void applyTurnData(TurnData turnData) {
+        int playerFrom = turnData.ownerPlayerNumber;
+        int cardNumber = turnData.cardNumber;
         ArrayList<Card> hand = players[playerFrom].getHand();
-        gameData.apply(hand.get(cardNumber));
         for (int i = 0; i < hand.size(); i++) {
-            if (gameData.spins[i]) {
+            if (turnData.spins[i]) {
                 ((Tunnel) hand.get(i)).spin();
             }
         }
-
+        Log.d(TAG, "applyTurnData()");
+        Card cardToPlay = hand.get(cardNumber);
+        switch (turnData.type) {
+            case UNKNOWN:
+                cardToPlay.discard();
+                break;
+            case HEAL:
+                ((Heal)cardToPlay).play(turnData.targetPlayerNumber);
+                break;
+            case DEBUFF:
+                ((Debuff)cardToPlay).play(turnData.targetPlayerNumber);
+                break;
+            case WATCH:
+                ((Watch)cardToPlay).play(turnData.i, turnData.j);
+                break;
+            case TUNNEL:
+                ((Tunnel)cardToPlay).play(turnData.i, turnData.j);
+                break;
+            case DESTROY:
+                ((Destroy)cardToPlay).play(turnData.i, turnData.j);
+                break;
+        }
         startNextTurn(false);
     }
 
@@ -85,10 +108,13 @@ public class Field implements Serializable {
     }
 
     public void startNextTurn(boolean needToSend) {
+        Log.d(TAG, "startNextTurn()");
         if (deck.size() != 0) {
             Card next = deck.remove(deck.size() - 1);
             next.setPlayerNumber(currentPlayer);
             players[currentPlayer].addCard(next);
+            Log.d(TAG, "player" + (currentPlayer + 1) + "take some cards, now we have " + players[currentPlayer].getHand().size());
+            Log.d(TAG, "players hands sizes" + players[0].getHand().size() + players[1].getHand().size());
         }
         if (players[currentPlayer].getHand().size() == 0) {
             players[currentPlayer].concede();

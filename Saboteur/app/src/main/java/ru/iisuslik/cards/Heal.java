@@ -21,20 +21,16 @@ public class Heal extends Card {
     }
 
     public void play(final int playerNumber) {
+        field.currentTD = new TurnData(CARD_TYPE.HEAL, ownerPlayerNumber,
+                field.players[ownerPlayerNumber].getCardNumber(this),
+                -1, -1, playerNumber,
+                isHealLamp(), isHealTrolley(), isHealPick());
         field.players[playerNumber].heal(this);
         field.players[ownerPlayerNumber].playCard(this);
         field.iPlayedCard();
-            field.currentTD = new TurnData(ownerPlayerNumber,
-                    field.players[ownerPlayerNumber].getCardNumber(this),
-                    -1, -1, playerNumber, this) {
-                @Override
-                public void apply(Card card) {
-                    ((Heal)card).play(targetPlayerNumber);
-                    card.field.startNextTurn(false);
-                }
-            };
 
     }
+
     public boolean isHealLamp() {
         return healLamp;
     }

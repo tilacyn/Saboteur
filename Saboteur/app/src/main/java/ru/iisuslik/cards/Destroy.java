@@ -17,18 +17,12 @@ public class Destroy extends Card {
     }
 
     public void play(int i, int j) {
+        field.currentTD = new TurnData(CARD_TYPE.DESTROY, ownerPlayerNumber,
+                field.players[ownerPlayerNumber].getCardNumber(this),
+                i, j, -1);
         field.field[i][j] = null;
         field.players[ownerPlayerNumber].playCard(this);
         field.iPlayedCard();
-        field.currentTD = new TurnData(ownerPlayerNumber,
-                field.players[ownerPlayerNumber].getCardNumber(this),
-                i, j, -1, this) {
-            @Override
-            public void apply(Card card) {
-                ((Destroy) card).play(i, j);
-                card.field.startNextTurn(false);
-            }
-        };
     }
 }
 

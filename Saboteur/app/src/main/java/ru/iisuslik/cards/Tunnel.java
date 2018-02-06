@@ -41,20 +41,15 @@ public class Tunnel extends Card {
     }
 
     public void play(int i, int j) {
+        field.currentTD = new TurnData(CARD_TYPE.TUNNEL, ownerPlayerNumber,
+                field.players[ownerPlayerNumber].getCardNumber(this),
+                i, j, -1);
+
         field.putTunnel(this, i, j);
         Log.d("AAAAAAAA", "put tunnel player " + ownerPlayerNumber + " field i j empty " + (field.field[i][j] == null));
         field.players[ownerPlayerNumber].playCard(this);
         field.iPlayedCard();
         field.startDfs();
-        field.currentTD = new TurnData(ownerPlayerNumber,
-                field.players[ownerPlayerNumber].getCardNumber(this),
-                i, j, -1, this) {
-            @Override
-            public void apply(Card card) {
-                ((Tunnel) card).play(i, j);
-                card.field.startNextTurn(false);
-            }
-        };
         Log.d("AAAAAAAA", "finish play tunnel " + field.didCurrentPlayerPlayCard());
     }
 
