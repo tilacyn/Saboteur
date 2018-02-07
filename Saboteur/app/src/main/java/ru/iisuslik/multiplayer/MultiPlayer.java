@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 
 import ru.iisuslik.controller.Controller;
 import ru.iisuslik.field.Field;
+import ru.iisuslik.gameData.GameData;
 import ru.iisuslik.gameData.Shuffle;
 
 
@@ -42,8 +43,6 @@ public class MultiPlayer implements Serializable {
     public int getMyNumber() {
         String myParticipantId = curMatch.getParticipantId(playerId);
         ArrayList<String> ids = curMatch.getParticipantIds();
-        String id1 = ids.get(0);
-        String id2 = ids.get(1);
         for (int i = 0; i < ids.size(); i++) {
             if (ids.get(i).equals(myParticipantId)) {
                 return i;
@@ -61,7 +60,7 @@ public class MultiPlayer implements Serializable {
             return;
         }
         sendingData = true;
-        Log.d(TAG, "sendData() in my turn? " + isMyTurn());
+        Log.d(TAG, "sendData() in my turn? " + isMyTurn() + "shuffle is null? " + (controller.gameData.shuffle == null));
         Log.d(TAG, "sendData() match status " + curMatch.getStatus());
         multiplayerClient.takeTurn(curMatch.getMatchId(),
                 data, nextParticipantId).addOnCompleteListener(new OnCompleteListener<TurnBasedMatch>() {
@@ -111,7 +110,6 @@ public class MultiPlayer implements Serializable {
 
     public void updateMatch(TurnBasedMatch match) {
         curMatch = match;
-
         int status = match.getStatus();
         int turnStatus = match.getTurnStatus();
 
@@ -144,7 +142,6 @@ public class MultiPlayer implements Serializable {
         // OK, it's active. Check on turn status.
         switch (turnStatus) {
             case TurnBasedMatch.MATCH_TURN_STATUS_MY_TURN:
-
                 if (!sendingData)
                     controller.applyData(curMatch.getData());
                 //setGameplayUI();
@@ -159,10 +156,6 @@ public class MultiPlayer implements Serializable {
                 //showWarning("Good inititative!",
                 // "Still waiting for invitations.\n\nBe patient!");
         }
-
-        //mTurnData = null;
-
-        //setViewVisibility();
     }
 
     public boolean isMyTurn() {
@@ -188,11 +181,23 @@ public class MultiPlayer implements Serializable {
     public void startMatch(TurnBasedMatch match) {
         curMatch = match;
         int playerCount = match.getParticipantIds().size();
+        if(controller.gameData == null)
+            controller.gameData = new GameData();
         controller.gameData.shuffle = new Shuffle(playerCount, Controller.DECK_SIZE,
                 Field.getSaboteurCount(playerCount));
         controller.initializeField(controller.gameData.shuffle);
         controller.sendData(controller.gameData);
         Log.d(TAG, "startMatch()");
+    }
+
+    public void finish() {
+        multiplayerClient.finishMatch(curMatch.getMatchId())
+                .addOnSuccessListener(new OnSuccessListener<TurnBasedMatch>() {
+                    @Override
+                    public void onSuccess(TurnBasedMatch turnBasedMatch) {
+                        updateMatch(turnBasedMatch);
+                    }
+                });
     }
 
 

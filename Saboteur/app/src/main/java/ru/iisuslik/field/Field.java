@@ -51,7 +51,7 @@ public class Field implements Serializable {
 
     public Tunnel[][] field = new Tunnel[HEIGHT][WIDTH];
     public Player[] players;
-    public ArrayList<Card> deck = new ArrayList<>();
+    private ArrayList<Card> deck = new ArrayList<>();
 
 
     public void applyTurnData(TurnData turnData) {
@@ -108,12 +108,12 @@ public class Field implements Serializable {
     }
 
     public void startNextTurn(boolean needToSend) {
-        Log.d(TAG, "startNextTurn()");
+        Log.d(TAG, "startNextTurn()" + "shuffle is null? " + (controller.gameData.shuffle == null));
         if (deck.size() != 0) {
             Card next = deck.remove(deck.size() - 1);
             next.setPlayerNumber(currentPlayer);
             players[currentPlayer].addCard(next);
-            Log.d(TAG, "player" + (currentPlayer + 1) + "take some cards, now we have " + players[currentPlayer].getHand().size());
+            Log.d(TAG, "player" + currentPlayer + "take some cards, now we have " + players[currentPlayer].getHand().size());
             Log.d(TAG, "players hands sizes" + players[0].getHand().size() + players[1].getHand().size());
         }
         if (players[currentPlayer].getHand().size() == 0) {
@@ -121,7 +121,7 @@ public class Field implements Serializable {
             playingCount--;
         }
         if (playingCount == 0) {
-            theEnd = true;
+            finish();
             return;
         }
         currentPlayer++;
@@ -138,6 +138,7 @@ public class Field implements Serializable {
         }
         currentTD = null;
         spins = new boolean[6];
+        Log.d(TAG, "startNextTurn() the end" + "shuffle is null? " + (controller.gameData.shuffle == null));
     }
 
     public void startNextTurn() {
@@ -280,7 +281,7 @@ public class Field implements Serializable {
                 ClosedTunnel ct = (ClosedTunnel) t;
                 ct.open();
                 if (ct.isGold()) {
-                    theEnd = true;
+                    finish();
                     return false;
                 } else {
                     if (!wayTo)
@@ -290,6 +291,11 @@ public class Field implements Serializable {
             }
         }
         return false;
+    }
+    void finish() {
+        if(!controller.isSinglePlayer())
+            controller.multiPlayer.finish();
+        theEnd = true;
     }
 
     private void dfs(int i, int j) {
@@ -408,6 +414,8 @@ public class Field implements Serializable {
         deck.clear();
         deck.addAll(Arrays.asList(shuffled));
         giveCards();
+        if(!controller.isSinglePlayer())
+            currentPlayer = 1;
     }
 
 

@@ -46,11 +46,11 @@ public class Tunnel extends Card {
                 i, j, -1);
 
         field.putTunnel(this, i, j);
-        Log.d("AAAAAAAA", "put tunnel player " + ownerPlayerNumber + " field i j empty " + (field.field[i][j] == null));
+        Log.d("TTTTTTTTT", "put tunnel player " + ownerPlayerNumber + " field i j empty " + (field.field[i][j] == null));
         field.players[ownerPlayerNumber].playCard(this);
         field.iPlayedCard();
         field.startDfs();
-        Log.d("AAAAAAAA", "finish play tunnel " + field.didCurrentPlayerPlayCard());
+        Log.d("TTTTTTTTT", "finish play tunnel " + field.didCurrentPlayerPlayCard());
     }
 
 

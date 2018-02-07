@@ -17,7 +17,7 @@ import java.util.Arrays;
 
 public class Controller implements Serializable {
     private static final String TAG = "CCCCCCCC";
-    private Field field;
+    public Field field;
     public MultiPlayer multiPlayer = null;
 
     public GameData gameData = new GameData();
@@ -145,18 +145,18 @@ public class Controller implements Serializable {
     }
 
     public void applyGameData(GameData gameData) {
-        Log.d(TAG, "applyGameData(), game data null? " + (gameData == null) + " game data turns null?" + (gameData.turns == null));
         if (field == null) {
             initializeField(gameData.shuffle);
+            this.gameData = new GameData();
         }
-        Log.d(TAG, "applyGameData(), data length " + gameData.turns.size() + ", shuffle null? " + (gameData.shuffle == null));
+        Log.d(TAG, "applyGameData(), how many turns " + gameData.turns.size() + ", shuffle null? " + (gameData.shuffle == null));
+        Log.d(TAG, "applyGameData() current player " + field.getCurrentPlayer() + " me " + multiPlayer.getMyNumber());
         for (int i = this.gameData.turns.size(); i < gameData.turns.size(); i++) {
             Log.d(TAG, "applyGameData() apply new turn №" + i + 1);
             field.applyTurnData(gameData.turns.get(i));
         }
-        if (gameData.turns.size() > this.gameData.turns.size()) {
-            Log.d(TAG, "applyGameData() we have new turns");
-            this.gameData = gameData;
+        if(this.gameData.shuffle == null) {
+            this.gameData.shuffle = gameData.shuffle;
         }
     }
 

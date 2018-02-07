@@ -88,7 +88,7 @@ public class GameActivity extends AppCompatActivity {
         }
 
         public void add() {
-            if(!contains(screen, this)) {
+            if (!contains(screen, this)) {
                 buttonsRow.addView(this);
             }
         }
@@ -619,12 +619,11 @@ public class GameActivity extends AppCompatActivity {
         hscroll = (HorizontalScrollView) findViewById(R.id.hscroll);
 
 
-        if(getIntent().getByteArrayExtra("controller") != null) {
+        if (getIntent().getByteArrayExtra("controller") != null) {
             byte[] controllerCypher = getIntent().getByteArrayExtra("controller");
             controller = Controller.deserialize(new ByteArrayInputStream(controllerCypher));
             controllerByteArray = controllerCypher;
-        }
-        else {
+        } else {
             controller = SaboteurApplication.getInstance().getController();
             controllerByteArray = null;
         }
@@ -769,8 +768,11 @@ public class GameActivity extends AppCompatActivity {
 
     void makeYou() {
 
-
-        yourNumber.setText("Player " + ((Integer) (controller.currentPlayerNumber() + 1)).toString());
+        if (controller.isSinglePlayer())
+            yourNumber.setText("Player " + ((Integer) (controller.currentPlayerNumber() + 1)).toString());
+        else
+            yourNumber.setText("Player " + ((Integer) (controller.multiPlayer.getMyNumber() + 1)).toString() +
+                    (controller.multiPlayer.isMyTurn() ? " My turn" : " Not my turn"));
         yourNumber.setTextSize(30);
         yourNumber.setGravity(Gravity.CENTER_HORIZONTAL);
         yourNumber.setTextColor(Color.WHITE);
@@ -902,7 +904,7 @@ public class GameActivity extends AppCompatActivity {
                     discard.makeItSelected();
                 }
                 removeSpin();
-                if(isDiscard) {
+                if (isDiscard) {
                     setDiscardFalse();
                 } else {
                     isDiscard = true;
@@ -1038,7 +1040,10 @@ public class GameActivity extends AppCompatActivity {
 
         Toast.makeText(getApplicationContext(), "onStop applied", Toast.LENGTH_SHORT).show();
         //finish();
-
+        if(!controller.isSinglePlayer()) {
+            controller.field = null;
+            controller.gameData = null;
+        }
     }
 
 
@@ -1052,7 +1057,7 @@ public class GameActivity extends AppCompatActivity {
         //Log.d("EEEE", "EEEEEEExperimenty");
         //controller.multiPlayer.sendData(new byte[2]);//strange
         //controller.update();
-        if(!controller.isSinglePlayer())
+        if (!controller.isSinglePlayer())
             controller.multiPlayer.onInitiateMatch(controller.multiPlayer.curMatch);
         playerCount = getIntent().getIntExtra("playerCount", 2);
 
