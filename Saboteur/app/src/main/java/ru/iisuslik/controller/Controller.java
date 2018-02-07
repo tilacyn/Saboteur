@@ -3,6 +3,10 @@ package ru.iisuslik.controller;
 
 import android.util.Log;
 
+import com.google.android.gms.games.AnnotatedData;
+import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatch;
+import com.google.android.gms.tasks.OnSuccessListener;
+
 import ru.iisuslik.cards.Card;
 import ru.iisuslik.cards.Tunnel;
 import ru.iisuslik.field.Field;
@@ -55,12 +59,10 @@ public class Controller implements Serializable {
 
 
     public int getWidth() {
-        //update();
         return field.WIDTH;
     }
 
     public int getHeight() {
-        //update();
         return field.HEIGHT;
     }
 
@@ -100,7 +102,7 @@ public class Controller implements Serializable {
     }
 
     public boolean isCurrentPlayerSaboteur() {
-        //update();
+        update();
         return field.isCurrentPlayerSaboteur();
     }
 
@@ -122,8 +124,16 @@ public class Controller implements Serializable {
     }
 
     public void update() {
-        if (!isSinglePlayer())
-            multiPlayer.updateMatch(multiPlayer.curMatch);
+        if (!isSinglePlayer()) {
+            multiPlayer.multiplayerClient.loadMatch(multiPlayer.curMatch.getMatchId())
+                    .addOnSuccessListener(new OnSuccessListener<AnnotatedData<TurnBasedMatch>>() {
+                @Override
+                public void onSuccess(AnnotatedData<TurnBasedMatch> turnBasedMatchAnnotatedData) {
+                    multiPlayer.curMatch = turnBasedMatchAnnotatedData.get();
+                    multiPlayer.updateMatch(multiPlayer.curMatch);
+                }
+            });
+        }
     }
 
     public void sendData(GameData gameData) {

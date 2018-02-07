@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.games.AnnotatedData;
 import com.google.android.gms.games.InvitationsClient;
 import com.google.android.gms.games.TurnBasedMultiplayerClient;
 import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatch;
@@ -32,7 +33,6 @@ public class MultiPlayer implements Serializable {
     public TurnBasedMultiplayerClient multiplayerClient;
     public InvitationsClient invitationsClient;
     public TurnBasedMatch curMatch;
-    public boolean isDoingTurn;
     public Controller controller;
 
     public MultiPlayer(Controller controller) {
@@ -98,11 +98,8 @@ public class MultiPlayer implements Serializable {
         }
 
         if (curMatch.getAvailableAutoMatchSlots() <= 0) {
-            // You've run out of automatch slots, so we start over.
             return participantIds.get(0);
         } else {
-            // You have not yet fully automatched, so null will find a new
-            // person to play against.
             return null;
         }
     }
@@ -115,46 +112,27 @@ public class MultiPlayer implements Serializable {
 
         switch (status) {
             case TurnBasedMatch.MATCH_STATUS_CANCELED:
-                //showWarning("Canceled!", "This game was canceled!");
                 return;
             case TurnBasedMatch.MATCH_STATUS_EXPIRED:
-                // showWarning("Expired!", "This game is expired.  So sad!");
                 return;
             case TurnBasedMatch.MATCH_STATUS_AUTO_MATCHING:
-                //showWarning("Waiting for auto-match...",
-                //"We're still waiting for an automatch partner.");
                 return;
             case TurnBasedMatch.MATCH_STATUS_COMPLETE:
                 if (turnStatus == TurnBasedMatch.MATCH_TURN_STATUS_COMPLETE) {
-                   /* showWarning("Complete!",
-                            "This game is over; someone finished it, and so did you!  " +
-                                    "There is nothing to be done.");
-                    */
                     break;
                 }
-
-                // Note that in this state, you must still call "Finish" yourself,
-                // so we allow this to continue.
-                /*showWarning("Complete!",
-                        "This game is over; someone finished it!  You can only finish it now.");*/
         }
 
-        // OK, it's active. Check on turn status.
         switch (turnStatus) {
             case TurnBasedMatch.MATCH_TURN_STATUS_MY_TURN:
                 if (!sendingData)
                     controller.applyData(curMatch.getData());
-                //setGameplayUI();
                 return;
             case TurnBasedMatch.MATCH_TURN_STATUS_THEIR_TURN:
-                // Should return results.
                 if (!sendingData)
                     controller.applyData(curMatch.getData());
-                //showWarning("Alas...", "It's not your turn.");
                 break;
             case TurnBasedMatch.MATCH_TURN_STATUS_INVITED:
-                //showWarning("Good inititative!",
-                // "Still waiting for invitations.\n\nBe patient!");
         }
     }
 
@@ -171,13 +149,6 @@ public class MultiPlayer implements Serializable {
         } else
             startMatch(match);
     }
-
-    // startMatch() happens in response to the createTurnBasedMatch()
-    // above. This is only called on success, so we should have a
-    // valid match object. We're taking this opportunity to setup the
-    // game, saving our initial state. Calling takeTurn() will
-    // callback to OnTurnBasedMatchUpdated(), which will show the game
-    // UI.
     public void startMatch(TurnBasedMatch match) {
         curMatch = match;
         int playerCount = match.getParticipantIds().size();
