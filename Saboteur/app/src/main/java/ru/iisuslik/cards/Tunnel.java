@@ -8,7 +8,7 @@ import ru.iisuslik.gameData.TurnData;
 public class Tunnel extends Card {
 
     public boolean up, down, left, right, centre;
-    protected boolean closedTunnel = false;
+    boolean closedTunnel = false;
 
     public Tunnel(String name, String description, Field field, int playerNumber,
                   boolean up, boolean down, boolean left, boolean right, boolean centre) {
@@ -81,10 +81,5 @@ public class Tunnel extends Card {
 
     public boolean isClosedTunnel() {
         return closedTunnel;
-    }
-
-    private void printBoolean(boolean b) {
-        if (b) System.out.print('+');
-        else System.out.print(' ');
     }
 }

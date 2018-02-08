@@ -587,6 +587,8 @@ public class GameActivity extends AppCompatActivity {
     //hscroll
     HorizontalScrollView hscroll;
 
+    //for Log
+    private String TAG = "GGGGGGGGGGGGGGGGGG";
 
     boolean contains(ViewGroup parent, View child) {
         for (int i = 0; i < parent.getChildCount(); i++) {
@@ -782,6 +784,8 @@ public class GameActivity extends AppCompatActivity {
         dwarf.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                makeLog();
+                makeYou();
                 boolean isSaboteur = controller.isCurrentPlayerSaboteur();
 
                 if (!isSaboteur) {
@@ -1040,10 +1044,21 @@ public class GameActivity extends AppCompatActivity {
 
         Toast.makeText(getApplicationContext(), "onStop applied", Toast.LENGTH_SHORT).show();
         //finish();
+        /*
         if(!controller.isSinglePlayer()) {
             controller.field = null;
             controller.gameData = null;
         }
+        */
+        Log.d(TAG, "onStop()");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d(TAG, "onResume()");
+        if (!controller.isSinglePlayer())
+            controller.multiPlayer.fastUpdate();
     }
 
 
@@ -1054,9 +1069,6 @@ public class GameActivity extends AppCompatActivity {
         setContentView(R.layout.activity_game);
 
         initializeAll();
-        //Log.d("EEEE", "EEEEEEExperimenty");
-        //controller.multiPlayer.sendData(new byte[2]);//strange
-        //controller.update();
         if (!controller.isSinglePlayer())
             controller.multiPlayer.onInitiateMatch(controller.multiPlayer.curMatch);
         playerCount = getIntent().getIntExtra("playerCount", 2);
@@ -1083,9 +1095,9 @@ public class GameActivity extends AppCompatActivity {
         makeGameField();
 
         makeButtonsTable();
-
         table.drawTable();
-
+        Toast.makeText(getApplicationContext(), "onCreate applied", Toast.LENGTH_LONG).show();
+        Log.d(TAG, "onCreate()");
     }
 
 }

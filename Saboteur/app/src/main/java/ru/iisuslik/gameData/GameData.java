@@ -10,17 +10,12 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-import ru.iisuslik.controller.Controller;
 
 
 public class GameData implements Serializable {
 
     public ArrayList<TurnData> turns = new ArrayList<>();
     public Shuffle shuffle;
-
-    public void addTurn(TurnData td) {
-        turns.add(td);
-    }
 
     public void serialize(OutputStream out) throws IOException {
         Log.d("GGGGGGG", "turns are null? " + (turns == null));

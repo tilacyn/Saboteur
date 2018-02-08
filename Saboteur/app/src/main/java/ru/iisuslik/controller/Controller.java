@@ -3,10 +3,6 @@ package ru.iisuslik.controller;
 
 import android.util.Log;
 
-import com.google.android.gms.games.AnnotatedData;
-import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatch;
-import com.google.android.gms.tasks.OnSuccessListener;
-
 import ru.iisuslik.cards.Card;
 import ru.iisuslik.cards.Tunnel;
 import ru.iisuslik.field.Field;
@@ -32,7 +28,7 @@ public class Controller implements Serializable {
         initializeField(playerCount, gameData.shuffle);
     }
 
-    public void initializeField(int playerCount, Shuffle shuffle) {
+    private void initializeField(int playerCount, Shuffle shuffle) {
         field = new Field(playerCount, this, shuffle);
     }
 
@@ -53,17 +49,15 @@ public class Controller implements Serializable {
         return field.players.length;
     }
 
-    public static final int ENTRY_POS_I = Field.ENTRY_POS_I;
-    public static final int ENTRY_POS_J = Field.ENTRY_POS_J;
     public static final int DECK_SIZE = 70;
 
 
     public int getWidth() {
-        return field.WIDTH;
+        return Field.WIDTH;
     }
 
     public int getHeight() {
-        return field.HEIGHT;
+        return Field.HEIGHT;
     }
 
     public ArrayList<Card> getCurrentPlayerHand() {
@@ -125,14 +119,7 @@ public class Controller implements Serializable {
 
     public void update() {
         if (!isSinglePlayer()) {
-            multiPlayer.multiplayerClient.loadMatch(multiPlayer.curMatch.getMatchId())
-                    .addOnSuccessListener(new OnSuccessListener<AnnotatedData<TurnBasedMatch>>() {
-                @Override
-                public void onSuccess(AnnotatedData<TurnBasedMatch> turnBasedMatchAnnotatedData) {
-                    multiPlayer.curMatch = turnBasedMatchAnnotatedData.get();
-                    multiPlayer.updateMatch(multiPlayer.curMatch);
-                }
-            });
+            multiPlayer.update();
         }
     }
 
@@ -154,7 +141,7 @@ public class Controller implements Serializable {
         return multiPlayer == null;
     }
 
-    public void applyGameData(GameData gameData) {
+    private void applyGameData(GameData gameData) {
         if (field == null) {
             initializeField(gameData.shuffle);
             this.gameData = new GameData();

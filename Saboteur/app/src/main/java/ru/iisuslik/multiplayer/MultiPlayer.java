@@ -8,16 +8,12 @@ import com.google.android.gms.games.AnnotatedData;
 import com.google.android.gms.games.InvitationsClient;
 import com.google.android.gms.games.TurnBasedMultiplayerClient;
 import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatch;
-import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatchUpdateCallback;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.stream.Collectors;
 
 import ru.iisuslik.controller.Controller;
 import ru.iisuslik.field.Field;
@@ -27,11 +23,12 @@ import ru.iisuslik.gameData.Shuffle;
 
 public class MultiPlayer implements Serializable {
     private static final String TAG = "MMMMMMMMM";
-    boolean sendingData = false;
-    public String playerId;
-    public GoogleSignInClient signInClient;
-    public TurnBasedMultiplayerClient multiplayerClient;
-    public InvitationsClient invitationsClient;
+    private boolean sendingData = false;
+    private boolean receivingData = false;
+    String playerId;
+    GoogleSignInClient signInClient;
+    TurnBasedMultiplayerClient multiplayerClient;
+    InvitationsClient invitationsClient;
     public TurnBasedMatch curMatch;
     public Controller controller;
 
@@ -73,13 +70,14 @@ public class MultiPlayer implements Serializable {
                     Log.d(TAG, "sendData() izi, shuffle is null? " + (controller.gameData.shuffle == null));
                 } else {
                     sendingData = false;
-                    Log.d(TAG, "sendData() problem " + task.getException().getMessage());
+                    if (task.getException() != null)
+                        Log.d(TAG, "sendData() problem " + task.getException().getMessage());
                 }
             }
         });
     }
 
-    public String getNextParticipantId() {
+    private String getNextParticipantId() {
 
         String myParticipantId = curMatch.getParticipantId(playerId);
 
@@ -103,9 +101,28 @@ public class MultiPlayer implements Serializable {
             return null;
         }
     }
+    public void fastUpdate() {
+        updateMatch(curMatch);
+    }
+    public void update() {
+        if (receivingData) {
+            Log.d(TAG, "update() - we are receiving data already");
+            return;
+        }
+        receivingData = true;
+        multiplayerClient.loadMatch(curMatch.getMatchId())
+                .addOnSuccessListener(new OnSuccessListener<AnnotatedData<TurnBasedMatch>>() {
+                    @Override
+                    public void onSuccess(AnnotatedData<TurnBasedMatch> turnBasedMatchAnnotatedData) {
+                        receivingData = false;
+                        curMatch = turnBasedMatchAnnotatedData.get();
+                        updateMatch(curMatch);
+                    }
+                });
+    }
 
 
-    public void updateMatch(TurnBasedMatch match) {
+    void updateMatch(TurnBasedMatch match) {
         curMatch = match;
         int status = match.getStatus();
         int turnStatus = match.getTurnStatus();
@@ -149,10 +166,11 @@ public class MultiPlayer implements Serializable {
         } else
             startMatch(match);
     }
-    public void startMatch(TurnBasedMatch match) {
+
+    private void startMatch(TurnBasedMatch match) {
         curMatch = match;
         int playerCount = match.getParticipantIds().size();
-        if(controller.gameData == null)
+        if (controller.gameData == null)
             controller.gameData = new GameData();
         controller.gameData.shuffle = new Shuffle(playerCount, Controller.DECK_SIZE,
                 Field.getSaboteurCount(playerCount));

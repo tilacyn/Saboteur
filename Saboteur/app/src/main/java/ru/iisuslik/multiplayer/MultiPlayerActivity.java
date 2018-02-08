@@ -3,11 +3,16 @@ package ru.iisuslik.multiplayer;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.support.annotation.NonNull;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -31,7 +36,9 @@ import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 
 import ru.iisuslik.controller.Controller;
+import ru.iisuslik.gameData.GameData;
 import ru.tilacyn.saboteur.GameActivity;
+import ru.tilacyn.saboteur.MainActivity;
 import ru.tilacyn.saboteur.R;
 import ru.tilacyn.saboteur.SaboteurApplication;
 
@@ -49,14 +56,9 @@ public class MultiPlayerActivity extends AppCompatActivity implements View.OnCli
 
     public void startGame(int playerCount) {
         Intent intent = new Intent(MultiPlayerActivity.this, GameActivity.class);
-
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        controller.serialize(byteArrayOutputStream);
-
-        byte [] controllerByteArray = byteArrayOutputStream.toByteArray();
-
+        controller.gameData = null;
+        controller.field = null;
         intent.putExtra("playerCount", playerCount);
-        //intent.putExtra("controller", controllerByteArray);
         startActivity(intent);
     }
 
@@ -111,14 +113,45 @@ public class MultiPlayerActivity extends AppCompatActivity implements View.OnCli
         findViewById(R.id.sign_in).setOnClickListener(this);
         findViewById(R.id.start).setOnClickListener(this);
         findViewById(R.id.check).setOnClickListener(this);
+        //get controller
         controller = SaboteurApplication.getInstance().getController();
         controller.initializeMultiplayer();
         multiPlayer = controller.multiPlayer;
+        //sign in
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN)
                 .requestEmail()
                 .build();
         multiPlayer.signInClient = GoogleSignIn.getClient(this, gso);
         startSignInIntent();
+        //set backgtound
+        ConstraintLayout screen = (ConstraintLayout) findViewById(R.id.activity_multiplayer);
+        screen.setBackgroundResource(R.drawable.background3);
+        makeButtons();
+    }
+    private void makeButtons(){
+        //sign in
+        Button signIn = (Button)findViewById(R.id.sign_in);
+        decorateButton(signIn);
+        signIn.setOnClickListener(this);
+        //sign out
+        Button signOut = (Button)findViewById(R.id.sign_out);
+        decorateButton(signOut);
+        signOut.setOnClickListener(this);
+        //start
+        Button start = (Button)findViewById(R.id.start);
+        decorateButton(start);
+        start.setOnClickListener(this);
+        //select
+        Button select = (Button)findViewById(R.id.check);
+        decorateButton(select);
+        select.setOnClickListener(this);
+    }
+
+    void decorateButton(Button b) {
+        b.setTextSize(13);
+        b.setBackgroundResource(R.drawable.red_button);
+        b.setTextColor(Color.WHITE);
+        b.setTypeface(Typeface.createFromAsset(getAssets(), "almendra.ttf"));
     }
 
     @Override
@@ -164,9 +197,7 @@ public class MultiPlayerActivity extends AppCompatActivity implements View.OnCli
                 onConnected(account);
             } catch (ApiException apiException) {
                 String message = apiException.getMessage();
-                if (message == null || message.isEmpty()) {
-                    //message = getString(R.string.signin_other_error);
-                } else {
+                if (message != null && !message.isEmpty()) {
                     showToast(message);
                 }
 
@@ -229,14 +260,12 @@ public class MultiPlayerActivity extends AppCompatActivity implements View.OnCli
             TurnBasedMatchConfig tbmc = TurnBasedMatchConfig.builder()
                     .addInvitedPlayers(invitees)
                     .setAutoMatchCriteria(autoMatchCriteria).build();
-            showToast("so close");
 
             // Start the match
             multiPlayer.multiplayerClient.createMatch(tbmc)
                     .addOnSuccessListener(new OnSuccessListener<TurnBasedMatch>() {
                         @Override
                         public void onSuccess(TurnBasedMatch turnBasedMatch) {
-                            showToast("success createMatch");
                             //multiPlayer.onInitiateMatch(turnBasedMatch);
                             multiPlayer.curMatch = turnBasedMatch;
                             int playerCount = turnBasedMatch.getParticipantIds().size();
@@ -333,7 +362,7 @@ public class MultiPlayerActivity extends AppCompatActivity implements View.OnCli
     }
 
     private void handleException(Exception exception, String details) {
-        int status = 0;
+        int status;
 
         if (exception instanceof TurnBasedMultiplayerClient.MatchOutOfDateApiException) {
             TurnBasedMultiplayerClient.MatchOutOfDateApiException matchOutOfDateApiException =
