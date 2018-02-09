@@ -161,7 +161,6 @@ public class MultiPlayer implements Serializable {
     public void onInitiateMatch(TurnBasedMatch match) {
         Log.d(TAG, "onInitiateMatch() match == null? " + (match == null));
         if (!sendingData && match.getData() != null) {
-            // This is a game that has already started, so I'll just start
             updateMatch(match);
         } else
             startMatch(match);

@@ -1,10 +1,13 @@
 package ru.tilacyn.saboteur;
 
+import org.json.JSONArray;
+
 import ru.iisuslik.controller.Controller;
 
 public class SaboteurApplication {
     private static SaboteurApplication example;
     private Controller controller;
+    public JSONArray tunnels, actions;
 
     private SaboteurApplication(){
         controller = new Controller();

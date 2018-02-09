@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -32,13 +31,10 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
-import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 
 import ru.iisuslik.controller.Controller;
-import ru.iisuslik.gameData.GameData;
 import ru.tilacyn.saboteur.GameActivity;
-import ru.tilacyn.saboteur.MainActivity;
 import ru.tilacyn.saboteur.R;
 import ru.tilacyn.saboteur.SaboteurApplication;
 
@@ -67,13 +63,10 @@ public class MultiPlayerActivity extends AppCompatActivity implements View.OnCli
         if (account == null)
             startActivityForResult(multiPlayer.signInClient.getSignInIntent(), RC_SIGN_IN);
         else {
-            //showToast("there is last signed in account");
             onConnected(account);
         }
     }
 
-    // Open the create-game UI. You will get back an onActivityResult
-    // and figure out what to do.
     public void onStartMatchClicked() {
         if (multiPlayer.multiplayerClient == null) {
             return;
@@ -87,8 +80,6 @@ public class MultiPlayerActivity extends AppCompatActivity implements View.OnCli
                 });
     }
 
-    // Displays your inbox. You will get back onActivityResult where
-    // you will need to figure out what you clicked on.
     public void onCheckGamesClicked() {
         if (multiPlayer.multiplayerClient == null) {
             return;
@@ -101,8 +92,6 @@ public class MultiPlayerActivity extends AppCompatActivity implements View.OnCli
                     }
                 });
     }
-
-    // Create a one-on-one automatch game.
 
 
     @Override
@@ -128,21 +117,22 @@ public class MultiPlayerActivity extends AppCompatActivity implements View.OnCli
         screen.setBackgroundResource(R.drawable.background3);
         makeButtons();
     }
-    private void makeButtons(){
+
+    private void makeButtons() {
         //sign in
-        Button signIn = (Button)findViewById(R.id.sign_in);
+        Button signIn = (Button) findViewById(R.id.sign_in);
         decorateButton(signIn);
         signIn.setOnClickListener(this);
         //sign out
-        Button signOut = (Button)findViewById(R.id.sign_out);
+        Button signOut = (Button) findViewById(R.id.sign_out);
         decorateButton(signOut);
         signOut.setOnClickListener(this);
         //start
-        Button start = (Button)findViewById(R.id.start);
+        Button start = (Button) findViewById(R.id.start);
         decorateButton(start);
         start.setOnClickListener(this);
         //select
-        Button select = (Button)findViewById(R.id.check);
+        Button select = (Button) findViewById(R.id.check);
         decorateButton(select);
         select.setOnClickListener(this);
     }
@@ -202,19 +192,11 @@ public class MultiPlayerActivity extends AppCompatActivity implements View.OnCli
                 }
 
                 onDisconnected();
-                /*
-                new AlertDialog.Builder(this)
-                        .setMessage(message)
-                        .setNeutralButton(android.R.string.ok, null)
-                        .show();
-                */
             }
         } else if (requestCode == RC_LOOK_AT_MATCHES) {
             // Returning from the 'Select Match' dialog
 
             if (resultCode != Activity.RESULT_OK) {
-                //logBadActivityResult(requestCode, resultCode,
-                //       "User cancelled returning from the 'Select Match' dialog.");
                 showToast("Look at matches bad result");
                 return;
             }
@@ -223,29 +205,21 @@ public class MultiPlayerActivity extends AppCompatActivity implements View.OnCli
                     .getParcelableExtra(Multiplayer.EXTRA_TURN_BASED_MATCH);
 
             if (match != null) {
-                //multiPlayer.updateMatch(match);
                 multiPlayer.curMatch = match;
                 int playerCount = match.getParticipantIds().size();
                 startGame(playerCount);
 
             }
-            //Log.d(TAG, "Match = " + match);
         } else if (requestCode == RC_SELECT_PLAYERS) {
             // Returning from 'Select players to Invite' dialog
 
             if (resultCode != Activity.RESULT_OK) {
-                // user canceled
-                //logBadActivityResult(requestCode, resultCode,
-                //        "User cancelled returning from 'Select players to Invite' dialog");
                 showToast("Invite bad result");
                 return;
             }
 
-            // get the invitee list
             ArrayList<String> invitees = intent
                     .getStringArrayListExtra(Games.EXTRA_PLAYER_IDS);
-
-            // get automatch criteria
             Bundle autoMatchCriteria;
 
             int minAutoMatchPlayers = intent.getIntExtra(Multiplayer.EXTRA_MIN_AUTOMATCH_PLAYERS, 0);
@@ -266,7 +240,6 @@ public class MultiPlayerActivity extends AppCompatActivity implements View.OnCli
                     .addOnSuccessListener(new OnSuccessListener<TurnBasedMatch>() {
                         @Override
                         public void onSuccess(TurnBasedMatch turnBasedMatch) {
-                            //multiPlayer.onInitiateMatch(turnBasedMatch);
                             multiPlayer.curMatch = turnBasedMatch;
                             int playerCount = turnBasedMatch.getParticipantIds().size();
                             Log.d(TAG, "onActivityResult() - success createMatch");
@@ -291,16 +264,10 @@ public class MultiPlayerActivity extends AppCompatActivity implements View.OnCli
                         new OnSuccessListener<Player>() {
                             @Override
                             public void onSuccess(Player player) {
-                                //mDisplayName = player.getDisplayName();
                                 multiPlayer.playerId = player.getPlayerId();
-
-                                //setViewVisibility();
                             }
                         }
                 ).addOnFailureListener(createFailureListener("There was a problem getting the player!"));
-
-        // Retrieve the TurnBasedMatch from the connectionHint
-
         GamesClient gamesClient = Games.getGamesClient(this, googleSignInAccount);
         gamesClient.getActivationHint()
                 .addOnSuccessListener(new OnSuccessListener<Bundle>() {
@@ -317,7 +284,6 @@ public class MultiPlayerActivity extends AppCompatActivity implements View.OnCli
                     }
                 }).addOnFailureListener(createFailureListener(
                 "There was a problem getting the activation hint!"));
-        //setViewVisibility();
 
     }
 
@@ -327,8 +293,6 @@ public class MultiPlayerActivity extends AppCompatActivity implements View.OnCli
 
         multiPlayer.multiplayerClient = null;
         multiPlayer.invitationsClient = null;
-
-        //setViewVisibility();
     }
 
     public void signOut() {
@@ -386,17 +350,5 @@ public class MultiPlayerActivity extends AppCompatActivity implements View.OnCli
             status = apiException.getStatusCode();
             showToast("apiException: " + status + ": " + details);
         }
-        /*
-        if (!checkStatusCode(status)) {
-            return;
-        }
-
-        String message = getString(R.string.status_exception_error, details, status, exception);
-
-        new AlertDialog.Builder(this)
-                .setMessage(message)
-                .setNeutralButton(android.R.string.ok, null)
-                .show();
-        */
     }
 }

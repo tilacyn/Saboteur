@@ -34,8 +34,13 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigInteger;
 
 import ru.iisuslik.controller.Controller;
@@ -116,7 +121,24 @@ public class MainActivity extends AppCompatActivity {
         logDatabaseHelper = new LogDatabaseHelper(getApplicationContext());
         logDatabaseHelper.create_db();
         logDb = logDatabaseHelper.open();
+        SaboteurApplication.getInstance().tunnels = loadJSONFromAsset("tunnels.json");
+        SaboteurApplication.getInstance().actions = loadJSONFromAsset("actions.json");
+    }
 
+    public JSONArray loadJSONFromAsset(String file) {
+        JSONArray json;
+        try {
+            InputStream is = this.getAssets().open(file);
+            int size = is.available();
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            is.close();
+            json = new JSONArray(new String(buffer, "UTF-8"));
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+        return json;
     }
 
     private class Style {

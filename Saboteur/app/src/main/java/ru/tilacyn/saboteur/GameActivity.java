@@ -784,8 +784,9 @@ public class GameActivity extends AppCompatActivity {
         dwarf.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                makeLog();
                 makeYou();
+                table.makeLogTable();
+                table.drawTable();
                 boolean isSaboteur = controller.isCurrentPlayerSaboteur();
 
                 if (!isSaboteur) {

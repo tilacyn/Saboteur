@@ -2,7 +2,6 @@ package ru.iisuslik.controller;
 
 
 import android.util.Log;
-
 import ru.iisuslik.cards.Card;
 import ru.iisuslik.cards.Tunnel;
 import ru.iisuslik.field.Field;
@@ -19,7 +18,6 @@ public class Controller implements Serializable {
     private static final String TAG = "CCCCCCCC";
     public Field field;
     public MultiPlayer multiPlayer = null;
-
     public GameData gameData = new GameData();
 
     public void initializeField(int playerCount) {
@@ -117,7 +115,7 @@ public class Controller implements Serializable {
             sendData(gameData);
     }
 
-    public void update() {
+    private void update() {
         if (!isSinglePlayer()) {
             multiPlayer.update();
         }

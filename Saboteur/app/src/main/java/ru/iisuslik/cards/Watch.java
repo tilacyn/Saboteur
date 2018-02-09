@@ -1,11 +1,14 @@
 package ru.iisuslik.cards;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import ru.iisuslik.field.Field;
 import ru.iisuslik.gameData.TurnData;
 
 public class Watch extends Card {
-    public Watch(int id, String name, String description, Field field, int playerNumber) {
-        super(id, name, description, field, playerNumber);
+    public Watch(JSONArray action, Field field) throws JSONException {
+        super(action.getInt(4), field, -1);
     }
 
     public boolean canPlay(int i, int j) {
