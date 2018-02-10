@@ -16,11 +16,16 @@ public class Tunnel extends Card {
 
     public Tunnel(JSONArray tunnel, Field field) throws JSONException {
         super(0, field, -1);
-        this.up = tunnel.getInt(1) == 1;
-        this.down = tunnel.getInt(2) == 1;
-        this.left = tunnel.getInt(3) == 1;
-        this.right = tunnel.getInt(4) == 1;
-        this.centre = tunnel.getInt(5) == 1;
+        up = tunnel.getInt(1) == 1;
+        down = tunnel.getInt(2) == 1;
+        left = tunnel.getInt(3) == 1;
+        right = tunnel.getInt(4) == 1;
+        centre = tunnel.getInt(5) == 1;
+        calculateId();
+    }
+
+    private void calculateId() {
+        this.id = 0;
         if (centre) {
             this.id++;
         } else {
@@ -60,16 +65,7 @@ public class Tunnel extends Card {
         temp = right;
         right = left;
         left = temp;
-        this.id = 0;
-        if (centre) {
-            this.id++;
-        } else {
-            this.id += 16;
-        }
-        if (left) this.id++;
-        if (down) this.id += 2;
-        if (up) this.id += 4;
-        if (right) this.id += 8;
+        calculateId();
         if (!this.isClosedTunnel())
             field.spins[field.players[ownerPlayerNumber].getCardNumber(this)] ^= true;
     }

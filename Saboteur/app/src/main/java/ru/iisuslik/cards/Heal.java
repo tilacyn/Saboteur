@@ -12,9 +12,9 @@ public class Heal extends Card {
 
     public Heal(JSONArray action, Field field) throws JSONException {
         super(action.getInt(4), field, -1);
-        this.healLamp = action.getInt(1) == 1;
-        this.healPick = action.getInt(2) == 1;
-        this.healTrolley = action.getInt(3) == 1;
+        healLamp = action.getInt(1) == 1;
+        healPick = action.getInt(2) == 1;
+        healTrolley = action.getInt(3) == 1;
     }
 
     public boolean canPlay(int playerNumber) {

@@ -72,6 +72,10 @@ public class GameActivity extends AppCompatActivity {
             selected.setBackgroundResource(selectedButtonStyle);
             selected.setTextColor(selectedTextColor);
         }
+
+        boolean isSelected(Button b) {
+            return b.equals(selected);
+        }
     }
 
     private class ActionButton extends android.support.v7.widget.AppCompatButton {
@@ -785,8 +789,10 @@ public class GameActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 makeYou();
-                table.makeLogTable();
-                table.drawTable();
+                if (style.isSelected(log))
+                    table.makeLogTable();
+                if (style.isSelected(gameField))
+                    table.drawTable();
                 boolean isSaboteur = controller.isCurrentPlayerSaboteur();
 
                 if (!isSaboteur) {

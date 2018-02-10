@@ -54,18 +54,7 @@ public class Field implements Serializable {
     public Player[] players;
     private ArrayList<Card> deck = new ArrayList<>();
 
-
-    public void applyTurnData(TurnData turnData) {
-        int playerFrom = turnData.ownerPlayerNumber;
-        int cardNumber = turnData.cardNumber;
-        ArrayList<Card> hand = players[playerFrom].getHand();
-        for (int i = 0; i < hand.size(); i++) {
-            if (turnData.spins[i]) {
-                ((Tunnel) hand.get(i)).spin();
-            }
-        }
-        Log.d(TAG, "applyTurnData()");
-        Card cardToPlay = hand.get(cardNumber);
+    private void playCardWithTurnData(Card cardToPlay, TurnData turnData) {
         switch (turnData.type) {
             case UNKNOWN:
                 cardToPlay.discard();
@@ -86,6 +75,25 @@ public class Field implements Serializable {
                 ((Destroy) cardToPlay).play(turnData.i, turnData.j);
                 break;
         }
+    }
+
+
+    private void spinCardsInHand(ArrayList<Card> hand, TurnData turnData) {
+        for (int i = 0; i < hand.size(); i++) {
+            if (turnData.spins[i]) {
+                ((Tunnel) hand.get(i)).spin();
+            }
+        }
+    }
+
+    public void applyTurnData(TurnData turnData) {
+        Log.d(TAG, "applyTurnData()");
+        int playerFrom = turnData.ownerPlayerNumber;
+        int cardNumber = turnData.cardNumber;
+        ArrayList<Card> hand = players[playerFrom].getHand();
+        spinCardsInHand(hand, turnData);
+        Card cardToPlay = hand.get(cardNumber);
+        playCardWithTurnData(cardToPlay, turnData);
         startNextTurn(false);
     }
 
@@ -406,24 +414,27 @@ public class Field implements Serializable {
     }
 
     public Field(int playersCount, Controller controller, Shuffle shuffle) {
-
-        initializeDeck();
         if (shuffle == null)
             shuffle = new Shuffle(playersCount, deck.size(), getSaboteurCount(playersCount));
         this.controller = controller;
         playingCount = playersCount;
         players = new Player[playingCount];
+        initializeDeck();
         initializeField(shuffle);
         initializePlayers(shuffle);
+        shuffleDeck(shuffle);
+        giveCards();
+        if (!controller.isSinglePlayer())
+            currentPlayer = 1;
+    }
+
+    private void shuffleDeck(Shuffle shuffle){
         Card[] shuffled = new Card[deck.size()];
         for (int i = 0; i < deck.size(); i++) {
             shuffled[shuffle.deckShuffle[i]] = deck.get(i);
         }
         deck.clear();
         deck.addAll(Arrays.asList(shuffled));
-        giveCards();
-        if (!controller.isSinglePlayer())
-            currentPlayer = 1;
     }
 
 
