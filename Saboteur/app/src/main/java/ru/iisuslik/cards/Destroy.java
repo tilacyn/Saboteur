@@ -7,8 +7,8 @@ import ru.iisuslik.field.Field;
 import ru.iisuslik.gameData.TurnData;
 
 public class Destroy extends Card {
-    public Destroy(JSONArray action, Field field) throws JSONException {
-        super(action.getInt(4), field, -1);
+    public Destroy(int[] action, Field field) {
+        super(action[4], field, -1);
     }
 
     public boolean canPlay(int i, int j) {

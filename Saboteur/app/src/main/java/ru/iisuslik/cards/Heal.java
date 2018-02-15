@@ -1,5 +1,7 @@
 package ru.iisuslik.cards;
 
+import android.util.Log;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 
@@ -10,11 +12,11 @@ public class Heal extends Card {
 
     private boolean healLamp, healTrolley, healPick;
 
-    public Heal(JSONArray action, Field field) throws JSONException {
-        super(action.getInt(4), field, -1);
-        healLamp = action.getInt(1) == 1;
-        healPick = action.getInt(2) == 1;
-        healTrolley = action.getInt(3) == 1;
+    public Heal(int[] action, Field field) {
+        super(action[4], field, -1);
+        healLamp = action[1] == 1;
+        healPick = action[2] == 1;
+        healTrolley = action[3] == 1;
     }
 
     public boolean canPlay(int playerNumber) {

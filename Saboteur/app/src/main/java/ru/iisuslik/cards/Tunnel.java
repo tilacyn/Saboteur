@@ -14,13 +14,13 @@ public class Tunnel extends Card {
     boolean closedTunnel = false;
     private static final String TAG = "TTTTTTTTT";
 
-    public Tunnel(JSONArray tunnel, Field field) throws JSONException {
+    public Tunnel(int[] tunnel, Field field) {
         super(0, field, -1);
-        up = tunnel.getInt(1) == 1;
-        down = tunnel.getInt(2) == 1;
-        left = tunnel.getInt(3) == 1;
-        right = tunnel.getInt(4) == 1;
-        centre = tunnel.getInt(5) == 1;
+        up = tunnel[1] == 1;
+        down = tunnel[2] == 1;
+        left = tunnel[3] == 1;
+        right = tunnel[4] == 1;
+        centre = tunnel[5] == 1;
         calculateId();
     }
 
@@ -69,6 +69,7 @@ public class Tunnel extends Card {
         if (!this.isClosedTunnel())
             field.spins[field.players[ownerPlayerNumber].getCardNumber(this)] ^= true;
     }
+
 
     public boolean isClosedTunnel() {
         return closedTunnel;

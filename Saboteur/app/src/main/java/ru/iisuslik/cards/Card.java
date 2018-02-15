@@ -1,5 +1,7 @@
 package ru.iisuslik.cards;
 
+import android.util.Log;
+
 import java.io.Serializable;
 
 import ru.iisuslik.field.Field;

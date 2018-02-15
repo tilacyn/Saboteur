@@ -22,7 +22,7 @@ import ru.iisuslik.gameData.Shuffle;
 
 
 public class MultiPlayer implements Serializable {
-    private static final String TAG = "MMMMMMMMM";
+    private static final String TAG = "MP";
     private boolean sendingData = false;
     private boolean receivingData = false;
     String playerId;
@@ -57,8 +57,7 @@ public class MultiPlayer implements Serializable {
             return;
         }
         sendingData = true;
-        Log.d(TAG, "sendData() in my turn? " + isMyTurn() + "shuffle is null? " + (controller.gameData.shuffle == null));
-        Log.d(TAG, "sendData() match status " + curMatch.getStatus());
+        Log.d(TAG, "sendData() begins, match status " + curMatch.getStatus());
         multiplayerClient.takeTurn(curMatch.getMatchId(),
                 data, nextParticipantId).addOnCompleteListener(new OnCompleteListener<TurnBasedMatch>() {
             @Override
@@ -67,11 +66,11 @@ public class MultiPlayer implements Serializable {
                     curMatch = task.getResult();
                     updateMatch(curMatch);
                     sendingData = false;
-                    Log.d(TAG, "sendData() izi, shuffle is null? " + (controller.gameData.shuffle == null));
+                    Log.d(TAG, "sendData() successful");
                 } else {
                     sendingData = false;
                     if (task.getException() != null)
-                        Log.d(TAG, "sendData() problem " + task.getException().getMessage());
+                        Log.d(TAG, "sendData() problems");
                 }
             }
         });
@@ -159,7 +158,7 @@ public class MultiPlayer implements Serializable {
     }
 
     public void onInitiateMatch(TurnBasedMatch match) {
-        Log.d(TAG, "onInitiateMatch() match == null? " + (match == null));
+        Log.d(TAG, "onInitiateMatch(), match == null? " + (match == null));
         if (!sendingData && match.getData() != null) {
             updateMatch(match);
         } else
@@ -186,6 +185,7 @@ public class MultiPlayer implements Serializable {
                         updateMatch(turnBasedMatch);
                     }
                 });
+        Log.d(TAG, "finishMatch()");
     }
 
 

@@ -3,6 +3,7 @@ android {
     compileSdkVersion 25
     buildToolsVersion "26.0.2"
     defaultConfig {
+        multiDexEnabled true
         applicationId "ru.tilacyn.saboteur"
         minSdkVersion 15
         targetSdkVersion 25
@@ -16,6 +17,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
 }
 
 dependencies {
@@ -29,6 +31,7 @@ dependencies {
     compile 'com.google.android.gms:play-services-games:11.6.2'
     compile 'com.google.android.gms:play-services-auth:11.6.2'
     compile 'com.google.android.gms:play-services-auth:11.6.2'
+    compile 'com.googlecode.json-simple:json-simple:1.1'
     testCompile 'junit:junit:4.12'
 }
 apply plugin: 'com.google.gms.google-services'

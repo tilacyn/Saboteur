@@ -165,63 +165,64 @@ public class Field implements Serializable {
             return 4;
     }
 
+    private CheckNeighborResult checkNeighborTunnel(int i, int j, int iNeighbor, int jNeighbor, Tunnel current) {
+        if (!doesTunnelExists(iNeighbor, jNeighbor))
+            return CheckNeighborResult.NoConflict;
+        Tunnel neighbor = field[iNeighbor][jNeighbor];
+        if (neighbor.isClosedTunnel() && ((ClosedTunnel) neighbor).isClosed())
+            return CheckNeighborResult.NoConflict;
+        boolean currentExit, neighborEntry;
+        if (iNeighbor == i + 1) {
+            currentExit = current.down;
+            neighborEntry = neighbor.up;
+        } else if (iNeighbor == i - 1) {
+            currentExit = current.up;
+            neighborEntry = neighbor.down;
+        } else if (jNeighbor == j + 1) {
+            currentExit = current.right;
+            neighborEntry = neighbor.left;
+        } else {
+            currentExit = current.left;
+            neighborEntry = neighbor.right;
+        }
+        if (currentExit) {
+            if (neighborEntry)
+                return CheckNeighborResult.HasContinue;
+            else
+                return CheckNeighborResult.BadNeighbor;
+        } else if (neighborEntry) {
+            return CheckNeighborResult.BadNeighbor;
+        }
+        return CheckNeighborResult.NoConflict;
+    }
+
+    private enum CheckNeighborResult {BadNeighbor, NoConflict, HasContinue}
+
     public boolean canPutTunnel(Tunnel tunnel, int i, int j) {
         if (field[i][j] != null) {
             return false;
         }
         boolean hasContinue = false;
-        if (i < HEIGHT - 1 && field[i + 1][j] != null) {
-            Tunnel t = field[i + 1][j];
-            if (!t.isClosedTunnel() || t.isClosedTunnel() && !((ClosedTunnel) t).isClosed()) {
-                if (tunnel.down) {
-                    if (t.up) {
-                        hasContinue = true;
-                    } else {
-                        return false;
-                    }
-                } else if (t.up)
-                    return false;
-            }
-        }
-        if (i > 0 && field[i - 1][j] != null) {
-            Tunnel t = field[i - 1][j];
-            if (!t.isClosedTunnel() || t.isClosedTunnel() && !((ClosedTunnel) t).isClosed()) {
-                if (tunnel.up) {
-                    if (t.down) {
-                        hasContinue = true;
-                    } else {
-                        return false;
-                    }
-                } else if (t.down)
-                    return false;
-            }
-        }
-        if (i < WIDTH - 1 && field[i][j + 1] != null) {
-            Tunnel t = field[i][j + 1];
-            if (!t.isClosedTunnel() || t.isClosedTunnel() && !((ClosedTunnel) t).isClosed()) {
-                if (tunnel.right) {
-                    if (t.left) {
-                        hasContinue = true;
-                    } else {
-                        return false;
-                    }
-                } else if (t.left)
-                    return false;
-            }
-        }
-        if (j > 0 && field[i][j - 1] != null) {
-            Tunnel t = field[i][j - 1];
-            if (!t.isClosedTunnel() || t.isClosedTunnel() && !((ClosedTunnel) t).isClosed()) {
-                if (tunnel.left) {
-                    if (t.right) {
-                        hasContinue = true;
-                    } else {
-                        return false;
-                    }
-                } else if (t.right)
-                    return false;
-            }
-        }
+        ////
+        CheckNeighborResult result = checkNeighborTunnel(i, j, i + 1, j, tunnel);
+        if (result == CheckNeighborResult.BadNeighbor)
+            return false;
+        else hasContinue |= result == CheckNeighborResult.HasContinue;
+        ////
+        result = checkNeighborTunnel(i, j, i - 1, j, tunnel);
+        if (result == CheckNeighborResult.BadNeighbor)
+            return false;
+        else hasContinue |= result == CheckNeighborResult.HasContinue;
+        ////
+        result = checkNeighborTunnel(i, j, i, j + 1, tunnel);
+        if (result == CheckNeighborResult.BadNeighbor)
+            return false;
+        else hasContinue |= result == CheckNeighborResult.HasContinue;
+        ////
+        result = checkNeighborTunnel(i, j, i, j - 1, tunnel);
+        if (result == CheckNeighborResult.BadNeighbor)
+            return false;
+        else hasContinue |= result == CheckNeighborResult.HasContinue;
         return hasContinue;
     }
 
@@ -236,21 +237,17 @@ public class Field implements Serializable {
     }
 
     private void initializeField(Shuffle shuffle) {
-        try {
-            JSONArray json = SaboteurApplication.getInstance().tunnels;
-            field[ENTRY_POS_I][ENTRY_POS_J] = new Tunnel(json.getJSONArray(16), this);
-            int[] shuffleArray = shuffle.closedTunnelsShuffle;
-            ClosedTunnel[] tunnels = new ClosedTunnel[3];
-            tunnels[0] = new ClosedTunnel(json.getJSONArray(17), this);
-            tunnels[1] = new ClosedTunnel(json.getJSONArray(18), this);
-            tunnels[2] = new ClosedTunnel(json.getJSONArray(19), this);
-            int firstTunnelI = ENTRY_POS_I - 8;
-            int firstTunnelJ = ENTRY_POS_J - 2;
-            for (int k = 0; k < 3; k++) {
-                field[firstTunnelI][firstTunnelJ + k * 2] = tunnels[shuffleArray[k]];
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
+        int[][] json = SaboteurApplication.getInstance().tunnels;
+        field[ENTRY_POS_I][ENTRY_POS_J] = new Tunnel(json[16], this);
+        int[] shuffleArray = shuffle.closedTunnelsShuffle;
+        ClosedTunnel[] tunnels = new ClosedTunnel[3];
+        tunnels[0] = new ClosedTunnel(json[17], this);
+        tunnels[1] = new ClosedTunnel(json[18], this);
+        tunnels[2] = new ClosedTunnel(json[19], this);
+        int firstTunnelI = ENTRY_POS_I - 8;
+        int firstTunnelJ = ENTRY_POS_J - 2;
+        for (int k = 0; k < 3; k++) {
+            field[firstTunnelI][firstTunnelJ + k * 2] = tunnels[shuffleArray[k]];
         }
     }
 
@@ -265,41 +262,45 @@ public class Field implements Serializable {
         dfs(ENTRY_POS_I, ENTRY_POS_J);
     }
 
-    private boolean checkTunnel(int i, int j, int iNext, int jNext) {
+    private boolean dfsCheckTunnel(int i, int j, int iNext, int jNext) {
         Tunnel tunnel = field[i][j];
-        if (iNext > HEIGHT - 1 || iNext < 0 || jNext > WIDTH - 1 || jNext < 0)
+        if (!doesTunnelExists(iNext, jNext))
             return false;
-        if (!used[iNext][jNext] && field[iNext][jNext] != null && field[iNext][jNext].centre) {
-            Tunnel t = field[iNext][jNext];
-            boolean wayTo;
-            if (i + 1 == iNext && tunnel.down) {
-                wayTo = t.up;
-            } else if (i - 1 == iNext && tunnel.up) {
-                wayTo = t.down;
-            } else if (j + 1 == jNext && tunnel.right) {
-                wayTo = t.left;
-            } else if (j - 1 == jNext && tunnel.left) {
-                wayTo = t.right;
-            } else {
-                return false;
-            }
-            if (!t.isClosedTunnel() || !((ClosedTunnel) t).isClosed()) {
-                return wayTo;
-            } else {
-                ClosedTunnel ct = (ClosedTunnel) t;
-                ct.open();
-                if (ct.isGold()) {
-                    finish();
-                    return false;
+        if (!used[iNext][jNext] && field[iNext][jNext].centre) {
+            Tunnel nextTunnel = field[iNext][jNext];
+            if ((i + 1 == iNext && tunnel.down) ||
+                    (i - 1 == iNext && tunnel.up) ||
+                    (j + 1 == jNext && tunnel.right) ||
+                    (j - 1 == jNext && tunnel.left)) {
+                if (!nextTunnel.isClosedTunnel() || !((ClosedTunnel) nextTunnel).isClosed()) {
+                    return true;
                 } else {
-                    if (!wayTo)
-                        ct.spin();
-                    return false;
+                    ClosedTunnel ct = (ClosedTunnel) nextTunnel;
+                    ct.open();
+                    if (ct.isGold()) {
+                        finish();
+                        return false;
+                    } else {
+                        if (i + 1 == iNext && !nextTunnel.up)
+                            nextTunnel.spin();
+                        if (i - 1 == iNext && !nextTunnel.down)
+                            nextTunnel.spin();
+                        if (j + 1 == jNext && !nextTunnel.left)
+                            nextTunnel.spin();
+                        if (j - 1 == jNext && !nextTunnel.right)
+                            nextTunnel.spin();
+                        return true;
+                    }
                 }
             }
         }
         return false;
     }
+
+    private boolean doesTunnelExists(int i, int j) {
+        return i <= HEIGHT - 1 && i >= 0 && j <= WIDTH - 1 && j >= 0 && field[i][j] != null;
+    }
+
 
     private void finish() {
         if (!controller.isSinglePlayer())
@@ -309,13 +310,13 @@ public class Field implements Serializable {
 
     private void dfs(int i, int j) {
         used[i][j] = true;
-        if (checkTunnel(i, j, i + 1, j))
+        if (dfsCheckTunnel(i, j, i + 1, j))
             dfs(i + 1, j);
-        if (checkTunnel(i, j, i - 1, j))
+        if (dfsCheckTunnel(i, j, i - 1, j))
             dfs(i - 1, j);
-        if (checkTunnel(i, j, i, j + 1))
+        if (dfsCheckTunnel(i, j, i, j + 1))
             dfs(i, j + 1);
-        if (checkTunnel(i, j, i, j - 1))
+        if (dfsCheckTunnel(i, j, i, j - 1))
             dfs(i, j - 1);
     }
 
@@ -330,73 +331,53 @@ public class Field implements Serializable {
     }
 
     private void addHealingCards() {
-        JSONArray actions = SaboteurApplication.getInstance().actions;
+        int[][] actions = SaboteurApplication.getInstance().actions;
         for (int i = 0; i < 6; i++) {
-            try {
-                JSONArray action = actions.getJSONArray(i);
-                for(int j = 0; j < action.getInt(0); j++) {
-                    deck.add(new Heal(action, this));
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
+            int[] action = actions[i];
+            for (int j = 0; j < action[0]; j++) {
+                deck.add(new Heal(action, this));
             }
         }
     }
 
     private void addDebuffCards() {
-        JSONArray actions = SaboteurApplication.getInstance().actions;
+        int[][] actions = SaboteurApplication.getInstance().actions;
         for (int i = 6; i < 9; i++) {
-            try {
-                JSONArray action = actions.getJSONArray(i);
-                for(int j = 0; j < action.getInt(0); j++) {
-                    deck.add(new Debuff(action, this));
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
+            int[] action = actions[i];
+            for (int j = 0; j < action[0]; j++) {
+                deck.add(new Debuff(action, this));
             }
         }
     }
 
 
     private void addWatchCards() {
-        JSONArray actions = SaboteurApplication.getInstance().actions;
+        int[][] actions = SaboteurApplication.getInstance().actions;
         for (int i = 9; i < 10; i++) {
-            try {
-                JSONArray action = actions.getJSONArray(i);
-                for(int j = 0; j < action.getInt(0); j++) {
-                    deck.add(new Watch(action, this));
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
+            int[] action = actions[i];
+            for (int j = 0; j < action[0]; j++) {
+                deck.add(new Watch(action, this));
             }
         }
     }
 
 
     private void addDestroyCards() {
-        JSONArray actions = SaboteurApplication.getInstance().actions;
+        int[][] actions = SaboteurApplication.getInstance().actions;
         for (int i = 10; i < 11; i++) {
-            try {
-                JSONArray action = actions.getJSONArray(i);
-                for(int j = 0; j < action.getInt(0); j++) {
-                    deck.add(new Destroy(action, this));
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
+            int[] action = actions[i];
+            for (int j = 0; j < action[0]; j++) {
+                deck.add(new Destroy(action, this));
             }
         }
     }
 
     private void addTunnels() {
-        JSONArray tunnels = SaboteurApplication.getInstance().tunnels;
+        int[][] tunnels = SaboteurApplication.getInstance().tunnels;
         for (int i = 0; i < 16; i++) {
-            try {
-                JSONArray tunnel = tunnels.getJSONArray(i);
-                for(int j = 0; j < tunnel.getInt(0); j++) {
-                    deck.add(new Tunnel(tunnel, this));
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
+            int[] tunnel = tunnels[i];
+            for (int j = 0; j < tunnel[0]; j++) {
+                deck.add(new Tunnel(tunnel, this));
             }
         }
     }
@@ -414,12 +395,12 @@ public class Field implements Serializable {
     }
 
     public Field(int playersCount, Controller controller, Shuffle shuffle) {
+        initializeDeck();
         if (shuffle == null)
             shuffle = new Shuffle(playersCount, deck.size(), getSaboteurCount(playersCount));
         this.controller = controller;
         playingCount = playersCount;
         players = new Player[playingCount];
-        initializeDeck();
         initializeField(shuffle);
         initializePlayers(shuffle);
         shuffleDeck(shuffle);
@@ -428,7 +409,17 @@ public class Field implements Serializable {
             currentPlayer = 1;
     }
 
-    private void shuffleDeck(Shuffle shuffle){
+    public static Field getFieldForTests(Controller controller) {
+        return new Field(controller);
+    }
+
+    private Field(Controller controller) {
+        initializeField(new Shuffle(1, 0, 0));
+        this.controller = controller;
+        playingCount = 1;
+    }
+
+    private void shuffleDeck(Shuffle shuffle) {
         Card[] shuffled = new Card[deck.size()];
         for (int i = 0; i < deck.size(); i++) {
             shuffled[shuffle.deckShuffle[i]] = deck.get(i);

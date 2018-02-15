@@ -7,7 +7,7 @@ import ru.iisuslik.controller.Controller;
 public class SaboteurApplication {
     private static SaboteurApplication example;
     private Controller controller;
-    public JSONArray tunnels, actions;
+    public int[][] tunnels, actions;
 
     private SaboteurApplication(){
         controller = new Controller();

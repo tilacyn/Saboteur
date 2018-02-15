@@ -12,10 +12,9 @@ import ru.iisuslik.multiplayer.MultiPlayer;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class Controller implements Serializable {
-    private static final String TAG = "CCCCCCCC";
+    private static final String TAG = "C";
     public Field field;
     public MultiPlayer multiPlayer = null;
     public GameData gameData = new GameData();
@@ -43,7 +42,6 @@ public class Controller implements Serializable {
     }
 
     public int getPlayersNumber() {
-        //update();
         return field.players.length;
     }
 
@@ -71,12 +69,10 @@ public class Controller implements Serializable {
 
 
     public void startNextTurn() {
-        //update();
         field.startNextTurn();
     }
 
     public Tunnel[][] getField() {
-        //update();
         return field.field;
     }
 
@@ -128,7 +124,7 @@ public class Controller implements Serializable {
         try {
             gameData.serialize(out);
         } catch (IOException e) {
-            Log.d(TAG, "sendData() problem with serialize " + e.getMessage());
+            Log.d(TAG, "sendData(), problems with serialize");
             e.printStackTrace();
         }
         byte[] data = out.toByteArray();
@@ -144,8 +140,7 @@ public class Controller implements Serializable {
             initializeField(gameData.shuffle);
             this.gameData = new GameData();
         }
-        Log.d(TAG, "applyGameData(), how many turns " + gameData.turns.size() + ", shuffle null? " + (gameData.shuffle == null));
-        Log.d(TAG, "applyGameData() current player " + field.getCurrentPlayer() + " me " + multiPlayer.getMyNumber());
+        Log.d(TAG, "applyGameData()");
         for (int i = this.gameData.turns.size(); i < gameData.turns.size(); i++) {
             Log.d(TAG, "applyGameData() apply new turn №" + i + 1);
             field.applyTurnData(gameData.turns.get(i));
@@ -157,20 +152,18 @@ public class Controller implements Serializable {
 
     public void applyData(byte[] data) {
         if (data == null) {
-            Log.d(TAG, "applyData() data null");
+            Log.d(TAG, "applyData(), data = null");
             multiPlayer.onInitiateMatch(multiPlayer.curMatch);
             return;
         }
-        Log.d(TAG, "applyData() byte[] data = " + Arrays.toString(data));
+        Log.d(TAG, "applyData(), data != null");
         try {
             ByteArrayInputStream in = new ByteArrayInputStream(data);
-            //Log.d(TAG, "applyData() null" + (data == null));
             GameData gd = GameData.deserialize(in);
-            Log.d(TAG, "applyData() null? " + (gd == null));
             applyGameData(gd);
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
-            Log.d(TAG, "applyData() problem with deserialize " + e.getMessage());
+            Log.d(TAG, "applyData(), problems with deserialize");
         }
     }
 

@@ -40,7 +40,7 @@ import ru.tilacyn.saboteur.SaboteurApplication;
 
 public class MultiPlayerActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private static final String TAG = "AAAAAAAA";
+    private static final String TAG = "MPA";
     private static final int RC_SIGN_IN = 9001;
     final static int RC_SELECT_PLAYERS = 10000;
     final static int RC_LOOK_AT_MATCHES = 10001;
@@ -98,10 +98,6 @@ public class MultiPlayerActivity extends AppCompatActivity implements View.OnCli
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_multi_player);
-        findViewById(R.id.sign_out).setOnClickListener(this);
-        findViewById(R.id.sign_in).setOnClickListener(this);
-        findViewById(R.id.start).setOnClickListener(this);
-        findViewById(R.id.check).setOnClickListener(this);
         //get controller
         controller = SaboteurApplication.getInstance().getController();
         controller.initializeMultiplayer();
@@ -166,87 +162,95 @@ public class MultiPlayerActivity extends AppCompatActivity implements View.OnCli
 
     private void showToast(String str) {
         Toast.makeText(getApplicationContext(), str, Toast.LENGTH_SHORT).show();
+    }
 
+    private void handleSignIn(int resultCode, Intent intent) {
+        if (resultCode != RESULT_OK) {
+            showToast("bad sign in");
+        }
+        if (resultCode == RESULT_OK)
+            showToast("Nice sign in");
+
+        Task<GoogleSignInAccount> task =
+                GoogleSignIn.getSignedInAccountFromIntent(intent);
+
+        try {
+            GoogleSignInAccount account = task.getResult(ApiException.class);
+            onConnected(account);
+        } catch (ApiException apiException) {
+            String message = apiException.getMessage();
+            if (message != null && !message.isEmpty()) {
+                showToast(message);
+            }
+
+            onDisconnected();
+        }
+    }
+
+    private void handleLookAtMatches(int resultCode, Intent intent) {
+        if (resultCode != Activity.RESULT_OK) {
+            showToast("Look at matches bad result");
+            return;
+        }
+
+        TurnBasedMatch match = intent
+                .getParcelableExtra(Multiplayer.EXTRA_TURN_BASED_MATCH);
+
+        if (match != null) {
+            multiPlayer.curMatch = match;
+            int playerCount = match.getParticipantIds().size();
+            startGame(playerCount);
+
+        }
+    }
+
+    private void handleSelectPlayers(int resultCode, Intent intent) {
+        if (resultCode != Activity.RESULT_OK) {
+            showToast("Invite bad result");
+            return;
+        }
+
+        ArrayList<String> invitees = intent
+                .getStringArrayListExtra(Games.EXTRA_PLAYER_IDS);
+        Bundle autoMatchCriteria;
+
+        int minAutoMatchPlayers = intent.getIntExtra(Multiplayer.EXTRA_MIN_AUTOMATCH_PLAYERS, 0);
+        int maxAutoMatchPlayers = intent.getIntExtra(Multiplayer.EXTRA_MAX_AUTOMATCH_PLAYERS, 0);
+
+        if (minAutoMatchPlayers > 0) {
+            autoMatchCriteria = RoomConfig.createAutoMatchCriteria(minAutoMatchPlayers,
+                    maxAutoMatchPlayers, 0);
+        } else {
+            autoMatchCriteria = null;
+        }
+        TurnBasedMatchConfig tbmc = TurnBasedMatchConfig.builder()
+                .addInvitedPlayers(invitees)
+                .setAutoMatchCriteria(autoMatchCriteria).build();
+
+        // Start the match
+        multiPlayer.multiplayerClient.createMatch(tbmc)
+                .addOnSuccessListener(new OnSuccessListener<TurnBasedMatch>() {
+                    @Override
+                    public void onSuccess(TurnBasedMatch turnBasedMatch) {
+                        multiPlayer.curMatch = turnBasedMatch;
+                        int playerCount = turnBasedMatch.getParticipantIds().size();
+                        Log.d(TAG, "onActivityResult() - success createMatch");
+                        startGame(playerCount);
+                    }
+                });
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
 
         if (requestCode == RC_SIGN_IN) {
-            if (resultCode != RESULT_OK) {
-                showToast("bad sign in");
-            }
-            if (resultCode == RESULT_OK)
-                showToast("Nice sign in");
-
-            Task<GoogleSignInAccount> task =
-                    GoogleSignIn.getSignedInAccountFromIntent(intent);
-
-            try {
-                GoogleSignInAccount account = task.getResult(ApiException.class);
-                onConnected(account);
-            } catch (ApiException apiException) {
-                String message = apiException.getMessage();
-                if (message != null && !message.isEmpty()) {
-                    showToast(message);
-                }
-
-                onDisconnected();
-            }
+            handleSignIn(resultCode, intent);
         } else if (requestCode == RC_LOOK_AT_MATCHES) {
             // Returning from the 'Select Match' dialog
-
-            if (resultCode != Activity.RESULT_OK) {
-                showToast("Look at matches bad result");
-                return;
-            }
-
-            TurnBasedMatch match = intent
-                    .getParcelableExtra(Multiplayer.EXTRA_TURN_BASED_MATCH);
-
-            if (match != null) {
-                multiPlayer.curMatch = match;
-                int playerCount = match.getParticipantIds().size();
-                startGame(playerCount);
-
-            }
+            handleLookAtMatches(resultCode, intent);
         } else if (requestCode == RC_SELECT_PLAYERS) {
             // Returning from 'Select players to Invite' dialog
-
-            if (resultCode != Activity.RESULT_OK) {
-                showToast("Invite bad result");
-                return;
-            }
-
-            ArrayList<String> invitees = intent
-                    .getStringArrayListExtra(Games.EXTRA_PLAYER_IDS);
-            Bundle autoMatchCriteria;
-
-            int minAutoMatchPlayers = intent.getIntExtra(Multiplayer.EXTRA_MIN_AUTOMATCH_PLAYERS, 0);
-            int maxAutoMatchPlayers = intent.getIntExtra(Multiplayer.EXTRA_MAX_AUTOMATCH_PLAYERS, 0);
-
-            if (minAutoMatchPlayers > 0) {
-                autoMatchCriteria = RoomConfig.createAutoMatchCriteria(minAutoMatchPlayers,
-                        maxAutoMatchPlayers, 0);
-            } else {
-                autoMatchCriteria = null;
-            }
-            TurnBasedMatchConfig tbmc = TurnBasedMatchConfig.builder()
-                    .addInvitedPlayers(invitees)
-                    .setAutoMatchCriteria(autoMatchCriteria).build();
-
-            // Start the match
-            multiPlayer.multiplayerClient.createMatch(tbmc)
-                    .addOnSuccessListener(new OnSuccessListener<TurnBasedMatch>() {
-                        @Override
-                        public void onSuccess(TurnBasedMatch turnBasedMatch) {
-                            multiPlayer.curMatch = turnBasedMatch;
-                            int playerCount = turnBasedMatch.getParticipantIds().size();
-                            Log.d(TAG, "onActivityResult() - success createMatch");
-                            startGame(playerCount);
-                        }
-                    });
-
+            handleSelectPlayers(resultCode, intent);
         }
     }
 
@@ -284,24 +288,19 @@ public class MultiPlayerActivity extends AppCompatActivity implements View.OnCli
                     }
                 }).addOnFailureListener(createFailureListener(
                 "There was a problem getting the activation hint!"));
-
     }
 
     private void onDisconnected() {
-
         Log.d(TAG, "onDisconnected()");
-
         multiPlayer.multiplayerClient = null;
         multiPlayer.invitationsClient = null;
     }
 
     public void signOut() {
-
         multiPlayer.signInClient.signOut().addOnCompleteListener(this,
                 new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
-
                         if (task.isSuccessful()) {
                             Log.d(TAG, "signOut(): success");
                             showToast("sign out complete");

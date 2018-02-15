@@ -125,20 +125,26 @@ public class MainActivity extends AppCompatActivity {
         SaboteurApplication.getInstance().actions = loadJSONFromAsset("actions.json");
     }
 
-    public JSONArray loadJSONFromAsset(String file) {
-        JSONArray json;
+    private int[][] loadJSONFromAsset(String file) {
+        int [][] res;
         try {
             InputStream is = this.getAssets().open(file);
             int size = is.available();
             byte[] buffer = new byte[size];
             is.read(buffer);
             is.close();
-            json = new JSONArray(new String(buffer, "UTF-8"));
+            JSONArray json = new JSONArray(new String(buffer, "UTF-8"));
+            res = new int[json.length()][json.getJSONArray(0).length()];
+            for (int i = 0; i < json.length(); i++) {
+                for(int j = 0; j < json.getJSONArray(i).length(); j++) {
+                    res[i][j] = json.getJSONArray(i).getInt(j);
+                }
+            }
         } catch (IOException | JSONException e) {
             e.printStackTrace();
             return null;
         }
-        return json;
+        return res;
     }
 
     private class Style {

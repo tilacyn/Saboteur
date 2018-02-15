@@ -7,8 +7,8 @@ import ru.iisuslik.field.Field;
 import ru.iisuslik.gameData.TurnData;
 
 public class Watch extends Card {
-    public Watch(JSONArray action, Field field) throws JSONException {
-        super(action.getInt(4), field, -1);
+    public Watch(int[] action, Field field) {
+        super(action[4], field, -1);
     }
 
     public boolean canPlay(int i, int j) {
