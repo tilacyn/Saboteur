@@ -399,7 +399,6 @@ public class GameActivity extends AppCompatActivity {
         }
 
         void makeLogTable() {
-            updateLogRows();
             removeAllViews();
             for (int i = 0; i < logRows.size(); i++) {
                 addView(logRows.get(i));
