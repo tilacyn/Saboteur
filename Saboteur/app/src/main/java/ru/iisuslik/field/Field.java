@@ -87,7 +87,6 @@ public class Field implements Serializable {
     }
 
     public void applyTurnData(TurnData turnData) {
-        Log.d(TAG, "applyTurnData()");
         int playerFrom = turnData.ownerPlayerNumber;
         int cardNumber = turnData.cardNumber;
         ArrayList<Card> hand = players[playerFrom].getHand();
@@ -116,14 +115,16 @@ public class Field implements Serializable {
         return players[currentPlayer].getPersonality() == Player.SABOTEUR;
     }
 
+    private void giveACardToCurrentPlayer() {
+        Card next = deck.remove(deck.size() - 1);
+        next.setPlayerNumber(currentPlayer);
+        players[currentPlayer].addCard(next);
+    }
+
     private void startNextTurn(boolean needToSend) {
-        Log.d(TAG, "startNextTurn()" + "shuffle is null? " + (controller.gameData.shuffle == null));
+        Log.d(TAG, "startNextTurn()");
         if (deck.size() != 0) {
-            Card next = deck.remove(deck.size() - 1);
-            next.setPlayerNumber(currentPlayer);
-            players[currentPlayer].addCard(next);
-            Log.d(TAG, "player" + currentPlayer + "take some cards, now we have " + players[currentPlayer].getHand().size());
-            Log.d(TAG, "players hands sizes" + players[0].getHand().size() + players[1].getHand().size());
+            giveACardToCurrentPlayer();
         }
         if (players[currentPlayer].getHand().size() == 0) {
             players[currentPlayer].concede();
@@ -147,7 +148,6 @@ public class Field implements Serializable {
         }
         currentTD = null;
         spins = new boolean[6];
-        Log.d(TAG, "startNextTurn() the end" + "shuffle is null? " + (controller.gameData.shuffle == null));
     }
 
     public void startNextTurn() {
@@ -231,6 +231,7 @@ public class Field implements Serializable {
     }
 
     private void initializePlayers(Shuffle shuffle) {
+        players = new Player[playingCount];
         for (int i = 0; i < playingCount; i++) {
             players[i] = new Player(shuffle.whoAreSaboteur[i]);
         }
@@ -310,6 +311,8 @@ public class Field implements Serializable {
 
     private void dfs(int i, int j) {
         used[i][j] = true;
+        if(!field[i][j].centre)
+            return;
         if (dfsCheckTunnel(i, j, i + 1, j))
             dfs(i + 1, j);
         if (dfsCheckTunnel(i, j, i - 1, j))
@@ -400,9 +403,8 @@ public class Field implements Serializable {
             shuffle = new Shuffle(playersCount, deck.size(), getSaboteurCount(playersCount));
         this.controller = controller;
         playingCount = playersCount;
-        players = new Player[playingCount];
-        initializeField(shuffle);
         initializePlayers(shuffle);
+        initializeField(shuffle);
         shuffleDeck(shuffle);
         giveCards();
         if (!controller.isSinglePlayer())
@@ -417,6 +419,7 @@ public class Field implements Serializable {
         initializeField(new Shuffle(1, 0, 0));
         this.controller = controller;
         playingCount = 1;
+        initializePlayers(new Shuffle(1,0,0));
     }
 
     private void shuffleDeck(Shuffle shuffle) {

@@ -2,6 +2,7 @@ package ru.iisuslik.controller;
 
 
 import android.util.Log;
+
 import ru.iisuslik.cards.Card;
 import ru.iisuslik.cards.Tunnel;
 import ru.iisuslik.field.Field;
@@ -111,7 +112,7 @@ public class Controller implements Serializable {
             sendData(gameData);
     }
 
-    private void update() {
+    public void update() {
         if (!isSinglePlayer()) {
             multiPlayer.update();
         }
@@ -120,6 +121,15 @@ public class Controller implements Serializable {
     public void sendData(GameData gameData) {
         if (isSinglePlayer() || gameData == null)
             return;
+        byte[] data = getByteData(gameData);
+        multiPlayer.sendData(data);
+    }
+
+    public void sendFirstData(GameData gameData) {
+        multiPlayer.sendFirstData(getByteData(gameData));
+    }
+
+    private byte[] getByteData(GameData gameData) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try {
             gameData.serialize(out);
@@ -127,8 +137,7 @@ public class Controller implements Serializable {
             Log.d(TAG, "sendData(), problems with serialize");
             e.printStackTrace();
         }
-        byte[] data = out.toByteArray();
-        multiPlayer.sendData(data);
+        return out.toByteArray();
     }
 
     public boolean isSinglePlayer() {
@@ -145,7 +154,7 @@ public class Controller implements Serializable {
             Log.d(TAG, "applyGameData() apply new turn №" + i + 1);
             field.applyTurnData(gameData.turns.get(i));
         }
-        if(this.gameData.shuffle == null) {
+        if (this.gameData.shuffle == null) {
             this.gameData.shuffle = gameData.shuffle;
         }
     }
@@ -174,6 +183,7 @@ public class Controller implements Serializable {
             objectOut.flush();
             objectOut.close();
         } catch (Exception ignored) {
+            ignored.printStackTrace();
         }
     }
 
@@ -184,6 +194,7 @@ public class Controller implements Serializable {
             objectIn.close();
             return res;
         } catch (Exception ignored) {
+            ignored.printStackTrace();
             return null;
         }
     }
