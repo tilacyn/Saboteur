@@ -12,6 +12,8 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -37,6 +39,10 @@ public class MultiPlayer implements Serializable {
     }
 
 
+    /**
+     * Get your number in id list
+     * @return your number
+     */
     public int getMyNumber() {
         String myParticipantId = curMatch.getParticipantId(playerId);
         ArrayList<String> ids = curMatch.getParticipantIds();
@@ -48,9 +54,22 @@ public class MultiPlayer implements Serializable {
         return -1;
     }
 
+    /**
+     * Takes turn in match and updates actual data, next turn has another player
+     *
+     * @param data byte array to send
+     */
     public void sendData(byte[] data) {
-
         String nextParticipantId = getNextParticipantId();
+        sendData(data, nextParticipantId);
+    }
+
+    public void sendFirstData(byte[] data) {
+        String nextParticipantId = curMatch.getParticipantId(playerId);
+        sendData(data, nextParticipantId);
+    }
+
+    private void sendData(byte[] data, String nextParticipantId) {
         // Create the next turn
         if (sendingData) {
             Log.d(TAG, "sendData() - data is sending now");
@@ -64,7 +83,7 @@ public class MultiPlayer implements Serializable {
             public void onComplete(@NonNull Task<TurnBasedMatch> task) {
                 if (task.isSuccessful()) {
                     curMatch = task.getResult();
-                    updateMatch(curMatch);
+                    controller.applyData(curMatch.getData());
                     sendingData = false;
                     Log.d(TAG, "sendData() successful");
                 } else {
@@ -76,6 +95,11 @@ public class MultiPlayer implements Serializable {
         });
     }
 
+    /**
+     * Get id of next player, who will take a turn after you
+     *
+     * @return next player id
+     */
     private String getNextParticipantId() {
 
         String myParticipantId = curMatch.getParticipantId(playerId);
@@ -100,9 +124,17 @@ public class MultiPlayer implements Serializable {
             return null;
         }
     }
+
+    /**
+     * Updates match without loading newest version
+     */
     public void fastUpdate() {
-        updateMatch(curMatch);
+        controller.applyData(curMatch.getData());
     }
+
+    /**
+     * Loads newest match version with curMatch id and receives data from it
+     */
     public void update() {
         if (receivingData) {
             Log.d(TAG, "update() - we are receiving data already");
@@ -121,50 +153,28 @@ public class MultiPlayer implements Serializable {
     }
 
 
-    void updateMatch(TurnBasedMatch match) {
-        curMatch = match;
-        int status = match.getStatus();
-        int turnStatus = match.getTurnStatus();
-
-        switch (status) {
-            case TurnBasedMatch.MATCH_STATUS_CANCELED:
-                return;
-            case TurnBasedMatch.MATCH_STATUS_EXPIRED:
-                return;
-            case TurnBasedMatch.MATCH_STATUS_AUTO_MATCHING:
-                return;
-            case TurnBasedMatch.MATCH_STATUS_COMPLETE:
-                if (turnStatus == TurnBasedMatch.MATCH_TURN_STATUS_COMPLETE) {
-                    break;
-                }
-        }
-
-        switch (turnStatus) {
-            case TurnBasedMatch.MATCH_TURN_STATUS_MY_TURN:
-                if (!sendingData)
-                    controller.applyData(curMatch.getData());
-                return;
-            case TurnBasedMatch.MATCH_TURN_STATUS_THEIR_TURN:
-                if (!sendingData)
-                    controller.applyData(curMatch.getData());
-                break;
-            case TurnBasedMatch.MATCH_TURN_STATUS_INVITED:
-        }
-    }
-
     public boolean isMyTurn() {
         int turnStatus = curMatch.getTurnStatus();
         return turnStatus == TurnBasedMatch.MATCH_TURN_STATUS_MY_TURN;
     }
 
-    public void onInitiateMatch(TurnBasedMatch match) {
-        Log.d(TAG, "onInitiateMatch(), match == null? " + (match == null));
+    /**
+     * Update game data before starting game activity
+     */
+    public void onInitiateMatch(@NotNull TurnBasedMatch match) {
+        Log.d(TAG, "onInitiateMatch()");
         if (!sendingData && match.getData() != null) {
-            updateMatch(match);
-        } else
+            // Match has not null data, so it isn't 1 turn
+            controller.applyData(curMatch.getData());
+        } else {
+            // This is the first turn in game, initialize game data
             startMatch(match);
+        }
     }
 
+    /**
+     * Initialize shuffle in game data and send it to everyone
+     */
     private void startMatch(TurnBasedMatch match) {
         curMatch = match;
         int playerCount = match.getParticipantIds().size();
@@ -173,10 +183,17 @@ public class MultiPlayer implements Serializable {
         controller.gameData.shuffle = new Shuffle(playerCount, Controller.DECK_SIZE,
                 Field.getSaboteurCount(playerCount));
         controller.initializeField(controller.gameData.shuffle);
-        controller.sendData(controller.gameData);
+        controller.sendFirstData(controller.gameData);
         Log.d(TAG, "startMatch()");
     }
 
+    public void updateMatch(TurnBasedMatch match) {
+        controller.applyData(match.getData());
+    }
+
+    /**
+     * Finish match
+     */
     public void finish() {
         multiplayerClient.finishMatch(curMatch.getMatchId())
                 .addOnSuccessListener(new OnSuccessListener<TurnBasedMatch>() {

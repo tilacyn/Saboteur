@@ -68,6 +68,8 @@ public class Tunnel extends Card {
         calculateId();
         if (!this.isClosedTunnel())
             field.spins[field.players[ownerPlayerNumber].getCardNumber(this)] ^= true;
+        //Log.d(TAG, "You spin me right round baby right round");
+        //Log.d(TAG, "Like a record baby right round round round " + field.spins[field.players[ownerPlayerNumber].getCardNumber(this)]);
     }
 
 
