@@ -1,18 +1,13 @@
 package ru.tilacyn.saboteur;
 
 
-import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.CharArrayBuffer;
-import android.database.ContentObserver;
 import android.database.Cursor;
-import android.database.DataSetObserver;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.graphics.Typeface;
-import android.net.Uri;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -24,11 +19,9 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.ScrollView;
-import android.widget.SimpleCursorAdapter;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -41,7 +34,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigInteger;
+import java.util.Objects;
 
 import ru.iisuslik.controller.Controller;
 import ru.iisuslik.multiplayer.MultiPlayerActivity;
@@ -56,7 +49,6 @@ public class MainActivity extends AppCompatActivity {
     private int playerCount;
     private int savedPlayerCount;
 
-    private boolean settingsOpen;
 
     private Controller controller;
 
@@ -80,11 +72,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     String byteArrayToString(byte[] b) {
-        String res = "";
-        for (int i = 0; i < b.length; i++) {
-            res = res + (char) b[i];
+        StringBuilder res = new StringBuilder();
+        for (byte aB : b) {
+            res.append((char) aB);
         }
-        return res;
+        return res.toString();
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -108,8 +100,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void initializeAll() {
-        settingsOpen = false;
-
         playerCount = 2;
 
         controller = new Controller();
@@ -147,6 +137,9 @@ public class MainActivity extends AppCompatActivity {
         return res;
     }
 
+    /**
+     * inner class for managing style features
+     */
     private class Style {
         Button selected;
         Button selectedPlayerCount;
@@ -194,7 +187,6 @@ public class MainActivity extends AppCompatActivity {
             selectedPlayerCount.setTextColor(selectedTextColor);
         }
 
-
         void removeSelected() {
             if (selected != null) {
                 selected.setBackgroundResource(buttonStyle);
@@ -204,6 +196,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * inner class for managing layouts
+     */
     private class Layouts {
         ConstraintLayout screen;
         TextView name;
@@ -214,7 +209,9 @@ public class MainActivity extends AppCompatActivity {
         MultiPlayer multiPlayer;
 
 
-
+        /**
+         * inner class for managing layouts necessary for single player and multi player both
+         */
         private class Main {
             Button multiPlayerButton;
             Button singlePlayerButton;
@@ -250,7 +247,7 @@ public class MainActivity extends AppCompatActivity {
                     rules.setTextColor(Color.YELLOW);
                     rules.setTypeface(style.textFont);
 
-                    rules.setText("Rules");
+                    rules.setText(R.string.rules);
                 }
 
                 void makeHelpText() {
@@ -258,26 +255,12 @@ public class MainActivity extends AppCompatActivity {
                     helpText.setBackgroundColor(style.textBackgroundColor);
                     helpText.setTextColor(Color.WHITE);
                     helpText.setTypeface(style.textFont);
-                    helpText.setText("Here are the sacred rules\n\n\n" +
-                            "Prelude:\n" +
-                            "1. This game is our own invention, all rights reserved. " +
-                            "Though it is an open source project still copying, spreading and using our code for money " +
-                            "is against the law and will be punished immediately.\n" +
-                            "2. All the events and heroes are entirely fictional, even those based on the real characters.\n" +
-                            "3. Game content is rather irrelevant for people aged more than 16\n" +
-                            "Beware! Violence scenes in the game might badly influence young children\n\n" +
-                            "Best wishes and have a good time!\n" +
-                            "Maksim Kryuchkov and SDT (Saboteur Developers Team)\n\n\n" +
-                            "Game rules:\n" +
-                            "1. Before the game starts...\n" +
-                            "Saboteur is a team game, actually there are two teams: Saboteurs and Breadwinners. " +
-                            "Breadwinners is a team of good and honest gnomes which prefer making fair wealth to robbery and sabotage. " +
-                            "While Saboteurs is a team of completely dishonest dangerous and deleterious gnomes (like Vlad Golubtsov)");
+                    helpText.setText(getString(R.string.rules_text));
                 }
 
                 void makeBack() {
                     style.decorateButton(back);
-                    back.setText("back");
+                    back.setText(R.string.back_name);
 
                     back.setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -305,7 +288,7 @@ public class MainActivity extends AppCompatActivity {
             //ok
             void makeSinglePlayerButton() {
                 style.decorateButton(singlePlayerButton);
-                singlePlayerButton.setText("single player");
+                singlePlayerButton.setText(R.string.single_player_name);
 
                 singlePlayerButton.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -318,7 +301,7 @@ public class MainActivity extends AppCompatActivity {
             //ok
             void makeMultiPlayerButton() {
                 style.decorateButton(multiPlayerButton);
-                multiPlayerButton.setText("multiplayer");
+                multiPlayerButton.setText(R.string.multi_player_name);
 
                 multiPlayerButton.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -328,10 +311,9 @@ public class MainActivity extends AppCompatActivity {
                 });
             }
 
-            //ok
             void makeHelp() {
                 style.decorateButton(help);
-                help.setText("help");
+                help.setText(R.string.help_name);
 
                 help.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -341,7 +323,6 @@ public class MainActivity extends AppCompatActivity {
                 });
             }
 
-
             void makeAllViews() {
                 makeMultiPlayerButton();
                 makeSinglePlayerButton();
@@ -349,7 +330,6 @@ public class MainActivity extends AppCompatActivity {
                 helpClass.makeAllViews();
             }
 
-            //ok
             void show() {
                 screen.removeAllViews();
                 addCoolViews();
@@ -361,6 +341,9 @@ public class MainActivity extends AppCompatActivity {
 
         }
 
+        /**
+         * inner class for managing single player layouts (buttons and etc)
+         */
         private class SinglePlayer {
             Button continueGame;
             Button loadGame;
@@ -396,7 +379,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             void makeContinue() {
-                continueGame.setText("Continue");
+                continueGame.setText(R.string.continue_name);
                 style.decorateButton(continueGame);
                 continueGame.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -422,7 +405,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             void makeSave() {
-                save.setText("Save");
+                save.setText(R.string.save_name);
                 style.decorateButton(save);
                 save.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -433,7 +416,7 @@ public class MainActivity extends AppCompatActivity {
                             return;
                         }
 
-                        cursor = logDb.rawQuery("select * from " + logDatabaseHelper.TABLE, null);
+                        cursor = logDb.rawQuery("select * from " + LogDatabaseHelper.TABLE, null);
                         cursor.moveToFirst();
 
                         LayoutInflater inflater = getLayoutInflater();
@@ -451,7 +434,7 @@ public class MainActivity extends AppCompatActivity {
                                     public void onClick(DialogInterface dialog, int id) {
                                         textInput = "game" + ((Integer) cursor.getCount()).toString();
                                         dialog.cancel();
-                                        Cursor checkCursor = logDb.rawQuery("select * from " + logDatabaseHelper.TABLE + " where name = '" + textInput + "'", null);
+                                        Cursor checkCursor = logDb.rawQuery("select * from " + LogDatabaseHelper.TABLE + " where name = '" + textInput + "'", null);
 
                                         if (checkCursor.getCount() != 0) {
                                             Toast.makeText(getApplicationContext(), "This name already exists!",
@@ -463,11 +446,11 @@ public class MainActivity extends AppCompatActivity {
                                         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
                                         controller.serialize(byteArrayOutputStream);
                                         ContentValues values = new ContentValues();
-                                        values.put(logDatabaseHelper.COLUMN_NAME, textInput);
-                                        values.put(logDatabaseHelper.COLUMN_LOG, byteArrayToString(byteArrayOutputStream.toByteArray()));
+                                        values.put(LogDatabaseHelper.COLUMN_NAME, textInput);
+                                        values.put(LogDatabaseHelper.COLUMN_LOG, byteArrayToString(byteArrayOutputStream.toByteArray()));
 
 
-                                        long newRowId = logDb.insert(logDatabaseHelper.TABLE, null, values);
+                                        long newRowId = logDb.insert(LogDatabaseHelper.TABLE, null, values);
                                         gameLoader.updateList("*");
                                     }
                                 })
@@ -481,22 +464,24 @@ public class MainActivity extends AppCompatActivity {
                                                     Toast.LENGTH_SHORT).show();
                                             return;
                                         }
-                                        Cursor checkCursor = logDb.rawQuery("select * from " + logDatabaseHelper.TABLE + " where name = '" + textInput + "'", null);
+                                        Cursor checkCursor = logDb.rawQuery("select * from " + LogDatabaseHelper.TABLE + " where name = '" + textInput + "'", null);
 
                                         if (checkCursor.getCount() != 0) {
                                             Toast.makeText(getApplicationContext(), "This name already exists!",
                                                     Toast.LENGTH_SHORT).show();
+                                            checkCursor.close();
                                             return;
                                         }
+                                        checkCursor.close();
 
 
                                         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
                                         controller.serialize(byteArrayOutputStream);
                                         ContentValues values = new ContentValues();
-                                        values.put(logDatabaseHelper.COLUMN_NAME, textInput);
-                                        values.put(logDatabaseHelper.COLUMN_LOG, byteArrayToString(byteArrayOutputStream.toByteArray()));
+                                        values.put(LogDatabaseHelper.COLUMN_NAME, textInput);
+                                        values.put(LogDatabaseHelper.COLUMN_LOG, byteArrayToString(byteArrayOutputStream.toByteArray()));
 
-                                        long newRowId = logDb.insert(logDatabaseHelper.TABLE, null, values);
+                                        long newRowId = logDb.insert(LogDatabaseHelper.TABLE, null, values);
 
                                         gameLoader.updateList("*");
                                     }
@@ -514,7 +499,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             void makeBack() {
-                back.setText("back");
+                back.setText(R.string.back_name);
                 style.decorateButton(back);
                 back.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -525,7 +510,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             void makeNewGame() {
-                newGame.setText("New Game");
+                newGame.setText(R.string.new_game_name);
                 style.decorateButton(newGame);
 
                 newGame.setOnClickListener(new View.OnClickListener() {
@@ -554,7 +539,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             void makeLoadGame() {
-                loadGame.setText("Load Game");
+                loadGame.setText(R.string.load_game_name);
                 style.decorateButton(loadGame);
 
                 loadGame.setOnClickListener(new View.OnClickListener() {
@@ -568,7 +553,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             void makeSettings() {
-                settings.setText("Settings");
+                settings.setText(R.string.settings_name);
                 style.decorateButton(settings);
 
                 settings.setOnClickListener(new View.OnClickListener() {
@@ -664,7 +649,7 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onItemClick(AdapterView<?> parent, View itemClicked, int position, long id) {
                             String gameName = ((TextView) itemClicked).getText().toString();
-                            if (chosenGame != gameName) {
+                            if (!(chosenGame.equals(gameName))) {
                                 chosenGame = gameName;
                                 makeLoadValid();
                             } else {
@@ -698,7 +683,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 void makeLoad() {
-                    load.setText("load");
+                    load.setText(R.string.load_name);
                     style.decorateButton(load);
                     makeLoadInvalid();
 
@@ -710,7 +695,7 @@ public class MainActivity extends AppCompatActivity {
                             }
                             style.updateSelected(load);
                             cursor.moveToFirst();
-                            cursor = logDb.rawQuery("select * from " + logDatabaseHelper.TABLE + " where name = '" + chosenGame + "'", null);
+                            cursor = logDb.rawQuery("select * from " + LogDatabaseHelper.TABLE + " where name = '" + chosenGame + "'", null);
                             cursor.moveToFirst();
                             controllerByteArray = stringToByteArray(cursor.getString(1));
 
@@ -801,7 +786,9 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
-        // ok
+        /**
+         * inner class for managing multi player layouts (buttons and etc)
+         */
         private class MultiPlayer {
             Button newGame;
             Button back;
@@ -895,7 +882,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
-
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {

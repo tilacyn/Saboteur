@@ -22,7 +22,6 @@ import android.widget.Button;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -167,8 +166,8 @@ public class GameActivity extends AppCompatActivity {
                     tunnel.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            int x = (int) map.get(tunnel).first;
-                            int y = (int) map.get(tunnel).second;
+                            int x = map.get(tunnel).first;
+                            int y = map.get(tunnel).second;
                             //System.out.println(x);
                             //System.out.println(y);
                             if (chosenCard instanceof Tunnel) {
@@ -177,9 +176,6 @@ public class GameActivity extends AppCompatActivity {
                                     ((Tunnel) chosenCard).play(x, y);
 
                                     removeSpin();
-
-                                    chosenX = x;
-                                    chosenY = y;
 
                                     drawTable();
                                 } else {
@@ -191,9 +187,6 @@ public class GameActivity extends AppCompatActivity {
                                 //tunnel.setImageResource(getCardImageById[chosenCard.getId()]);
                                 if (((Destroy) chosenCard).canPlay(x, y)) {
                                     ((Destroy) chosenCard).play(x, y);
-
-                                    chosenX = x;
-                                    chosenY = y;
 
                                     drawTable();
                                 }
@@ -207,11 +200,6 @@ public class GameActivity extends AppCompatActivity {
                                     } else {
                                         tunnel.setImageResource(R.drawable.not_gold);
                                     }
-
-                                    chosenX = x;
-                                    chosenY = y;
-
-                                    //drawTable();
                                 }
                             }
 
@@ -219,7 +207,7 @@ public class GameActivity extends AppCompatActivity {
                     });
 
 
-                    map.put((ImageView) field[i].getVirtualChildAt(j + 1), new Pair<Integer, Integer>(i, j));
+                    map.put((ImageView) field[i].getVirtualChildAt(j + 1), new Pair<>(i, j));
                 }
 
                 ImageView arkenstone2 = new ImageView(GameActivity.this);
@@ -326,18 +314,6 @@ public class GameActivity extends AppCompatActivity {
 
             removeAllViews();
 
-        /*
-
-        screen.removeView(yourNumber);
-        screen.removeView(dwarf);
-
-        screen.setBackgroundResource(R.drawable.green_menu_tools);
-        if(!contains(screen, toolsScroll)){
-            screen.addView(toolsScroll);
-        }
-
-        */
-
             TableRow[] playerRows = new TableRow[playerCount];
             for (int i = 0; i < playerCount; i++) {
 
@@ -347,7 +323,7 @@ public class GameActivity extends AppCompatActivity {
 
 
                 TextView playerNumber = new TextView(GameActivity.this);
-                playerNumber.setText("Player " + ((Integer) (i + 1)).toString());
+                playerNumber.setText(String.format("Player %s", ((Integer) (i + 1)).toString()));
                 playerNumber.setTextSize(20);
                 playerNumber.setTypeface(style.textFont);
 
@@ -412,8 +388,6 @@ public class GameActivity extends AppCompatActivity {
                                             Toast.LENGTH_SHORT).show();
                                 }
                             }
-                        } else {
-                            return;
                         }
                     }
                 });
@@ -520,7 +494,7 @@ public class GameActivity extends AppCompatActivity {
 
     private int playerCount;
     private Controller controller;
-    private HashMap<ImageView, Pair<Integer, Integer>> map = new HashMap();
+    private HashMap<ImageView, Pair<Integer, Integer>> map = new HashMap<>();
     private int fieldHeight;
     private int fieldWidth;
 
@@ -569,9 +543,6 @@ public class GameActivity extends AppCompatActivity {
     private ActionButton log;
     private ArrayList<TableRow> logRows;
 
-    // chosen cell
-    private int chosenX;
-    private int chosenY;
 
     //chosen tunnel
     private TextView textChosenTunnel;
@@ -698,7 +669,7 @@ public class GameActivity extends AppCompatActivity {
     // Making Buttons
 
     void makeTools() {
-        tools.setText("Tools");
+        tools.setText(R.string.tools_name);
         tools.decorate();
 
         tools.setOnClickListener(new View.OnClickListener() {
@@ -713,7 +684,7 @@ public class GameActivity extends AppCompatActivity {
     }
 
     void makeLog() {
-        log.setText("Log");
+        log.setText(R.string.log_name);
         log.decorate();
 
         log.setOnClickListener(new View.OnClickListener() {
@@ -728,7 +699,7 @@ public class GameActivity extends AppCompatActivity {
     }
 
     void makeGameField() {
-        gameField.setText("Field");
+        gameField.setText(R.string.field_name);
         gameField.decorate();
 
         gameField.setOnClickListener(new View.OnClickListener() {
@@ -743,7 +714,7 @@ public class GameActivity extends AppCompatActivity {
     }
 
     void makeCards() {
-        cards.setText("Cards");
+        cards.setText(R.string.cards_name);
         cards.decorate();
         cards.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -758,7 +729,7 @@ public class GameActivity extends AppCompatActivity {
     }
 
     void makeSpin() {
-        spin.setText("Spin");
+        spin.setText(R.string.spin_name);
         spin.decorate();
         spin.setBackgroundResource(R.drawable.yellow_button);
         spin.setTextColor(Color.BLUE);
@@ -773,13 +744,11 @@ public class GameActivity extends AppCompatActivity {
     }
 
     void makeYou() {
-
         if (controller.isSinglePlayer())
-            yourNumber.setText("Player " + ((Integer) (controller.currentPlayerNumber() + 1)).toString());
+            yourNumber.setText(String.format("Player %s", ((Integer) (controller.currentPlayerNumber() + 1)).toString()));
         else
-            yourNumber.setText("Player " + ((Integer) (controller.multiPlayer.getMyNumber() + 1)).toString() +
-                    (controller.multiPlayer.isMyTurn() ? " My turn" : " Not my turn"));
-        yourNumber.setTextSize(30);
+            yourNumber.setText(String.format("Player %s%s", ((Integer) (controller.multiPlayer.getMyNumber() + 1)).toString(), controller.multiPlayer.isMyTurn() ? " My turn" : " Not my turn"));
+        yourNumber.setTextSize(15);
         yourNumber.setGravity(Gravity.CENTER_HORIZONTAL);
         yourNumber.setTextColor(Color.WHITE);
         yourNumber.setTypeface(style.textFont);
@@ -837,7 +806,7 @@ public class GameActivity extends AppCompatActivity {
 
         chosenTunnel.setImageResource(getCardImageById[chosenCard.getId()]);
 
-        textChosenTunnel.setText("Tunnel");
+        textChosenTunnel.setText(R.string.tunnel);
         textChosenTunnel.setTextSize(13);
         textChosenTunnel.setTextColor(Color.WHITE);
         textChosenTunnel.setTypeface(style.textFont);
@@ -849,14 +818,14 @@ public class GameActivity extends AppCompatActivity {
             screen.addView(textDiscardIndicator);
         }
 
-        textDiscardIndicator.setText("Discard");
+        textDiscardIndicator.setText(R.string.discard_text);
         textDiscardIndicator.setTextSize(13);
         textDiscardIndicator.setTextColor(Color.WHITE);
         textDiscardIndicator.setTypeface(style.textFont);
     }
 
     void makeSwitch() {
-        switchPlayer.setText("sWitch");
+        switchPlayer.setText(R.string.switch_player_name);
         switchPlayer.decorate();
 
         switchPlayer.setOnClickListener(new View.OnClickListener() {
@@ -869,8 +838,11 @@ public class GameActivity extends AppCompatActivity {
                 }
 
                 if (!controller.canStartNextTurn()) {
-                    Toast.makeText(getApplicationContext(), "Your turn still! Don't fraud!", Toast.LENGTH_SHORT).show();
-                    return;
+                    Toast.makeText(getApplicationContext(), "Pasha gay", Toast.LENGTH_SHORT).show();
+                    if (controller.isSinglePlayer()) {
+                        return;
+                    }
+                    controller.multiPlayer.update();
                 }
 
                 updateLogRows();
@@ -898,7 +870,7 @@ public class GameActivity extends AppCompatActivity {
     }
 
     void makeDiscard() {
-        discard.setText("Discard");
+        discard.setText(R.string.discard_name);
         discard.decorate();
 
 
@@ -942,58 +914,53 @@ public class GameActivity extends AppCompatActivity {
 
             TextView message = new TextView(this);
 
-            message.setText("Player " + turn.ownerPlayerNumber);
+            message.setText(String.format(getString(R.string.owner_player_number), turn.ownerPlayerNumber));
 
             if (turn.type == Card.CARD_TYPE.HEAL) {
-                message.setText(message.getText() + " repaired Player " +
-                        ((Integer) (turn.targetPlayerNumber + 1)).toString() + "'s ");
+                message.setText(String.format("%s repaired Player %s's ", message.getText(), ((Integer) (turn.targetPlayerNumber + 1)).toString()));
                 if (turn.lamp) {
                     if (turn.trolley) {
-                        message.setText(message.getText() + "lamp and trolley");
+                        message.setText(String.format("%slamp and trolley", message.getText()));
                     } else if (turn.pick) {
-                        message.setText(message.getText() + "lamp and pick");
+                        message.setText(String.format("%slamp and pick", message.getText()));
                     } else {
-                        message.setText(message.getText() + "lamp");
+                        message.setText(String.format("%slamp", message.getText()));
                     }
                 } else {
                     if (turn.trolley) {
                         if (turn.pick) {
-                            message.setText(message.getText() + "pick and trolley");
+                            message.setText(String.format("%spick and trolley", message.getText()));
                         } else {
-                            message.setText(message.getText() + "trolley");
+                            message.setText(String.format("%strolley", message.getText()));
                         }
                     } else {
-                        message.setText(message.getText() + "pick");
+                        message.setText(String.format("%spick", message.getText()));
                     }
                 }
             }
 
             if (turn.type == Card.CARD_TYPE.DEBUFF) {
-                message.setText(message.getText() + " broke Player " +
-                        ((Integer) (turn.targetPlayerNumber + 1)).toString() + "'s ");
+                message.setText(String.format("%s broke Player %s's ", message.getText(), ((Integer) (turn.targetPlayerNumber + 1)).toString()));
                 if (turn.lamp) {
-                    message.setText(message.getText() + "lamp");
+                    message.setText(String.format("%slamp", message.getText()));
                 } else if (turn.pick) {
-                    message.setText(message.getText() + "pick");
+                    message.setText(String.format("%spick", message.getText()));
                 } else {
-                    message.setText(message.getText() + "trolley");
+                    message.setText(String.format("%strolley", message.getText()));
                 }
             }
 
             if (turn.type == Card.CARD_TYPE.TUNNEL) {
-                message.setText(message.getText() + " put tunnel on (" +
-                        ((Integer) turn.i).toString() + ", " + ((Integer) turn.j).toString() + ") cell");
+                message.setText(String.format("%s put tunnel on (%s, %s) cell", message.getText(), ((Integer) turn.i).toString(), ((Integer) turn.j).toString()));
             }
 
             if (turn.type == Card.CARD_TYPE.DESTROY) {
-                message.setText(message.getText() + " destroyed tunnel on (" +
-                        ((Integer) turn.i).toString() + ", " + ((Integer) turn.j).toString() + ") cell");
+                message.setText(String.format("%s destroyed tunnel on (%s, %s) cell", message.getText(), ((Integer) turn.i).toString(), ((Integer) turn.j).toString()));
 
             }
 
             if (turn.type == Card.CARD_TYPE.WATCH) {
-                message.setText(message.getText() + " watched at (" +
-                        ((Integer) turn.i).toString() + ", " + ((Integer) turn.j).toString() + ") cell");
+                message.setText(String.format("%s watched at (%s, %s) cell", message.getText(), ((Integer) turn.i).toString(), ((Integer) turn.j).toString()));
             }
             message.setTextSize(12);
             message.setTextColor(Color.WHITE);
