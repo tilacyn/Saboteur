@@ -24,7 +24,7 @@ public class TurnData implements Serializable {
     }
 
     public TurnData(Card.CARD_TYPE type, int ownerPlayerNumber, int cardNumber, int i, int j, int targetPlayerNumber,
-                    boolean lamp, boolean trolley, boolean pick) {
+                    boolean lamp, boolean pick, boolean trolley) {
         this(type, ownerPlayerNumber, cardNumber, i, j, targetPlayerNumber);
         this.lamp = lamp;
         this.pick = pick;

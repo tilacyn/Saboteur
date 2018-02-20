@@ -79,6 +79,8 @@ public class Field implements Serializable {
 
 
     private void spinCardsInHand(ArrayList<Card> hand, TurnData turnData) {
+        if (hand.size() > 6)
+            Log.d(TAG, "hand size is too big " + hand.size());
         for (int i = 0; i < hand.size(); i++) {
             if (turnData.spins[i]) {
                 ((Tunnel) hand.get(i)).spin();
@@ -122,7 +124,7 @@ public class Field implements Serializable {
     }
 
     private void startNextTurn(boolean needToSend) {
-        Log.d(TAG, "startNextTurn()");
+        Log.d(TAG, "startNextTurn(), cur player " + (currentPlayer + 1) + " hand size " + players[currentPlayer].getHand().size());
         if (deck.size() != 0) {
             giveACardToCurrentPlayer();
         }
@@ -311,7 +313,7 @@ public class Field implements Serializable {
 
     private void dfs(int i, int j) {
         used[i][j] = true;
-        if(!field[i][j].centre)
+        if (!field[i][j].centre)
             return;
         if (dfsCheckTunnel(i, j, i + 1, j))
             dfs(i + 1, j);
@@ -408,7 +410,7 @@ public class Field implements Serializable {
         shuffleDeck(shuffle);
         giveCards();
         if (!controller.isSinglePlayer())
-            currentPlayer = 1;
+            currentPlayer = 0;
     }
 
     public static Field getFieldForTests(Controller controller) {
@@ -419,7 +421,7 @@ public class Field implements Serializable {
         initializeField(new Shuffle(1, 0, 0));
         this.controller = controller;
         playingCount = 1;
-        initializePlayers(new Shuffle(1,0,0));
+        initializePlayers(new Shuffle(1, 0, 0));
     }
 
     private void shuffleDeck(Shuffle shuffle) {

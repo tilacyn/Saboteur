@@ -28,7 +28,7 @@ public class Heal extends Card {
         field.currentTD = new TurnData(CARD_TYPE.HEAL, ownerPlayerNumber,
                 field.players[ownerPlayerNumber].getCardNumber(this),
                 -1, -1, playerNumber,
-                isHealLamp(), isHealTrolley(), isHealPick());
+                isHealLamp(), isHealPick(), isHealTrolley());
         field.players[playerNumber].heal(this);
         field.players[ownerPlayerNumber].playCard(this);
         field.iPlayedCard();

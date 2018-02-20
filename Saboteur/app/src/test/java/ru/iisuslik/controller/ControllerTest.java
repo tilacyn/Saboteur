@@ -1,10 +1,6 @@
 package ru.iisuslik.controller;
 
 import org.junit.Test;
-
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
-
 import ru.iisuslik.gameData.GameData;
 import ru.iisuslik.gameData.Shuffle;
 

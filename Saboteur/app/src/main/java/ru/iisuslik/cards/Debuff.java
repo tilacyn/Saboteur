@@ -26,7 +26,7 @@ public class Debuff extends Card {
         field.currentTD = new TurnData(CARD_TYPE.DEBUFF, ownerPlayerNumber,
                 field.players[ownerPlayerNumber].getCardNumber(this),
                 -1, -1, playerNumber,
-                isBreakingLamp(), isBreakingTrolley(), isBreakingPick());
+                isBreakingLamp(), isBreakingPick(), isBreakingTrolley());
         field.players[playerNumber].breakIt(this);
         field.players[ownerPlayerNumber].playCard(this);
         field.iPlayedCard();
