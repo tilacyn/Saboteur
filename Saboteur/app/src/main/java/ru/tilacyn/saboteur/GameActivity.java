@@ -686,11 +686,11 @@ public class GameActivity extends AppCompatActivity {
     void makeLog() {
         log.setText(R.string.log_name);
         log.decorate();
-
         log.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 log.makeItSelected();
+                updateLogRows();
                 setDiscardFalse();
                 removeSpin();
                 table.makeLogTable();
@@ -838,11 +838,12 @@ public class GameActivity extends AppCompatActivity {
                 }
 
                 if (!controller.canStartNextTurn()) {
-                    Toast.makeText(getApplicationContext(), "Pasha gay", Toast.LENGTH_SHORT).show();
-                    if (controller.isSinglePlayer()) {
-                        return;
+                    Toast.makeText(getApplicationContext(), "Play some card", Toast.LENGTH_SHORT).show();
+                    if (!controller.isSinglePlayer()) {
+                        controller.multiPlayer.update();
+                        makeYou();
                     }
-                    controller.multiPlayer.update();
+                    return;
                 }
 
                 updateLogRows();
