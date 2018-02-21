@@ -690,7 +690,6 @@ public class GameActivity extends AppCompatActivity {
         log.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                updateLogRows();
                 log.makeItSelected();
                 setDiscardFalse();
                 removeSpin();
@@ -839,12 +838,11 @@ public class GameActivity extends AppCompatActivity {
                 }
 
                 if (!controller.canStartNextTurn()) {
-                    Toast.makeText(getApplicationContext(), "It's your turn, play some card", Toast.LENGTH_SHORT).show();
-                    if (!controller.isSinglePlayer()) {
-                        controller.multiPlayer.update();
-                        //makeYou();
+                    Toast.makeText(getApplicationContext(), "Pasha gay", Toast.LENGTH_SHORT).show();
+                    if (controller.isSinglePlayer()) {
+                        return;
                     }
-                    return;
+                    controller.multiPlayer.update();
                 }
 
                 updateLogRows();
@@ -854,18 +852,19 @@ public class GameActivity extends AppCompatActivity {
                 makeYou();
                 table.drawTable();
                 playerChoose = -1;
-                if(controller.isSinglePlayer()) {
-                    Intent res = new Intent();
-                    byte[] controllerByteArray;
-                    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                    controller.serialize(byteArrayOutputStream);
 
-                    controllerByteArray = byteArrayOutputStream.toByteArray();
 
-                    res.putExtra("controller", controllerByteArray);
+                Intent res = new Intent();
+                byte[] controllerByteArray;
+                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                controller.serialize(byteArrayOutputStream);
 
-                    setResult(RESULT_OK, res);
-                }
+                controllerByteArray = byteArrayOutputStream.toByteArray();
+
+                res.putExtra("controller", controllerByteArray);
+
+                setResult(RESULT_OK, res);
+
             }
         });
     }
@@ -907,7 +906,7 @@ public class GameActivity extends AppCompatActivity {
 
         logRows.clear();
 
-        //Toast.makeText(getApplicationContext(), ((Integer) controller.gameData.turns.size()).toString(), Toast.LENGTH_SHORT).show();
+        Toast.makeText(getApplicationContext(), ((Integer) controller.gameData.turns.size()).toString(), Toast.LENGTH_LONG).show();
 
         for (TurnData turn : controller.gameData.turns) {
             TableRow logRow = new TableRow(this);
@@ -915,7 +914,7 @@ public class GameActivity extends AppCompatActivity {
 
             TextView message = new TextView(this);
 
-            message.setText(String.format(getString(R.string.owner_player_number), turn.ownerPlayerNumber + 1));
+            message.setText(String.format(getString(R.string.owner_player_number), turn.ownerPlayerNumber));
 
             if (turn.type == Card.CARD_TYPE.HEAL) {
                 message.setText(String.format("%s repaired Player %s's ", message.getText(), ((Integer) (turn.targetPlayerNumber + 1)).toString()));
@@ -1006,8 +1005,7 @@ public class GameActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         //
-        if(!controller.isSinglePlayer())
-            return;
+
         Intent intent = new Intent();
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         controller.serialize(byteArrayOutputStream);

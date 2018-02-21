@@ -649,7 +649,7 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onItemClick(AdapterView<?> parent, View itemClicked, int position, long id) {
                             String gameName = ((TextView) itemClicked).getText().toString();
-                            if (!(chosenGame.equals(gameName))) {
+                            if (chosenGame == null || !(chosenGame.equals(gameName))) {
                                 chosenGame = gameName;
                                 makeLoadValid();
                             } else {
