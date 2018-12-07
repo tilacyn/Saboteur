@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "794692037707",
+    "firebase_url": "https://saboteur-186516.firebaseio.com",
+    "project_id": "saboteur-186516",
+    "storage_bucket": "saboteur-186516.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:794692037707:android:5cdc374f299f33b3",
+        "android_client_info": {
+          "package_name": "ru.tilacyn.saboteur"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "794692037707-p84bedijqq97eiedue028lp4tcbj36vh.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "794692037707-t23kkmkrhgrisgj7v462av7m4o1p0s3u.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "ru.tilacyn.saboteur",
+            "certificate_hash": "79d525cfe66965f1adf4730ecf06f80ff67d761b"
+          }
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD2dlQjMyY8elNxSu59rSXD9WJzKfzC1W4"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "794692037707-p84bedijqq97eiedue028lp4tcbj36vh.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

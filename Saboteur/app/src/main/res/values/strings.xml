@@ -1,0 +1,44 @@
+<resources>
+    <string name="app_name">Saboteur</string>
+    <string name="title_activity_game">GameActivity</string>
+    <string name="title_activity_player_choose">PlayerChooseActivity</string>
+    <string name="switch_player_name">play</string>
+    <string name="cards_name">Cards</string>
+    <string name="log_name">Log</string>
+    <string name="tools_name">Tools</string>
+    <string name="discard_name">Discard</string>
+    <string name="owner_player_number">Player %d</string>
+    <string name="field_name">Field</string>
+    <string name="tunnel">Tunnel</string>
+    <string name="discard_text">Discard</string>
+    <string name="spin_name">Spin</string>
+    <string name="rules">Rules</string>
+    <string name="rules_text">
+        Here are the sacred rules\n
+        Prelude:\n
+        1. This game is our own invention, all rights reserved.
+        Though it is an open source project still copying, spreading and using our code for money
+        is against the law and will be punished immediately.\n
+        2. All the events and heroes are entirely fictional, even those based on the real characters.\n
+        3. Game content is rather irrelevant for people aged more than 16\n
+        Beware! Violence scenes in the game might badly influence young children\n\n
+        Best wishes and have a good time!\n
+        Maksim Kryuchkov and SDT (Saboteur Developers Team)\n\n\n
+        Game rules:\n
+        1. Before the game starts…\n
+        Saboteur is a team game, actually there are two teams: Saboteurs and Breadwinners.
+        Breadwinners is a team of good and honest gnomes which prefer making fair wealth to robbery and sabotage.
+        While Saboteurs is a team of completely dishonest dangerous and deleterious gnomes (like Vlad Golubtsov)
+    </string>
+    <string name="back_name">back</string>
+    <string name="single_player_name">single player</string>
+    <string name="multi_player_name">multiplayer</string>
+    <string name="help_name">help</string>
+    <string name="continue_name">Continue</string>
+    <string name="load_game_name">Load Game</string>
+    <string name="settings_name">Settings</string>
+    <string name="new_game_name">New Game</string>
+    <string name="load_name">load</string>
+    <string name="save_name">Save</string>
+</resources>
+
